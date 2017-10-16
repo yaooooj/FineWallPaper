@@ -124,7 +124,6 @@ public  class FreshViewPager extends ViewGroup {
                 child.layout(0,contentHeight,getMeasuredWidth(),contentHeight + child.getMeasuredHeight());
             }
             else {
-
                 child.layout(0,contentHeight,child.getMeasuredWidth(),contentHeight + child.getMeasuredHeight());
                 if (index <= lastChildIndex){
                     if (child instanceof ScrollView){
@@ -137,7 +136,6 @@ public  class FreshViewPager extends ViewGroup {
 
 
         }
-
         bottomScroll = contentHeight - getMeasuredHeight();
     }
 
@@ -153,43 +151,33 @@ public  class FreshViewPager extends ViewGroup {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         boolean intercept = false;
-
         int y = (int) ev.getY();
-
         switch (ev.getAction()){
             case MotionEvent.ACTION_DOWN:
-                Log.e(TAG, "onInterceptTouchEvent: " );
                 mLastMotionY = mInitialMotionY = ev.getY();
                 mLastMotionX = mInitialMotionX = ev.getX();
                 //lastYMove = y;
                 intercept = false;
                 break;
-
             case MotionEvent.ACTION_MOVE:
                 final float x = ev.getX();
                 final float xDiff = Math.abs(x - mLastMotionX);
                 final float yDiff = Math.abs(y - mInitialMotionY);
                 if (y - mInitialMotionY > 20 && yDiff * 0.5f > xDiff ){
-
                     View child = getFirstVisibleChild();
                     if (child != null && isTop(child)){
                         intercept = true;
                     }
-
                 }else if (mInitialMotionY - y > 20 && yDiff * 0.5f > xDiff){
-
                     View child = getLastVisibleChild();
                     if (child != null && isBottom(child)){
                         intercept = true;
                     }
-
                 }else {
-
                     intercept = false;
                 }
                 break;
             case MotionEvent.ACTION_UP:
-
                 intercept = false;
                 break;
             default:
@@ -209,7 +197,6 @@ public  class FreshViewPager extends ViewGroup {
                 if (getScrollY() < 0){
                     scrollBy(0, yDiff / 2);
                     if (header != null && header instanceof HeaderView){
-
                         if (Math.abs(getScrollY()) >  header.getMeasuredHeight()){
                             updateStatus(PullStatus.DOWN_AFTER);
                             mStatus = PullStatus.DOWN_AFTER;
@@ -218,15 +205,11 @@ public  class FreshViewPager extends ViewGroup {
                             mStatus = PullStatus.DOWN_BEFORE;
                         }
                     }else {
-
                         mStatus = PullStatus.DEFAULT;
                     }
                 }else {
-
                     scrollBy(0,yDiff / 2);
-
                     if (footer != null && footer instanceof  FooterView){
-
                         if ( Math.abs(getScrollY()) >=  (bottomScroll + footer.getMeasuredHeight())){
                             updateStatus(PullStatus.UP_AFTER);
                             mStatus = PullStatus.UP_AFTER;
@@ -234,9 +217,7 @@ public  class FreshViewPager extends ViewGroup {
                             updateStatus(PullStatus.UP_BEFORE);
                             mStatus = PullStatus.UP_BEFORE;
                         }
-
                     }else {
-
                         mStatus = PullStatus.DEFAULT;
                     }
 
@@ -341,15 +322,12 @@ public  class FreshViewPager extends ViewGroup {
 
     private boolean isBottom(View view){
         boolean intercept = false;
-
         if (view instanceof ViewGroup) {
-
             if (view instanceof NestedScrollView){
                 NestedScrollView nestedScrollView = (NestedScrollView) view;
                 if (nestedScrollView.getScrollY() >= (nestedScrollView.getChildAt(0).getHeight() - nestedScrollView.getHeight())) {
                     intercept = true;
                 }
-
             }else if (view instanceof ScrollView){
                 ScrollView scrollView = (ScrollView) view;
                 if (scrollView.getScrollY() >= scrollView.getChildAt(0).getHeight() - scrollView.getHeight()){
@@ -358,22 +336,18 @@ public  class FreshViewPager extends ViewGroup {
             }else {
                 intercept =  isChildBottom((ViewGroup) view);
             }
-
         } else {
             intercept = false;
         }
         return intercept;
     }
 
-
     private boolean isChildBottom(ViewGroup viewGroup){
         int maxY = 0;
         int count = viewGroup.getChildCount();
-
         if (count == 0) {
             return false;
         }
-
         for (int i = 0; i < count; i++) {
             View view = viewGroup.getChildAt(i);
             int bottomMargin = 0;
@@ -384,56 +358,9 @@ public  class FreshViewPager extends ViewGroup {
             int bottom = view.getBottom() + bottomMargin;
             maxY = Math.max(maxY, bottom);
         }
-
         int h = viewGroup.getMeasuredHeight() - viewGroup.getPaddingBottom();
-
         return maxY <= h;
     }
-
-
-
-
-
-
-
-    public boolean svPullDownIntercept(View child) {
-        boolean intercept = false;
-        if (child instanceof NestedScrollView){
-
-            if (child.getScrollY() <= 0){
-                intercept = true;
-            }
-        }else {
-            if (child.getScrollY() <= 0) {
-                intercept = true;
-            }
-        }
-
-        return intercept;
-    }
-
-    public boolean svPullUpIntercept(View child) {
-        boolean intercept = false;
-        if (child instanceof NestedScrollView){
-            NestedScrollView nestedScrollView = (NestedScrollView) child;
-            View nestedScrollViewChild = nestedScrollView.getChildAt(0);
-
-            if (nestedScrollView.getScrollY() >= (nestedScrollViewChild.getHeight() - nestedScrollView.getHeight())) {
-                intercept = true;
-            }
-        }else {
-            ScrollView scrollView = (ScrollView) child;
-            View scrollChild = scrollView.getChildAt(0);
-
-            if (scrollView.getScrollY() >= (scrollChild.getHeight() - scrollView.getHeight())) {
-                intercept = true;
-            }
-        }
-
-        return intercept;
-    }
-
-
 
 
     private void  onDefault(){
