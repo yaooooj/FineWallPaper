@@ -3,6 +3,8 @@ package com.open.finewallpaper.CoustomView;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -10,6 +12,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.PopupWindow;
 import android.widget.ScrollView;
 import android.widget.Scroller;
 
@@ -49,6 +53,8 @@ public  class FreshViewPager extends ViewGroup {
     private boolean isLoadSuccess = false;
 
     private Scroller mScroller;
+
+    private Fragment mFragment;
 
     private OnPullListener onPullListener;
     public FreshViewPager(Context context, AttributeSet attrs) {
@@ -91,6 +97,13 @@ public  class FreshViewPager extends ViewGroup {
     }
 
 
+    public void addFragment(PopupWindow fragment){
+
+        LayoutParams layoutParams =
+                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+
+
+    }
 
 
     @Override
@@ -117,6 +130,7 @@ public  class FreshViewPager extends ViewGroup {
             if (child.getVisibility() == GONE){
                 continue;
             }
+
             if (child == header){
                 child.layout(0,0 - child.getMeasuredHeight(),child.getMeasuredWidth(),0);
             }
@@ -195,6 +209,7 @@ public  class FreshViewPager extends ViewGroup {
                 yDiff  = (int)( mLastMotionY - y);
                 mLastMotionY = y;
                 if (getScrollY() < 0){
+
                     scrollBy(0, yDiff / 2);
                     if (header != null && header instanceof HeaderView){
                         if (Math.abs(getScrollY()) >  header.getMeasuredHeight()){
@@ -465,7 +480,7 @@ public  class FreshViewPager extends ViewGroup {
         updateStatus(PullStatus.REFRESH_DOING);
         if (onPullListener != null){
 
-            if (isRefreshSuccess = onPullListener.onRefresh()){
+            if (isRefreshSuccess = onPullListener.onRefresh(yDiff)){
                 updateStatus(PullStatus.REFRESH_COMPLETE_SCROLLING);
                 //updateStatus(PullStatus.DEFAULT);
                 mScroller.startScroll(0, yDiff,0, 0,500);

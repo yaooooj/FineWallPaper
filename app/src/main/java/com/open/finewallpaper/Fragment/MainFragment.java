@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.open.finewallpaper.Activity.MainActivity;
 import com.open.finewallpaper.Adapter.MainFragmentAdapter;
@@ -47,8 +48,7 @@ public class MainFragment extends Fragment {
 
     // TODO: Rename and change types of parameters
     private String mParam1;
-    private List<PictureBean> pictureBeen;
-    private MainFragmentAdapter adapter;
+    private String mParam2;
     private OnFragmentInteractionListener mListener;
 
     public MainFragment() {
@@ -64,11 +64,11 @@ public class MainFragment extends Fragment {
      * @return A new instance of fragment MainFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static MainFragment newInstance(String param1, List<PictureBean> param2) {
+    public static MainFragment newInstance(String param1, String param2) {
         MainFragment fragment = new MainFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
-        //args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_PARAM2, param2);
         //args.putParcelableArrayList(ARG_PARAM2, (ArrayList<? extends Parcelable>) param2);
         fragment.setArguments(args);
         return fragment;
@@ -79,7 +79,7 @@ public class MainFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
-           // pictureBeen = getArguments().getString(ARG_PARAM2);
+            mParam2 = getArguments().getString(ARG_PARAM2);
            // pictureBeen =  getArguments().getParcelableArrayList(ARG_PARAM2);
         }
     }
@@ -90,66 +90,17 @@ public class MainFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         initData();
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.fragment_main_recyclerview);
-        adapter = new MainFragmentAdapter(MainFragment.this,R.layout.fragment_mian_adapter_m,pictureBeen);
-        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
-        recyclerView.setAdapter(adapter);
-        recyclerView.setNestedScrollingEnabled(false);
-        recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
-            @Override
-            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-                final int dividerLeft = 10;
-                final int dividerRight = 10;
-                final int dividerHeight = 10;
-
-                int childPosition = parent.getChildAdapterPosition(view);
-                RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
-                if (layoutManager instanceof StaggeredGridLayoutManager){
-                    int spanCount = ((StaggeredGridLayoutManager)layoutManager).getSpanCount();
-                    if ((childPosition ) % 5 == 0){
-                        outRect.set(0,0,0,dividerHeight);
-                    }else if ((childPosition + 2) % spanCount == 0){
-                        outRect.set(dividerLeft,0,dividerRight,dividerHeight);
-                    }else {
-                        outRect.set(dividerLeft,0,0,dividerHeight);
-                    }
-
-                }
-            }
-        });
+        TextView textView = (TextView) view.findViewById(R.id.big_word);
         return view;
     }
 
 
     public void initData(){
-        pictureBeen = new ArrayList<>();
 
 
-        BmobQuery<PictureBean> bmobQuery = new BmobQuery<>();
-        bmobQuery.addQueryKeys("url,picturename");
-        bmobQuery.setLimit(12);
-        bmobQuery.findObjects(new FindListener<PictureBean>() {
-            @Override
-            public void done(List<PictureBean> list, BmobException e) {
-                if (e == null){
-                    ToastUtil.show(getActivity(),"success");
-                    for (PictureBean pictureBean : list){
-                        Log.e(TAG, "done: " + pictureBean.getUrl() );
-                    }
-                    adapter.updataData(list);
-                }else {
-                    Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
-                }
-
-            }
-        });
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
-        getActivity().getMenuInflater().inflate(R.menu.main_menu,menu);
-    }
 
     @Override
     public void onAttach(Context context) {

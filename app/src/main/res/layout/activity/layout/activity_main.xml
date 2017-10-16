@@ -9,6 +9,7 @@
     android:orientation="vertical"
     tools:context="com.open.finewallpaper.Activity.MainActivity">
     <com.open.finewallpaper.CoustomView.FreshViewPager
+        android:id="@+id/main_freshviewpager"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

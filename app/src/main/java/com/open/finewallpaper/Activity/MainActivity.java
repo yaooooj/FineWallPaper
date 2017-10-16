@@ -2,46 +2,54 @@ package com.open.finewallpaper.Activity;
 
 
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
+import android.widget.PopupWindow;
+
 
 import com.open.finewallpaper.Adapter.MainFragmentAdapter;
 import com.open.finewallpaper.Bean.PictureBean;
+
+import com.open.finewallpaper.CoustomView.FreshViewPager;
+import com.open.finewallpaper.CoustomView.HeaderView;
+import com.open.finewallpaper.CoustomView.OnPullListener;
 import com.open.finewallpaper.Fragment.MainFragment;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.FileUtil;
 import com.open.finewallpaper.Util.ScreenUtil;
 import com.open.finewallpaper.Util.ToastUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import cn.bmob.v3.Bmob;
-import cn.bmob.v3.BmobConfig;
 import cn.bmob.v3.BmobQuery;
-import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.exception.BmobException;
-import cn.bmob.v3.listener.DownloadFileListener;
 import cn.bmob.v3.listener.FindListener;
 
 import static android.graphics.Color.TRANSPARENT;
+import static java.lang.System.in;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  implements MainFragment.OnFragmentInteractionListener{
     private final static String TAG = "MainActivity";
 
     private List<PictureBean> pictureBeen;
     private MainFragmentAdapter adapter;
-
+    private int lastMotionY;
+    private int lastMotionX;
+    private PopupWindow popUpWindow;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,9 +135,79 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+
+        FreshViewPager freshViewPager = (FreshViewPager) findViewById(R.id.main_freshviewpager);
+        freshViewPager.addHeader(new HeaderView(MainActivity.this));
+        freshViewPager.setOnPullListener(new OnPullListener() {
+            @Override
+            public boolean onRefresh(int diff) {
+                //addFragment();
+                showPopUpWindow();
+                return true;
+            }
+
+            @Override
+            public boolean onLoadMore() {
+                return false;
+            }
+        });
     }
 
     public void  initMenu(){
 
+    }
+
+
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        boolean intercept = false;
+        int y = (int) event.getY();
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                Log.e(TAG, "onTouchEvent: " + "Down" );
+                lastMotionY = (int) event.getY();
+                lastMotionX = (int) event.getX();
+                intercept = false;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                Log.e(TAG, "onTouchEvent: " + " Move" );
+                int diffY = (y - lastMotionY);
+                int diffX = (y - lastMotionX);
+                if (diffY > 20 && Math.abs(diffX) < Math.abs(diffY) * 0.5){
+                    addFragment();
+                    intercept = true;
+                }
+        }
+
+        return intercept;
+    }
+
+    public void addFragment(){
+        Log.e(TAG, "addFragment: " );
+        MainFragment fragment = MainFragment.newInstance(null,null);
+
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.main_activity,fragment)
+                .show(fragment)
+                .commit();
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
+    public void showPopUpWindow(){
+        View view = LayoutInflater.from(this).inflate(R.layout.popupwindow_layout,null,true);
+        popUpWindow = new PopupWindow(view);
+        popUpWindow.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
+        popUpWindow.setHeight(300);
+        popUpWindow.setOutsideTouchable(true);
+        popUpWindow.setBackgroundDrawable(new ColorDrawable(0));
+
+        View rootview = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_main, null);
+        popUpWindow.showAtLocation(rootview, Gravity.TOP,0,0);
     }
 }

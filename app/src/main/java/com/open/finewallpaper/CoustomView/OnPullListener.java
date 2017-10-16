@@ -6,7 +6,7 @@ package com.open.finewallpaper.CoustomView;
 
 public interface OnPullListener {
 
-    boolean onRefresh();
+    boolean onRefresh(int diff);
 
     boolean onLoadMore();
 }
