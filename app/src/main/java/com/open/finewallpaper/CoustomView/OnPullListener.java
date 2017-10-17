@@ -9,4 +9,6 @@ public interface OnPullListener {
     boolean onRefresh(int diff);
 
     boolean onLoadMore();
+
+    void    onMoveLoad(int dx);
 }

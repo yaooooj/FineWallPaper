@@ -30,7 +30,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activity.ShowPictureActivity"></activity>
+        <activity android:name=".Activity.ShowPictureActivity" />
+        <activity android:name=".Activity.BaseActivity"></activity>
     </application>
 
 </manifest>

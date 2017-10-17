@@ -1,6 +1,7 @@
 package com.open.finewallpaper.Activity;
 
 
+import android.content.Intent;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -16,7 +17,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 
 
 import com.open.finewallpaper.Adapter.MainFragmentAdapter;
@@ -42,7 +47,7 @@ import static android.graphics.Color.TRANSPARENT;
 import static java.lang.System.in;
 
 
-public class MainActivity extends AppCompatActivity  implements MainFragment.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements MainFragment.OnFragmentInteractionListener{
     private final static String TAG = "MainActivity";
 
     private List<PictureBean> pictureBeen;
@@ -50,6 +55,7 @@ public class MainActivity extends AppCompatActivity  implements MainFragment.OnF
     private int lastMotionY;
     private int lastMotionX;
     private PopupWindow popUpWindow;
+    private TranslateAnimation animation;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -142,14 +148,19 @@ public class MainActivity extends AppCompatActivity  implements MainFragment.OnF
         freshViewPager.setOnPullListener(new OnPullListener() {
             @Override
             public boolean onRefresh(int diff) {
-                //addFragment();
-                showPopUpWindow();
+                Intent intent = new Intent(MainActivity.this,ShowPictureActivity.class);
+                startActivity(intent);
                 return true;
             }
 
             @Override
             public boolean onLoadMore() {
                 return false;
+            }
+
+            @Override
+            public void onMoveLoad(int dx) {
+
             }
         });
     }
@@ -158,31 +169,6 @@ public class MainActivity extends AppCompatActivity  implements MainFragment.OnF
 
     }
 
-
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        boolean intercept = false;
-        int y = (int) event.getY();
-        switch (event.getAction()){
-            case MotionEvent.ACTION_DOWN:
-                Log.e(TAG, "onTouchEvent: " + "Down" );
-                lastMotionY = (int) event.getY();
-                lastMotionX = (int) event.getX();
-                intercept = false;
-                break;
-            case MotionEvent.ACTION_MOVE:
-                Log.e(TAG, "onTouchEvent: " + " Move" );
-                int diffY = (y - lastMotionY);
-                int diffX = (y - lastMotionX);
-                if (diffY > 20 && Math.abs(diffX) < Math.abs(diffY) * 0.5){
-                    addFragment();
-                    intercept = true;
-                }
-        }
-
-        return intercept;
-    }
 
     public void addFragment(){
         Log.e(TAG, "addFragment: " );
@@ -199,15 +185,27 @@ public class MainActivity extends AppCompatActivity  implements MainFragment.OnF
 
     }
 
-    public void showPopUpWindow(){
+    public void showPopUpWindow(int diffy){
         View view = LayoutInflater.from(this).inflate(R.layout.popupwindow_layout,null,true);
         popUpWindow = new PopupWindow(view);
         popUpWindow.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
-        popUpWindow.setHeight(300);
+        popUpWindow.setHeight(500);
         popUpWindow.setOutsideTouchable(true);
-        popUpWindow.setBackgroundDrawable(new ColorDrawable(0));
-
+        popUpWindow.setBackgroundDrawable(new ColorDrawable(0x70000000));
         View rootview = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_main, null);
-        popUpWindow.showAtLocation(rootview, Gravity.TOP,0,0);
+        //33
+        //
+        //
+        // 0popUpWindow.showAtLocation(rootview, Gravity.BOTTOM,0,-1000);
+        popUpWindow.update(0,diffy,-1,-1);
+
+    }
+
+    public void startAnimation(int diff){
+        animation = new TranslateAnimation(
+                Animation.RELATIVE_TO_PARENT,0,Animation.RELATIVE_TO_PARENT,0,Animation.RELATIVE_TO_PARENT,diff,Animation.RELATIVE_TO_PARENT,0);
+        animation.setInterpolator(new AccelerateInterpolator());
+        animation.setDuration(300);
+        animation.start();
     }
 }

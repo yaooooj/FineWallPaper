@@ -211,6 +211,7 @@ public  class FreshViewPager extends ViewGroup {
                 if (getScrollY() < 0){
 
                     scrollBy(0, yDiff / 2);
+                    onPullListener.onMoveLoad(yDiff);
                     if (header != null && header instanceof HeaderView){
                         if (Math.abs(getScrollY()) >  header.getMeasuredHeight()){
                             updateStatus(PullStatus.DOWN_AFTER);
