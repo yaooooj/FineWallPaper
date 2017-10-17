@@ -41,7 +41,7 @@ public class BaseActivity extends AppCompatActivity {
                         onBackPressed();
                     }
                     if (e1.getX() - e2.getX() > 100 && Math.abs(e2.getY() - e1.getY()) < 60){
-                        swipeRightListener.swipeRight();
+                        swipeRightListener.swipeRight(e1.getX() - e2.getX());
                     }
                     return false;
                 }
@@ -77,6 +77,6 @@ public class BaseActivity extends AppCompatActivity {
 
 
     public interface swipeRightListener {
-        void swipeRight();
+        void swipeRight(float dx);
     }
 }
