@@ -47,6 +47,8 @@ public class ShowPictureActivity extends BaseActivity {
     }
 
 
+
+
     public void addFragment(){
         getSupportFragmentManager()
                 .beginTransaction()
