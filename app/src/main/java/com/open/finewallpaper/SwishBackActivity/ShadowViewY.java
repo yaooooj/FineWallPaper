@@ -7,12 +7,14 @@ import android.graphics.drawable.GradientDrawable;
 import android.view.View;
 
 /**
- * Created by SEELE on 2017/10/19.
+ * Created by SEELE on 2017/10/20.
  */
-class ShadowView extends View {
+
+public class ShadowViewY extends View {
+
     private Drawable mDrawable;
 
-    public ShadowView(Context context) {
+    public ShadowViewY(Context context) {
         super(context);
     }
 
@@ -21,7 +23,7 @@ class ShadowView extends View {
         super.onDraw(canvas);
         if (mDrawable == null) {
             int colors[] = {0x00000000, 0x17000000, 0x43000000};//分别为开始颜色，中间夜色，结束颜色
-            mDrawable = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, colors);
+            mDrawable = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, colors);
         }
         mDrawable.setBounds(0, 0, getMeasuredWidth(),  getMeasuredHeight());
         mDrawable.draw(canvas);
