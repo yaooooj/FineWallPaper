@@ -8,7 +8,7 @@ import android.view.MotionEvent;
  * Created by SEELE on 2017/10/19.
  */
 
-public class SwipeBacActivity extends AppCompatActivity implements SwipeBackHelper.SlideBackManager {
+public class SwipeBackActivity extends AppCompatActivity implements SwipeBackHelper.SlideBackManager {
 
 
     private static final String TAG = "SwipeBackActivity";

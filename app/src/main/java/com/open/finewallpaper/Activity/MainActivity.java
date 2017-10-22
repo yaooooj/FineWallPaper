@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         freshViewPager.setOnPullListener(new OnPullListener() {
             @Override
             public boolean onRefresh(int diff) {
-                Intent intent = new Intent(MainActivity.this,ShowPictureActivity.class);
+                Intent intent = new Intent(MainActivity.this,CurrentActivity.class);
                 startActivity(intent);
                 return true;
             }

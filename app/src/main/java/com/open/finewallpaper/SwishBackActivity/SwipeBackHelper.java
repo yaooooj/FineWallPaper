@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.NestedScrollView;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -117,15 +118,27 @@ public class SwipeBackHelper extends Handler {
             mIsInThresholdArea = mLastPointX >= 0 && mLastPointX <= mEdgeSize;
         }
 
-        if(!mIsInThresholdArea) {  //不满足滑动区域，不做处理
-            return false;
-        }
-
-        if (mIsHaveNextActivity){
-            final View view = getContentView(mNextActivity).getChildAt(0);
-            if (!isTop(view)){
+        if (!mIsHaveNextActivity){
+            if(!mIsInThresholdArea) {  //不满足滑动区域，不做处理
                 return false;
             }
+        }
+
+
+        if (mIsHaveNextActivity){
+
+            ViewGroup decorView = (ViewGroup) mNextActivity.getWindow().getDecorView();
+            View contentView = decorView.findViewById(android.R.id.content);
+            ViewGroup contentParent = (ViewGroup) contentView.getParent();
+            contentParent.removeView(contentView);
+            Log.e(TAG, "processTouchEvent: " );
+            //addView(contentView);
+            //contentView.setBackgroundColor(Color.WHITE);
+            //contentParent.addView(this);
+            //final View view = getContentView(mNextActivity).getChildAt(0);
+            //if (!isTop(contentView)){
+            //    return false;
+           // }
             mIsAtTop = true;
         }
 
