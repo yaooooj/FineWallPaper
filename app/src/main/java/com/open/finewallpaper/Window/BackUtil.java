@@ -2,6 +2,9 @@ package com.open.finewallpaper.Window;
 
 import android.app.Activity;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -14,8 +17,10 @@ import com.open.finewallpaper.R;
 
 public class BackUtil{
 
+    private final static String TAG = "BackUtil";
 
     public static boolean attach(Activity activity){
+
         ViewGroup decorView = (ViewGroup)activity.getWindow().getDecorView();
         View oldScreen = decorView.getChildAt(0);
         decorView.removeViewAt(0);
@@ -26,8 +31,13 @@ public class BackUtil{
         oldScreen.setId(R.id.slidable_content);
         panel.addView(oldScreen);
         decorView.addView(panel, 0);
-
         return false;
+    }
+
+
+    public static void attach(Activity activity,Class clazz){
+        Intent in  = new Intent(activity.getApplication(),clazz);
+        activity.getApplication().startActivity(in);
     }
 
 
