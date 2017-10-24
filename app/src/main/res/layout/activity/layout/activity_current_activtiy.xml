@@ -15,11 +15,11 @@
         android:src="@mipmap/ic_favorite_border_black_24dp"
         android:scaleType="center"/>
 
-    <ImageView
+    <fragment
+        android:id="@+id/drawer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@mipmap/ic_launcher"
-        android:scaleType="center"
-        android:background="#50000000"/>
+        android:name="com.open.finewallpaper.Fragment.Fragment1"
+        />
 
 </com.open.finewallpaper.Window.VerticalDrawerLayout>

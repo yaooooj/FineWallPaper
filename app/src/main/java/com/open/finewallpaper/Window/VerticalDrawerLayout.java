@@ -3,6 +3,7 @@ package com.open.finewallpaper.Window;
 import android.content.Context;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
  */
 
 public class VerticalDrawerLayout extends ViewGroup {
+    private final static String TAG = "VerticalDrawerLayout";
     private ViewDragHelper mTopViewDragHelper;
 
     private View mContentView;
@@ -20,6 +22,9 @@ public class VerticalDrawerLayout extends ViewGroup {
     private int mCurTop = 0;
 
     private boolean mIsOpen = true;
+
+    private float lastMotionY;
+    private float lastMotionX;
 
     public VerticalDrawerLayout(Context context) {
         super(context);
@@ -40,6 +45,8 @@ public class VerticalDrawerLayout extends ViewGroup {
         //Step1：使用静态方法构造ViewDragHelper,其中需要传入一个ViewDragHelper.Callback回调对象.
         mTopViewDragHelper = ViewDragHelper.create(this, 1.0f, new ViewDragHelperCallBack());
         mTopViewDragHelper.setEdgeTrackingEnabled(ViewDragHelper.EDGE_TOP);
+
+
     }
 
     //Step2：定义一个ViewDragHelper.Callback回调实现类
@@ -47,8 +54,13 @@ public class VerticalDrawerLayout extends ViewGroup {
         @Override
         public boolean tryCaptureView(View child, int pointerId) {
             //返回ture则表示可以捕获该view,手指摸上一瞬间调运
+            Log.e(TAG, "tryCaptureView: " );
+            Log.e(TAG, "tryCaptureView: " + "" + (child == mDrawerView) );
             return child == mDrawerView;
         }
+
+
+
 
         @Override
         public void onEdgeDragStarted(int edgeFlags, int pointerId) {
@@ -73,9 +85,9 @@ public class VerticalDrawerLayout extends ViewGroup {
         @Override
         public void onViewReleased(View releasedChild, float xvel, float yvel) {
             //手指释放时回调
-            float movePrecent = (releasedChild.getHeight() + releasedChild.getTop()) / (float) releasedChild.getHeight();
-            int finalTop = (xvel >= 0 && movePrecent > 0.5f) ? 0 : -releasedChild.getHeight();
-            mTopViewDragHelper.settleCapturedViewAt(releasedChild.getLeft(), finalTop);
+            float movePercent = (releasedChild.getHeight() + releasedChild.getTop()) / (float) releasedChild.getHeight();
+            int finalBottom = (xvel >= 0 && movePercent > 0.3f) ? 0 : -releasedChild.getHeight();
+            mTopViewDragHelper.settleCapturedViewAt(releasedChild.getLeft(), finalBottom);
             invalidate();
         }
 
@@ -130,8 +142,28 @@ public class VerticalDrawerLayout extends ViewGroup {
     //Step3：重写onInterceptTouchEvent回调ViewDragHelper中对应的方法.
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        float y = ev.getY();
+        float x = ev.getX();
+        switch (ev.getAction()){
+            case MotionEvent.ACTION_MOVE:
+                lastMotionY = ev.getY();
+                lastMotionX = ev.getX();
+                final float dy = Math.abs(y - lastMotionY);
+                final float dx = Math.abs(x - lastMotionX);
+                Log.e(TAG, "onInterceptTouchEvent: " + " dy " + dy );
+                if (dy > 20 && dy * 0.5f > dx){
+                    Log.e(TAG, "onInterceptTouchEvent: " );
+
+                    return mTopViewDragHelper.shouldInterceptTouchEvent(ev);
+                }
+                break;
+            default:
+                break;
+        }
         return mTopViewDragHelper.shouldInterceptTouchEvent(ev);
     }
+
+
 
     //Step3：重写onTouchEvent回调ViewDragHelper中对应的方法.
     @Override
@@ -183,9 +215,11 @@ public class VerticalDrawerLayout extends ViewGroup {
                     mContentView.getMeasuredHeight() + params.topMargin);
 
             params = (MarginLayoutParams) mDrawerView.getLayoutParams();
-            mDrawerView.layout(params.leftMargin, mCurTop + params.topMargin,
+            //mCurTop + params.topMargin
+            //mCurTop + mDrawerView.getMeasuredHeight() + params.topMargin)
+            mDrawerView.layout(params.leftMargin, -(mCurTop + mDrawerView.getMeasuredHeight() + params.topMargin),
                     mDrawerView.getMeasuredWidth() + params.leftMargin,
-                    mCurTop + mDrawerView.getMeasuredHeight() + params.topMargin);
+                   0);
         }
     }
 }
