@@ -87,14 +87,20 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     public void initData(){
         pictureBeen = new ArrayList<>();
 
+
         BmobQuery<PictureBean> bmobQuery = new BmobQuery<>();
         bmobQuery.addQueryKeys("url,picturename");
         bmobQuery.setLimit(12);
         bmobQuery.findObjects(new FindListener<PictureBean>() {
             @Override
             public void done(List<PictureBean> list, BmobException e) {
+
                 if (e == null){
+
                     adapter.updataData(list);
+                    for (int i =0;i < list.size();i++){
+                        Log.e(TAG, "initData: "  + list.get(i).getUrl());
+                    }
                 }else {
                     Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
                 }
@@ -139,6 +145,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         });
 
 
+
         FreshViewPager freshViewPager = (FreshViewPager) findViewById(R.id.main_freshviewpager);
         freshViewPager.addHeader(new HeaderView(MainActivity.this));
         freshViewPager.setOnPullListener(new OnPullListener() {
@@ -159,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
 
             }
         });
+
     }
 
     public void  initMenu(){

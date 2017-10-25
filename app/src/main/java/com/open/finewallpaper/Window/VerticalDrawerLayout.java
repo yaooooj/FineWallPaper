@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ScrollView;
 
 /**
@@ -49,13 +50,15 @@ public class VerticalDrawerLayout extends ViewGroup {
         //Step1：使用静态方法构造ViewDragHelper,其中需要传入一个ViewDragHelper.Callback回调对象.
         mTopViewDragHelper = ViewDragHelper.create(this, 1.0f, new ViewDragHelperCallBack());
         //mTopViewDragHelper.setEdgeTrackingEnabled(ViewDragHelper.EDGE_TOP);
-
+        Log.e(TAG, "init: " + " init first" );
 
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mContentView = getChildAt(0);
+        mDrawerView = getChildAt(1);
 
     }
 
@@ -246,8 +249,7 @@ public class VerticalDrawerLayout extends ViewGroup {
         int measureHeight = MeasureSpec.getSize(heightMeasureSpec);
         setMeasuredDimension(measureWidth, measureHeight);
 
-        mContentView = getChildAt(0);
-        mDrawerView = getChildAt(1);
+
 
         MarginLayoutParams params = (MarginLayoutParams) mContentView.getLayoutParams();
         int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(
@@ -257,25 +259,44 @@ public class VerticalDrawerLayout extends ViewGroup {
         mContentView.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 
         mDrawerView.measure(widthMeasureSpec, heightMeasureSpec);
+        //Log.e(TAG, "onMeasure: " );
 
+    }
+
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        if (changed) {
+
+
+            //Log.e(TAG, "onLayout: " );
             MarginLayoutParams params = (MarginLayoutParams) mContentView.getLayoutParams();
             mContentView.layout(params.leftMargin, params.topMargin,
                     mContentView.getMeasuredWidth() + params.leftMargin,
                     mContentView.getMeasuredHeight() + params.topMargin);
-
+        if (changed){
             params = (MarginLayoutParams) mDrawerView.getLayoutParams();
             //mCurTop + params.topMargin
             //mCurTop + mDrawerView.getMeasuredHeight() + params.topMargin)
             mDrawerView.layout(params.leftMargin, -(mCurTop + mDrawerView.getMeasuredHeight() + params.topMargin),
                     mDrawerView.getMeasuredWidth() + params.leftMargin,
-                   0);
+                    0);
         }
 
+
+
+
+
+
+    }
+
+
+    public void invilide(){
+        invalidate();
     }
 
     private View getFirstVisibleChild() {

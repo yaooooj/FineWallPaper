@@ -86,7 +86,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
             holder.itemView.setTag(holder.getLayoutPosition());
            ((ItemViewHolderView) holder).mTextView.setText(data.get(position -1).getPicturename());
             Log.e(TAG, "onBindViewHolder: "  + data.get(position -1).getUrl() );
-            /*
+
             GlideApp.with(mContext)
                     .load(data.get(position -1).getUrl())
                     .placeholder(R.mipmap.ic_favorite_border_black_24dp)
@@ -94,7 +94,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
                     .centerCrop()
                     .dontAnimate()
                     .into(((ItemViewHolderView) holder).imageView);
-                    */
+
         }
 
     }
