@@ -1,14 +1,9 @@
 package com.open.finewallpaper.Activity;
 
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
 
-import com.open.finewallpaper.CoustomView.FractionTranslateLayout;
 import com.open.finewallpaper.Fragment.Fragment1;
 import com.open.finewallpaper.Fragment.Fragment2;
 import com.open.finewallpaper.R;

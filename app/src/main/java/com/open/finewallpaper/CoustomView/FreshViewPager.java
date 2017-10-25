@@ -147,8 +147,6 @@ public  class FreshViewPager extends ViewGroup {
                     contentHeight += child.getMeasuredHeight();
                 }
             }
-
-
         }
         bottomScroll = contentHeight - getMeasuredHeight();
     }

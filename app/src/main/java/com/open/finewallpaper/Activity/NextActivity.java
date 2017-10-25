@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.open.finewallpaper.R;
-import com.open.finewallpaper.Window.BackUtil;
 
 public class NextActivity extends AppCompatActivity {
     private final static String TAG = "NextActivity";

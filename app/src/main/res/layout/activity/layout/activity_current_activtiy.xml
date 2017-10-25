@@ -8,12 +8,25 @@
     android:layout_height="match_parent"
     tools:context="com.open.finewallpaper.Activity.CurrentActivity">
 
-
-    <ImageView
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@mipmap/ic_favorite_border_black_24dp"
-        android:scaleType="center"/>
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/current_rv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                >
+            </android.support.v7.widget.RecyclerView>
+        </RelativeLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
 
     <fragment
         android:id="@+id/drawer"

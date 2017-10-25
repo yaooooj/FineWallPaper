@@ -86,6 +86,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
             holder.itemView.setTag(holder.getLayoutPosition());
            ((ItemViewHolderView) holder).mTextView.setText(data.get(position -1).getPicturename());
             Log.e(TAG, "onBindViewHolder: "  + data.get(position -1).getUrl() );
+            /*
             GlideApp.with(mContext)
                     .load(data.get(position -1).getUrl())
                     .placeholder(R.mipmap.ic_favorite_border_black_24dp)
@@ -93,6 +94,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
                     .centerCrop()
                     .dontAnimate()
                     .into(((ItemViewHolderView) holder).imageView);
+                    */
         }
 
     }
@@ -188,10 +190,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
                 headerUrl = new ArrayList<>();
             }
             headerUrl.add("http://bmob-cdn-14274.b0.upaiyun.com/2017/09/25/178dd21d40e43154806e2bfbd5b0e4a9.jpg");
-            headerUrl.add("http://bmob-cdn-14274.b0.upaiyun.com/2017/09/25/c1534cf940fe271780fd922a37ebf55f.jpg");
-            headerUrl.add("http://bmob-cdn-14274.b0.upaiyun.com/2017/10/15/17fc0aeb40f47427803907a0aefad518.jpg");
-            headerUrl.add("http://bmob-cdn-14274.b0.upaiyun.com/2017/10/15/c154e7b94027983280b2c18f1c27423c.jpg");
-            headerUrl.add("http://bmob-cdn-14274.b0.upaiyun.com/2017/10/15/2f9f099a40b30cc38040ecf5835e746f.JPG");
+
             if (mImageViews == null){
                 mImageViews = new ArrayList<>();
             }

@@ -94,10 +94,6 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
             @Override
             public void done(List<PictureBean> list, BmobException e) {
                 if (e == null){
-                    ToastUtil.show(MainActivity.this,"success");
-                    for (PictureBean pictureBean : list){
-                        Log.e(TAG, "done: " + pictureBean.getUrl() );
-                    }
                     adapter.updataData(list);
                 }else {
                     Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.open.finewallpaper.CoustomView.FractionTranslateLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fragment_1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#50000000">
@@ -13,4 +14,4 @@
         android:textColor="@color/colorPrimaryDark"
         android:textSize="60sp"/>
 
-</com.open.finewallpaper.CoustomView.FractionTranslateLayout>
+</FrameLayout>

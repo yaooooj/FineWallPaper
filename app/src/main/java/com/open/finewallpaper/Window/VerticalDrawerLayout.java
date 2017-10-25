@@ -1,12 +1,16 @@
 package com.open.finewallpaper.Window;
 
 import android.content.Context;
+import android.support.v4.view.MotionEventCompat;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.ViewDragHelper;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ScrollView;
 
 /**
  * Created by SEELE on 2017/10/24.
@@ -44,8 +48,14 @@ public class VerticalDrawerLayout extends ViewGroup {
     private void init() {
         //Step1：使用静态方法构造ViewDragHelper,其中需要传入一个ViewDragHelper.Callback回调对象.
         mTopViewDragHelper = ViewDragHelper.create(this, 1.0f, new ViewDragHelperCallBack());
-        mTopViewDragHelper.setEdgeTrackingEnabled(ViewDragHelper.EDGE_TOP);
+        //mTopViewDragHelper.setEdgeTrackingEnabled(ViewDragHelper.EDGE_TOP);
 
+
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
 
     }
 
@@ -53,14 +63,10 @@ public class VerticalDrawerLayout extends ViewGroup {
     private class ViewDragHelperCallBack extends ViewDragHelper.Callback {
         @Override
         public boolean tryCaptureView(View child, int pointerId) {
-            //返回ture则表示可以捕获该view,手指摸上一瞬间调运
-            Log.e(TAG, "tryCaptureView: " );
-            Log.e(TAG, "tryCaptureView: " + "" + (child == mDrawerView) );
-            return child == mDrawerView;
+            //返回true则表示可以捕获该view,手指摸上一瞬间调运
+
+            return child == mDrawerView || child == mContentView;
         }
-
-
-
 
         @Override
         public void onEdgeDragStarted(int edgeFlags, int pointerId) {
@@ -79,21 +85,57 @@ public class VerticalDrawerLayout extends ViewGroup {
         public int clampViewPositionVertical(View child, int top, int dy) {
             //手指触摸移动时实时回调, top表示要到的y位置
             //保证手指挪动时只能向上，向下最大到0
-            return Math.max(Math.min(top, 0), -mDrawerView.getHeight());
+            if (child == mContentView){
+
+                //return -2 * mContentView.getHeight();
+                return  top;
+            }
+
+            if (child == mDrawerView){
+                if (top > 0){
+                    top = getMeasuredHeight() - mDrawerView.getMeasuredHeight();
+                }
+            }
+            return top;
+            //return top;
         }
 
         @Override
         public void onViewReleased(View releasedChild, float xvel, float yvel) {
             //手指释放时回调
-            float movePercent = (releasedChild.getHeight() + releasedChild.getTop()) / (float) releasedChild.getHeight();
-            int finalBottom = (xvel >= 0 && movePercent > 0.3f) ? 0 : -releasedChild.getHeight();
-            mTopViewDragHelper.settleCapturedViewAt(releasedChild.getLeft(), finalBottom);
+           // Log.e(TAG, "onViewReleased: " + "xvel = " + xvel + "  yvel = "  + yvel);
+            if (releasedChild == mContentView){
+               // Log.e(TAG, "onViewReleased: " + releasedChild.getTop() );
+                float movePercent = (releasedChild.getHeight() + releasedChild.getTop()) / (float) releasedChild.getHeight();
+                if (yvel >= 500 && movePercent > 0.5f){
+
+                    mTopViewDragHelper.smoothSlideViewTo(mDrawerView, mDrawerView.getLeft(), 0);
+                }else {
+                    mTopViewDragHelper.smoothSlideViewTo(mDrawerView, mDrawerView.getLeft(), -mDrawerView.getHeight());
+                }
+            }
+            if (releasedChild == mDrawerView){
+                float movePercent = (releasedChild.getHeight() + releasedChild.getTop()) / (float) releasedChild.getHeight();
+
+                if (yvel < 0 && movePercent > 0.3f){
+                    mTopViewDragHelper.smoothSlideViewTo(mDrawerView, mDrawerView.getLeft(), -mDrawerView.getHeight());
+                }else {
+                    mTopViewDragHelper.smoothSlideViewTo(mDrawerView, mDrawerView.getLeft(), 0);
+                    //int finalBottom = (yvel < 0 && movePercent > 0.3f) ? 0 : -releasedChild.getHeight();
+                    //mTopViewDragHelper.settleCapturedViewAt(releasedChild.getLeft(), finalBottom);
+                }
+            }
             invalidate();
         }
 
         @Override
         public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
             //mDrawerView完全挪出屏幕则防止过度绘制
+            if (changedView == mContentView){
+                //Log.e(TAG, "onViewPositionChanged: " + dy  );
+                changedView.layout(mContentView.getLeft(),mContentView.getTop() - dy,mContentView.getRight(),mContentView.getBottom() - dy);
+                mDrawerView.layout(mDrawerView.getLeft() ,mDrawerView.getTop() + dy,mDrawerView.getRight(),mDrawerView.getBottom() + dy);
+            }
             mDrawerView.setVisibility((changedView.getHeight()+top == 0)? View.GONE : View.VISIBLE);
             mCurTop = top;
             requestLayout();
@@ -121,49 +163,60 @@ public class VerticalDrawerLayout extends ViewGroup {
         }
     }
 
-    public void closeDrawer() {
-        if (mIsOpen) {
-            mTopViewDragHelper.smoothSlideViewTo(mDrawerView, mDrawerView.getLeft(), -mDrawerView.getHeight());
-            invalidate();
-        }
-    }
-
-    public void openDrawer() {
-        if (!mIsOpen) {
-            mTopViewDragHelper.smoothSlideViewTo(mDrawerView, mDrawerView.getLeft(), 0);
-            invalidate();
-        }
-    }
-
-    public boolean isDrawerOpened() {
-        return mIsOpen;
-    }
 
     //Step3：重写onInterceptTouchEvent回调ViewDragHelper中对应的方法.
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        float y = ev.getY();
-        float x = ev.getX();
-        switch (ev.getAction()){
-            case MotionEvent.ACTION_MOVE:
-                lastMotionY = ev.getY();
-                lastMotionX = ev.getX();
-                final float dy = Math.abs(y - lastMotionY);
-                final float dx = Math.abs(x - lastMotionX);
-                Log.e(TAG, "onInterceptTouchEvent: " + " dy " + dy );
-                if (dy > 20 && dy * 0.5f > dx){
-                    Log.e(TAG, "onInterceptTouchEvent: " );
+        boolean intercept = false;
+        final int actionIndex = MotionEventCompat.getActionIndex(ev);
 
-                    return mTopViewDragHelper.shouldInterceptTouchEvent(ev);
-                }
-                break;
-            default:
-                break;
+        //intercept = mTopViewDragHelper.shouldInterceptTouchEvent(ev);
+        if (mTopViewDragHelper.shouldInterceptTouchEvent(ev)){
+            return true;
         }
-        return mTopViewDragHelper.shouldInterceptTouchEvent(ev);
+            float y = ev.getY();
+            float x = ev.getX();
+            switch (ev.getAction()){
+                case MotionEvent.ACTION_DOWN:
+                    lastMotionY = ev.getY();
+                    lastMotionX = ev.getX();
+                    Log.e(TAG, "onInterceptTouchEvent: "+ "Down" );
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    final float dy = y - lastMotionY;
+                    final float dx = Math.abs(x - lastMotionX);
+                    Log.e(TAG, "onInterceptTouchEvent: " + " dy " + dy );
+                    View view = findTopChildUnder((int) x,(int) y);
+                    if (view == mContentView && isTop(view)){
+                        Log.e(TAG, "onInterceptTouchEvent: " + " is mContentView" );
+                        if (dy > 20 && dy * 0.5f > dx){
+                            mTopViewDragHelper.captureChildView(mContentView,actionIndex);
+                            intercept = true;
+                        }
+                    }else if (view == mDrawerView){
+                        Log.e(TAG, "onInterceptTouchEvent: " + " is mDrawerView" );
+                        intercept = true;
+                    }else {
+                        intercept = false;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        return intercept;
     }
 
-
+    public View findTopChildUnder(int x, int y) {
+        final int childCount = getChildCount();
+        for (int i = childCount - 1; i >= 0; i--) {
+            final View child = getChildAt(i);
+            if (x >= child.getLeft() && x < child.getRight()
+                    && y >= child.getTop() && y < child.getBottom()) {
+                return child;
+            }
+        }
+        return null;
+    }
 
     //Step3：重写onTouchEvent回调ViewDragHelper中对应的方法.
     @Override
@@ -204,6 +257,7 @@ public class VerticalDrawerLayout extends ViewGroup {
         mContentView.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 
         mDrawerView.measure(widthMeasureSpec, heightMeasureSpec);
+
     }
 
     @Override
@@ -221,5 +275,55 @@ public class VerticalDrawerLayout extends ViewGroup {
                     mDrawerView.getMeasuredWidth() + params.leftMargin,
                    0);
         }
+
+    }
+
+    private View getFirstVisibleChild() {
+
+        for (int i =0; i < getChildCount();i++){
+            View child = getChildAt(i);
+            if (child.getVisibility() == GONE){
+                continue;
+            }else {
+                return child;
+            }
+        }
+        return null;
+    }
+    private boolean isTop(View view){
+        boolean intercept = false;
+        if (view instanceof ViewGroup) {
+            if (view instanceof NestedScrollView){
+
+                if (view.getScrollY() <= 0){
+                    intercept = true;
+                }
+            }else if (view instanceof ScrollView){
+                if (view.getScrollY() <= 0) {
+                    intercept = true;
+                }
+            }else {
+                intercept = isChildTop((ViewGroup) view);
+            }
+
+        }else {
+            intercept = false;
+        }
+        return intercept;
+    }
+    private boolean isChildTop(ViewGroup viewGroup){
+        int minY = 0;
+        int count = viewGroup.getChildCount();
+        for (int i = 0; i < count; i++) {
+            View view = viewGroup.getChildAt(i);
+            int topMargin = 0;
+            LayoutParams lp = view.getLayoutParams();
+            if (lp instanceof MarginLayoutParams) {
+                topMargin = ((MarginLayoutParams) lp).topMargin;
+            }
+            int top = view.getTop() - topMargin;
+            minY = Math.min(minY, top);
+        }
+        return minY >= 0;
     }
 }
