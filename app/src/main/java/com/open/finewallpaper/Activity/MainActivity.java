@@ -1,18 +1,14 @@
 package com.open.finewallpaper.Activity;
 
 
-import android.content.Intent;
-import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -21,20 +17,17 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 
 
 import com.open.finewallpaper.Adapter.MainFragmentAdapter;
 import com.open.finewallpaper.Bean.PictureBean;
 
-import com.open.finewallpaper.CoustomView.FreshViewPager;
-import com.open.finewallpaper.CoustomView.HeaderView;
-import com.open.finewallpaper.CoustomView.OnPullListener;
 import com.open.finewallpaper.Fragment.MainFragment;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.FileUtil;
+import com.open.finewallpaper.Util.RvDecoration;
 import com.open.finewallpaper.Util.ScreenUtil;
-import com.open.finewallpaper.Util.ToastUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +37,6 @@ import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
 
 import static android.graphics.Color.TRANSPARENT;
-import static java.lang.System.in;
 
 
 public class MainActivity extends AppCompatActivity implements MainFragment.OnFragmentInteractionListener{
@@ -56,13 +48,14 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     private int lastMotionX;
     private PopupWindow popUpWindow;
     private TranslateAnimation animation;
+    private RecyclerView recyclerView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Window window = getWindow();
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_current_activtiy);
         initBmob();
         initFile();
         initData();
@@ -87,20 +80,21 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     public void initData(){
         pictureBeen = new ArrayList<>();
 
-
         BmobQuery<PictureBean> bmobQuery = new BmobQuery<>();
-        bmobQuery.addQueryKeys("url,picturename");
+        bmobQuery.addQueryKeys("url,picturename,type");
         bmobQuery.setLimit(12);
+        bmobQuery.order("type");
         bmobQuery.findObjects(new FindListener<PictureBean>() {
             @Override
-            public void done(List<PictureBean> list, BmobException e) {
+            public void done(final List<PictureBean> list, BmobException e) {
 
                 if (e == null){
-
-                    adapter.updataData(list);
-                    for (int i =0;i < list.size();i++){
-                        Log.e(TAG, "initData: "  + list.get(i).getUrl());
+                    for (int i =0 ; i < list.size();i++){
+                        Log.e(TAG, "done: " + list.get(i).getType() );
                     }
+                    adapter.updataData(list);
+
+
                 }else {
                     Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
                 }
@@ -115,37 +109,19 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         screenUtil.setStatusView(getWindow());
 
 
-
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.fragment_main_recyclerview);
-        adapter = new MainFragmentAdapter(this,R.layout.fragment_mian_adapter_m,pictureBeen);
-        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
+        recyclerView = (RecyclerView) findViewById(R.id.current_rv);
+        //recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
+        recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
+        adapter = new MainFragmentAdapter(MainActivity.this,R.layout.adapter_2,pictureBeen);
         recyclerView.setAdapter(adapter);
         recyclerView.setNestedScrollingEnabled(false);
-        recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
-            @Override
-            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-                final int dividerLeft = 10;
-                final int dividerRight = 10;
-                final int dividerHeight = 10;
-
-                int childPosition = parent.getChildAdapterPosition(view);
-                RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
-                if (layoutManager instanceof StaggeredGridLayoutManager){
-                    int spanCount = ((StaggeredGridLayoutManager)layoutManager).getSpanCount();
-                    if ((childPosition ) % 5 == 0){
-                        outRect.set(0,0,0,dividerHeight);
-                    }else if ((childPosition + 2) % spanCount == 0){
-                        outRect.set(dividerLeft,0,dividerRight,dividerHeight);
-                    }else {
-                        outRect.set(dividerLeft,0,0,dividerHeight);
-                    }
-
-                }
-            }
-        });
+        recyclerView.addItemDecoration(new RvDecoration(this));
 
 
 
+
+
+        /*
         FreshViewPager freshViewPager = (FreshViewPager) findViewById(R.id.main_freshviewpager);
         freshViewPager.addHeader(new HeaderView(MainActivity.this));
         freshViewPager.setOnPullListener(new OnPullListener() {
@@ -166,13 +142,16 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
 
             }
         });
-
+            */
     }
 
     public void  initMenu(){
 
     }
 
+    private void setPullList(){
+
+    }
 
     public void addFragment(){
         Log.e(TAG, "addFragment: " );
@@ -197,9 +176,6 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         popUpWindow.setOutsideTouchable(true);
         popUpWindow.setBackgroundDrawable(new ColorDrawable(0x70000000));
         View rootview = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_main, null);
-        //33
-        //
-        //
         // 0popUpWindow.showAtLocation(rootview, Gravity.BOTTOM,0,-1000);
         popUpWindow.update(0,diffy,-1,-1);
 

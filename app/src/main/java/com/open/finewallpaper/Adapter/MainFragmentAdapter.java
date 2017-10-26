@@ -15,10 +15,10 @@ import android.widget.TextView;
 
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.open.finewallpaper.Activity.MainActivity;
 import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.GlideApp;
+import com.open.finewallpaper.Util.RvDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,11 +62,12 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         RecyclerView.ViewHolder viewHolder;
         if (viewType == 1){
-            viewHolder = new ViewPagerHolderVew(inflate.inflate(R.layout.fragment_main_adapter,parent,false));
-        }else {
+            viewHolder = new ViewPagerHolderVew(inflate.inflate(R.layout.adapter_1,parent,false));
+        }else if (viewType == 2){
             viewHolder = new ItemViewHolderView(inflate.inflate(layoutResId,parent,false));
+        } else  {
+            viewHolder = new GrindLayoutHolderView(inflate.inflate(R.layout.adapter_3,parent,false));
         }
-
         return viewHolder;
     }
 
@@ -81,36 +82,33 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         }
 
         if (holder instanceof ItemViewHolderView) {
-            holder.itemView.setOnClickListener(this);
-            holder.itemView.setOnLongClickListener(this);
-            holder.itemView.setTag(holder.getLayoutPosition());
-           ((ItemViewHolderView) holder).mTextView.setText(data.get(position -1).getPicturename());
-            Log.e(TAG, "onBindViewHolder: "  + data.get(position -1).getUrl() );
-
-            GlideApp.with(mContext)
-                    .load(data.get(position -1).getUrl())
-                    .placeholder(R.mipmap.ic_favorite_border_black_24dp)
-                    .error(R.mipmap.ic_favorite_border_black_24dp)
-                    .centerCrop()
-                    .dontAnimate()
-                    .into(((ItemViewHolderView) holder).imageView);
-
+            ((ItemViewHolderView) holder).mTextView.setText(data.get(position).getType());
         }
 
+        if (holder instanceof GrindLayoutHolderView){
+            CustomLayout layoutManager = new CustomLayout(mContext,2);
+            layoutManager.setScrollEnable(false);
+            ((GrindLayoutHolderView) holder).recyclerView.setLayoutManager( layoutManager);
+            ((GrindLayoutHolderView) holder).recyclerView.setAdapter(new CurrentAdapter(mContext));
+            ((GrindLayoutHolderView) holder).recyclerView.addItemDecoration(new RvDecoration(mContext));
+        }
     }
 
     @Override
     public int getItemCount() {
-        return data.size()+1;
+        return data.size();
     }
 
     @Override
     public int getItemViewType(int position) {
         if (position  < 1) {
             return 1;
-        } else {
+        } else if ((position+1)%2 == 1 || position == 1){
             return 2;
+        }else if ((position + 1) / 2 == 0){
+            return 3;
         }
+        return 0;
     }
 
     @Override
@@ -172,14 +170,19 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     private class ItemViewHolderView extends RecyclerView.ViewHolder {
         TextView mTextView;
-        ImageView imageView;
         public ItemViewHolderView(View itemView) {
             super(itemView);
-            mTextView = (TextView) itemView.findViewById(R.id.fragment_main_adapter_textview);
-            imageView = (ImageView) itemView.findViewById(R.id.fragment_main_adapter_imageview);
+            mTextView = (TextView) itemView.findViewById(R.id.adapter_2_tv);
         }
     }
 
+    private class GrindLayoutHolderView extends RecyclerView.ViewHolder{
+        RecyclerView recyclerView;
+        public GrindLayoutHolderView(View itemView) {
+            super(itemView);
+            recyclerView = (RecyclerView) itemView.findViewById(R.id.adapter_3_rv);
+        }
+    }
     private class MainViewPagerAdapter extends PagerAdapter {
         List<String> headerUrl;
         List<ImageView> mImageViews;

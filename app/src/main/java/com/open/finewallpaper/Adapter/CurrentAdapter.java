@@ -2,33 +2,61 @@ package com.open.finewallpaper.Adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.open.finewallpaper.Activity.MainActivity;
 import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.GlideApp;
+import com.open.finewallpaper.Util.RvDecoration;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.FindListener;
 
 /**
  * Created by yaojian on 2017/10/25.
  */
 
 public class CurrentAdapter extends RecyclerView.Adapter {
+    private final static String TAG = "CurrentAdapter";
     private List<PictureBean> data;
     private LayoutInflater inflate;
     private Context mContext;
 
-    public CurrentAdapter(Context context,List<PictureBean> data) {
+    public CurrentAdapter(Context context) {
         this.mContext = context;
-        this.data = data;
         inflate = LayoutInflater.from(context);
+        init();
     }
 
+    private void init(){
+        data = new ArrayList<>();
+        BmobQuery<PictureBean> bmobQuery = new BmobQuery<>();
+        bmobQuery.addQueryKeys("url,picturename,type");
+        bmobQuery.setLimit(12);
+        bmobQuery.order("type");
+        bmobQuery.findObjects(new FindListener<PictureBean>() {
+            @Override
+            public void done(final List<PictureBean> list, BmobException e) {
+
+                if (e == null){
+                    data = list;
+                    notifyDataSetChanged();
+                }else {
+                    Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
+                }
+            }
+        });
+    }
     public  void  updataData (List<PictureBean> data ){
         this.data =  data;
         notifyDataSetChanged();
@@ -54,7 +82,6 @@ public class CurrentAdapter extends RecyclerView.Adapter {
                         .centerCrop()
                         .dontAnimate()
                         .into((((CurrentVH) holder).mImageView));
-
             }
     }
 

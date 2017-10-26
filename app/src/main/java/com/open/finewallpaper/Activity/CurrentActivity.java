@@ -44,8 +44,8 @@ public class CurrentActivity extends AppCompatActivity {
        // recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
         recyclerView.setNestedScrollingEnabled(false);
-        adapter = new CurrentAdapter(CurrentActivity.this,data);
-        recyclerView.setAdapter(adapter);
+        //adapter = new CurrentAdapter(CurrentActivity.this,data);
+        //recyclerView.setAdapter(adapter);
 
         mVerticalDrawerLayout = (VerticalDrawerLayout) findViewById(R.id.layout_id);
 
