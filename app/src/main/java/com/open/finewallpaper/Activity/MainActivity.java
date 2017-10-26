@@ -27,6 +27,7 @@ import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.FileUtil;
 import com.open.finewallpaper.Util.RvDecoration;
 import com.open.finewallpaper.Util.ScreenUtil;
+import com.open.finewallpaper.Window.ToolBarScrollView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +43,7 @@ import static android.graphics.Color.TRANSPARENT;
 public class MainActivity extends AppCompatActivity implements MainFragment.OnFragmentInteractionListener{
     private final static String TAG = "MainActivity";
 
-    private List<PictureBean> pictureBeen;
+    private List<String> pictureBeen;
     private MainFragmentAdapter adapter;
     private int lastMotionY;
     private int lastMotionX;
@@ -54,7 +55,8 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         super.onCreate(savedInstanceState);
         Window window = getWindow();
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(
+         WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_current_activtiy);
         initBmob();
         initFile();
@@ -89,10 +91,11 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
             public void done(final List<PictureBean> list, BmobException e) {
 
                 if (e == null){
-                    for (int i =0 ; i < list.size();i++){
-                        Log.e(TAG, "done: " + list.get(i).getType() );
+
+                    for (int i = 0; i < list.size();i++){
+                            pictureBeen.add(list.get(i).getType());
                     }
-                    adapter.updataData(list);
+                    adapter.updataData(pictureBeen);
 
 
                 }else {
@@ -107,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         ScreenUtil screenUtil = new ScreenUtil();
         screenUtil.setColor(TRANSPARENT);
         screenUtil.setStatusView(getWindow());
+
 
 
         recyclerView = (RecyclerView) findViewById(R.id.current_rv);
@@ -146,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     }
 
     public void  initMenu(){
-
+        
     }
 
     private void setPullList(){
