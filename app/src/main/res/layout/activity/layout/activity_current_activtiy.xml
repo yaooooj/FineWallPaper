@@ -1,41 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.open.finewallpaper.Window.VerticalDrawerLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_id"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.open.finewallpaper.Activity.CurrentActivity">
+    tools:context="com.open.finewallpaper.Activity.CurrentActivity"
+    android:orientation="vertical">
 
 
-    <android.support.v4.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <RelativeLayout
+
+
+        <com.open.finewallpaper.Window.VerticalDrawerLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:focusable="true"
-            android:focusableInTouchMode="true">
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/current_rv"
+            >
+            <android.support.v4.widget.NestedScrollView
+                android:id="@+id/main_tbs"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 >
-            </android.support.v7.widget.RecyclerView>
-        </RelativeLayout>
-    </android.support.v4.widget.NestedScrollView>
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/current_rv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        >
+                    </android.support.v7.widget.RecyclerView>
+
+            </android.support.v4.widget.NestedScrollView>
 
 
+            <fragment
+                android:id="@+id/drawer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:name="com.open.finewallpaper.Fragment.Fragment1"
+                />
 
-    <fragment
-        android:id="@+id/drawer"
+        </com.open.finewallpaper.Window.VerticalDrawerLayout>
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/main_tb"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="com.open.finewallpaper.Fragment.Fragment1"
-        />
+        android:layout_height="wrap_content"
+        android:background="#90000000"
+        android:layoutMode="opticalBounds"
+        >
+    </android.support.v7.widget.Toolbar>
 
 
 
-</com.open.finewallpaper.Window.VerticalDrawerLayout>
+
+</RelativeLayout>

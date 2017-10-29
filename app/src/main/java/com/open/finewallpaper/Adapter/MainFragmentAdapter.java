@@ -30,7 +30,7 @@ import java.util.List;
 public class MainFragmentAdapter extends RecyclerView.Adapter
         implements View.OnClickListener, View.OnLongClickListener{
     private final static String TAG = "MainFragmentAdapter";
-    private List<PictureBean> data;
+    private List<String> data;
     private Context mContext;
     private Fragment mFragment;
     private int layoutResId;
@@ -38,7 +38,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     private OnItemClickListener mOnItemClickListener;
     private OnItemLongClickListener mOnItemLongClickListener;
 
-    public MainFragmentAdapter(Context context, int layoutResId, List<PictureBean> data) {
+    public MainFragmentAdapter(Context context, int layoutResId, List<String> data) {
         this.data = data;
         this.mContext = context;
         this.layoutResId = layoutResId;
@@ -46,14 +46,14 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     }
 
-    public MainFragmentAdapter(Fragment fragment, int layoutResId, List<PictureBean> data) {
+    public MainFragmentAdapter(Fragment fragment, int layoutResId, List<String> data) {
         this.data = data;
         this.mFragment = fragment;
         this.layoutResId = layoutResId;
         inflate = LayoutInflater.from(fragment.getContext());
     }
 
-    public  void  updataData (List<PictureBean> data ){
+    public  void  updataData (List<String> data ){
         this.data =  data;
         notifyDataSetChanged();
     }
@@ -82,7 +82,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         }
 
         if (holder instanceof ItemViewHolderView) {
-            ((ItemViewHolderView) holder).mTextView.setText(data.get(position).getType());
+            ((ItemViewHolderView) holder).mTextView.setText(data.get(position));
         }
 
         if (holder instanceof GrindLayoutHolderView){
@@ -103,12 +103,11 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     public int getItemViewType(int position) {
         if (position  < 1) {
             return 1;
-        } else if ((position+1)%2 == 1 || position == 1){
+        } else if (isFirstInGroup(position)){
             return 2;
-        }else if ((position + 1) / 2 == 0){
+        }else {
             return 3;
         }
-        return 0;
     }
 
     @Override
@@ -124,6 +123,18 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         }
     }
 
+    private boolean isFirstInGroup(int pos){
+        Log.e(TAG, "isFirstInGroup: " + pos );
+        if (pos == 1){
+            return true;
+        }else if (pos == 0){
+            return  false;
+        }else {
+            String preGroupId = data.get(pos-1);
+            String groupId = data.get(pos);
+            return !preGroupId .equals( groupId);
+        }
+    }
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         mOnItemClickListener = onItemClickListener;
     }

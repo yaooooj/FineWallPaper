@@ -2,4 +2,6 @@
 <resources>
     <dimen name="sectioned_top">32dp</dimen>
     <dimen name="sectioned_alignBottom">32dp</dimen>
+    <dimen name="leftGap">5dp</dimen>
+    <dimen name="rightGap">5dp</dimen>
 </resources>

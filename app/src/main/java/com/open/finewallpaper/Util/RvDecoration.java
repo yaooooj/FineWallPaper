@@ -38,26 +38,12 @@ public class RvDecoration extends RecyclerView.ItemDecoration {
     private int bottomGap;
     private Paint paint1;
 
+    private int leftGap;
+    private int rightGap;
     private DecorationCallBack call;
 
     public RvDecoration(Context context){
-        Resources res = context.getResources();
-
-        paint = new Paint();
-        paint.setColor(Color.WHITE);
-
-        paint1 = new Paint();
-        paint1.setColor(Color.GRAY);
-
-        fontMetrics = new Paint.FontMetrics();
-        textPaint = new TextPaint();
-        textPaint.setTypeface(Typeface.DEFAULT);
-        textPaint.setAntiAlias(true);
-        textPaint.setTextSize(50);
-        textPaint.setColor(Color.BLACK);
-        textPaint.getFontMetrics(fontMetrics);
-        textPaint.setTextAlign(Paint.Align.LEFT);
-        bottomGap = res.getDimensionPixelSize(R.dimen.sectioned_top);
+        this(context,null);
     }
     public RvDecoration(Context context,DecorationCallBack call) {
         //this.data = data;
@@ -80,7 +66,13 @@ public class RvDecoration extends RecyclerView.ItemDecoration {
         textPaint.getFontMetrics(fontMetrics);
         textPaint.setTextAlign(Paint.Align.LEFT);
         bottomGap = res.getDimensionPixelSize(R.dimen.sectioned_top);
+
+        leftGap = res.getDimensionPixelSize(R.dimen.leftGap);
+        rightGap = res.getDimensionPixelSize(R.dimen.rightGap);
+
     }
+
+
 
     @Override
     public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
@@ -120,12 +112,12 @@ public class RvDecoration extends RecyclerView.ItemDecoration {
         final int dividerHeight = 10;
 
         int childPosition = parent.getChildAdapterPosition(view);
-       Log.e(TAG, "getItemOffsets: " + childPosition );
+
         RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
         if ( layoutManager instanceof GridLayoutManager){
             int spanCount = ((GridLayoutManager) layoutManager).getSpanCount();
-            if (childPosition % spanCount == 0 ){
-                outRect.set(10,0,10,10);
+            if (childPosition % 2 != 0 ){
+                outRect.set(leftGap,0,rightGap,10);
             }else {
                 outRect.set(10,0,0,10);
             }
@@ -141,12 +133,19 @@ public class RvDecoration extends RecyclerView.ItemDecoration {
                 outRect.top = 0;
             }
         }else {
-            outRect.set(0,0,0,dividerHeight);
+
+                if (childPosition == 0){
+                    outRect.set(0,0,0,0);
+                }else {
+                    outRect.set(leftGap,0,rightGap,dividerHeight);
+                }
+
+
+
         }
     }
 
     private boolean isFirstInGroup(int pos){
-        Log.e(TAG, "isFirstInGroup: " + pos );
         if (pos == 1){
             return true;
         }else if (pos == 0){

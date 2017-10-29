@@ -57,6 +57,7 @@ public class VerticalDrawerLayout extends ViewGroup {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+
         mContentView = getChildAt(0);
         mDrawerView = getChildAt(1);
 
@@ -251,6 +252,7 @@ public class VerticalDrawerLayout extends ViewGroup {
 
 
 
+
         MarginLayoutParams params = (MarginLayoutParams) mContentView.getLayoutParams();
         int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(
                 measureWidth- (params.leftMargin + params.rightMargin), MeasureSpec.EXACTLY);
@@ -259,25 +261,23 @@ public class VerticalDrawerLayout extends ViewGroup {
         mContentView.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 
         mDrawerView.measure(widthMeasureSpec, heightMeasureSpec);
+
         //Log.e(TAG, "onMeasure: " );
 
     }
 
 
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-    }
+
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
 
 
             //Log.e(TAG, "onLayout: " );
-            MarginLayoutParams params = (MarginLayoutParams) mContentView.getLayoutParams();
-            mContentView.layout(params.leftMargin, params.topMargin,
-                    mContentView.getMeasuredWidth() + params.leftMargin,
-                    mContentView.getMeasuredHeight() + params.topMargin);
+        MarginLayoutParams params = (MarginLayoutParams) mContentView.getLayoutParams();
+        mContentView.layout(params.leftMargin, params.topMargin,
+                mContentView.getMeasuredWidth() + params.leftMargin,
+                mContentView.getMeasuredHeight() + params.topMargin);
         if (changed){
             params = (MarginLayoutParams) mDrawerView.getLayoutParams();
             //mCurTop + params.topMargin
@@ -286,18 +286,8 @@ public class VerticalDrawerLayout extends ViewGroup {
                     mDrawerView.getMeasuredWidth() + params.leftMargin,
                     0);
         }
-
-
-
-
-
-
     }
 
-
-    public void invilide(){
-        invalidate();
-    }
 
     private View getFirstVisibleChild() {
 
