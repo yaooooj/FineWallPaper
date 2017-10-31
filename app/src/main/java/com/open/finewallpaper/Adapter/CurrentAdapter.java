@@ -1,6 +1,7 @@
 package com.open.finewallpaper.Adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
@@ -98,7 +99,7 @@ public class CurrentAdapter extends RecyclerView.Adapter implements View.OnClick
             if (holder instanceof CurrentVH){
                 //((CurrentVH) holder).textView.setText(data.get(position).getPicturename());
                 //((CurrentVH) holder).mImageView.setImageResource(R.mipmap.ic_favorite_border_black_24dp);
-
+                Log.e(TAG, "onBindViewHolder: " +  data.get(position).getUrl());
                 GlideApp.with(mContext)
                         .load(data.get(position).getUrl())
                         .placeholder(R.mipmap.ic_favorite_border_black_24dp)
@@ -130,8 +131,13 @@ public class CurrentAdapter extends RecyclerView.Adapter implements View.OnClick
 
     @Override
     public void onClick(View v) {
-        if (onItemLinstener != null){
-            onItemLinstener.onClick(data, (Integer) v.getTag());
+        if (onItemLinstener != null && data.size() != 0){
+
+            List<String> urls = new ArrayList<>();
+            for (int i =0 ;i < data.size(); i++){
+                urls.add(data.get(i).getUrl());
+            }
+            onItemLinstener.onClick(urls, (Integer) v.getTag());
 
         }
 
@@ -157,7 +163,7 @@ public class CurrentAdapter extends RecyclerView.Adapter implements View.OnClick
     }
 
     public interface OnItemClickListener {
-        void onClick(List<PictureBean> url, int position);
+        void onClick(List<String> url, int position);
     }
 
     public interface OnItemLongClickListener {

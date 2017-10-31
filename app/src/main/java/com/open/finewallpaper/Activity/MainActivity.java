@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         recyclerView.addItemDecoration(new RvDecoration(this));
         adapter.setOnItemClickListener(new MainFragmentAdapter.OnItemClickListener() {
             @Override
-            public void onClick(List<String> url, String position) {
+            public void onClick(List<String> url, int position) {
                 Intent intent = new Intent(MainActivity.this,NextActivity.class);
                 startActivity(intent);
             }
@@ -157,15 +157,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         
     }
 
-    public void addFragment(){
-        Log.e(TAG, "addFragment: " );
-        MainFragment fragment = MainFragment.newInstance(null,null);
 
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.main_activity,fragment)
-                .show(fragment)
-                .commit();
-    }
 
     @Override
     public void onFragmentInteraction(Uri uri) {

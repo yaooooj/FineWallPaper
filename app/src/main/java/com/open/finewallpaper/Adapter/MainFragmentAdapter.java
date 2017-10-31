@@ -2,6 +2,7 @@ package com.open.finewallpaper.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -118,7 +119,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
         if (holder instanceof GrindLayoutHolderView){
             ((GrindLayoutHolderView) holder).textView.setText(data.get(position - 1));
-            ((GrindLayoutHolderView) holder).moreTextView.setTag("moreTextView");
+            ((GrindLayoutHolderView) holder).moreTextView.setTag(holder.getAdapterPosition());
             ((GrindLayoutHolderView) holder).moreTextView.setOnClickListener(this);
 
             CustomLayout layoutManager = new CustomLayout(mContext,3);
@@ -140,8 +141,12 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
             });
             currentAdapter.setOnItemLinstener(new CurrentAdapter.OnItemClickListener() {
                 @Override
-                public void onClick(List<PictureBean> url, int position) {
+                public void onClick(List<String> urls, int position) {
+                    Bundle bundle = new Bundle();
+                    bundle.putStringArrayList("url", (ArrayList<String>) urls);
+                    bundle.putInt("position",position);
                     Intent intent = new Intent(mContext, NextActivity.class);
+                    intent.putExtra("urls",bundle);
                     mContext.startActivity(intent);
                     Toast.makeText(mContext,"click " + position,Toast.LENGTH_SHORT).show();
                 }
@@ -199,7 +204,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     @Override
     public void onClick(View v) {
         if (mOnItemClickListener != null){
-            mOnItemClickListener.onClick(data, (String) v.getTag());
+            mOnItemClickListener.onClick(data, (Integer) v.getTag());
         }
     }
 
@@ -214,7 +219,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
 
     public interface OnItemClickListener {
-        void onClick(List<String> url, String position);
+        void onClick(List<String> url, int position);
     }
 
     public interface OnItemLongClickListener {

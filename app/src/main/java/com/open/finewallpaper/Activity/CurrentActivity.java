@@ -36,7 +36,7 @@ public class CurrentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_activtiy);
 
-        mVerticalDrawerLayout = (VerticalDrawerLayout) findViewById(R.id.layout_id);
+
         init();
 
         recyclerView = (RecyclerView) findViewById(R.id.current_rv);
@@ -47,7 +47,7 @@ public class CurrentActivity extends AppCompatActivity {
         //adapter = new CurrentAdapter(CurrentActivity.this,data);
         //recyclerView.setAdapter(adapter);
 
-        mVerticalDrawerLayout = (VerticalDrawerLayout) findViewById(R.id.layout_id);
+
 
 
 

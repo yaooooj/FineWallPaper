@@ -1,0 +1,21 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:context="com.open.finewallpaper.Fragment.NextFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <com.open.finewallpaper.CoustomView.FreshViewPager
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/nextfragment_vp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </android.support.v4.view.ViewPager>
+    </com.open.finewallpaper.CoustomView.FreshViewPager>
+
+
+</FrameLayout>
