@@ -1,6 +1,7 @@
 package com.open.finewallpaper.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -12,16 +13,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.open.finewallpaper.Activity.NextActivity;
 import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.GlideApp;
 import com.open.finewallpaper.Util.RvDecoration;
+import com.open.finewallpaper.Util.RvScrollListener;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.FindListener;
 
 /**
  * Created by SEELE on 2017/10/15.
@@ -38,21 +47,45 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     private OnItemClickListener mOnItemClickListener;
     private OnItemLongClickListener mOnItemLongClickListener;
 
-    public MainFragmentAdapter(Context context, int layoutResId, List<String> data) {
+    public MainFragmentAdapter(Context context, int layoutResId,List<String> data) {
         this.data = data;
         this.mContext = context;
         this.layoutResId = layoutResId;
         inflate = LayoutInflater.from(context);
+        init();
 
     }
 
-    public MainFragmentAdapter(Fragment fragment, int layoutResId, List<String> data) {
+    public MainFragmentAdapter(Fragment fragment, int layoutResId,List<String> data) {
         this.data = data;
         this.mFragment = fragment;
         this.layoutResId = layoutResId;
         inflate = LayoutInflater.from(fragment.getContext());
     }
-
+    public void init(){
+        data = new ArrayList<>();
+        BmobQuery<PictureBean> bmobQuery = new BmobQuery<>();
+        bmobQuery.addQueryKeys("type");
+        //bmobQuery.setLimit(12);
+        bmobQuery.order("type");
+        bmobQuery.findObjects(new FindListener<PictureBean>() {
+            @Override
+            public void done(final List<PictureBean> list, BmobException e) {
+                if (e == null){
+                    data.add(list.get(0).getType());
+                    for (int i = 1 ;i < list.size();i++){
+                        if (!list.get(i-1).getType().equals(list.get(i).getType())){
+                            Log.e(TAG, "done: " +list.get(i).getType()  );
+                            data.add(list.get(i).getType());
+                        }
+                    }
+                    notifyDataSetChanged();
+                }else {
+                    Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
+                }
+            }
+        });
+    }
     public  void  updataData (List<String> data ){
         this.data =  data;
         notifyDataSetChanged();
@@ -60,12 +93,10 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        RecyclerView.ViewHolder viewHolder;
+        RecyclerView.ViewHolder viewHolder = null;
         if (viewType == 1){
             viewHolder = new ViewPagerHolderVew(inflate.inflate(R.layout.adapter_1,parent,false));
-        }else if (viewType == 2){
-            viewHolder = new ItemViewHolderView(inflate.inflate(layoutResId,parent,false));
-        } else  {
+        }else if (viewType == 3){
             viewHolder = new GrindLayoutHolderView(inflate.inflate(R.layout.adapter_3,parent,false));
         }
         return viewHolder;
@@ -86,28 +117,50 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         }
 
         if (holder instanceof GrindLayoutHolderView){
-            CustomLayout layoutManager = new CustomLayout(mContext,2);
+            ((GrindLayoutHolderView) holder).textView.setText(data.get(position - 1));
+            ((GrindLayoutHolderView) holder).moreTextView.setTag("moreTextView");
+            ((GrindLayoutHolderView) holder).moreTextView.setOnClickListener(this);
+
+            CustomLayout layoutManager = new CustomLayout(mContext,3);
             layoutManager.setScrollEnable(false);
             ((GrindLayoutHolderView) holder).recyclerView.setLayoutManager( layoutManager);
-            ((GrindLayoutHolderView) holder).recyclerView.setAdapter(new CurrentAdapter(mContext));
-            ((GrindLayoutHolderView) holder).recyclerView.addItemDecoration(new RvDecoration(mContext));
+            CurrentAdapter currentAdapter = new CurrentAdapter(mContext,data.get(position -1));
+            ((GrindLayoutHolderView) holder).recyclerView.setAdapter(currentAdapter);
+            ((GrindLayoutHolderView) holder).recyclerView.addOnScrollListener(new RvScrollListener() {
+                @Override
+                public void onLoadMore() {
+                    GlideApp.with(mContext).resumeRequests();
+
+                }
+
+                @Override
+                public void onDragLoadMore() {
+                   GlideApp.with(mContext).pauseRequests();
+                }
+            });
+            currentAdapter.setOnItemLinstener(new CurrentAdapter.OnItemClickListener() {
+                @Override
+                public void onClick(List<PictureBean> url, int position) {
+                    Intent intent = new Intent(mContext, NextActivity.class);
+                    mContext.startActivity(intent);
+                    Toast.makeText(mContext,"click " + position,Toast.LENGTH_SHORT).show();
+                }
+            });
+
         }
     }
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return data.size()  + 1;
     }
 
     @Override
     public int getItemViewType(int position) {
         if (position  < 1) {
             return 1;
-        } else if (isFirstInGroup(position)){
-            return 2;
-        }else {
-            return 3;
         }
+        return 3;
     }
 
     @Override
@@ -146,7 +199,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     @Override
     public void onClick(View v) {
         if (mOnItemClickListener != null){
-            mOnItemClickListener.onClick(data, (Integer) v.getTag());
+            mOnItemClickListener.onClick(data, (String) v.getTag());
         }
     }
 
@@ -160,8 +213,8 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
 
 
-    public interface OnItemClickListener<T> {
-        void onClick(List<T> url, int position);
+    public interface OnItemClickListener {
+        void onClick(List<String> url, String position);
     }
 
     public interface OnItemLongClickListener {
@@ -189,9 +242,13 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     private class GrindLayoutHolderView extends RecyclerView.ViewHolder{
         RecyclerView recyclerView;
+        TextView textView;
+        TextView moreTextView;
         public GrindLayoutHolderView(View itemView) {
             super(itemView);
             recyclerView = (RecyclerView) itemView.findViewById(R.id.adapter_3_rv);
+            textView = (TextView) itemView.findViewById(R.id.adapter_3_tv);
+            moreTextView = (TextView) itemView.findViewById(R.id.adapter_more_tv);
         }
     }
     private class MainViewPagerAdapter extends PagerAdapter {

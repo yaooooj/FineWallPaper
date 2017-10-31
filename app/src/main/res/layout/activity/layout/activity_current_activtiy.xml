@@ -11,48 +11,12 @@
 
 
 
-
-        <com.open.finewallpaper.Window.VerticalDrawerLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-
-            >
-            <android.support.v4.widget.NestedScrollView
-                android:id="@+id/main_tbs"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                >
-
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/current_rv"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:focusable="true"
-                        android:focusableInTouchMode="true"
+                        android:layout_height="match_parent"
                         >
                     </android.support.v7.widget.RecyclerView>
-
-            </android.support.v4.widget.NestedScrollView>
-
-
-            <fragment
-                android:id="@+id/drawer"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:name="com.open.finewallpaper.Fragment.Fragment1"
-                />
-
-        </com.open.finewallpaper.Window.VerticalDrawerLayout>
-
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/main_tb"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#90000000"
-        android:layoutMode="opticalBounds"
-        >
-    </android.support.v7.widget.Toolbar>
-
 
 
 

@@ -25,7 +25,7 @@ public final class FileUtil {
     public static String logPath = fineWallPaperPath + LOG;
 
     //File Path
-    public static File  cacheDir = new File(cachePath);
+    public static File cacheDir = new File(cachePath);
     public static File wallPaperDir = new File(wallPaperPath);
     public static File lockWallPaperDir = new File(lockWallPaperPath);
     public static File logDir = new File(logPath);

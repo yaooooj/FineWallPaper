@@ -116,11 +116,14 @@ public class RvDecoration extends RecyclerView.ItemDecoration {
         RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
         if ( layoutManager instanceof GridLayoutManager){
             int spanCount = ((GridLayoutManager) layoutManager).getSpanCount();
-            if (childPosition % 2 != 0 ){
-                outRect.set(leftGap,0,rightGap,10);
+            Log.e(TAG, "getItemOffsets: " + spanCount +1 );
+            if (childPosition % spanCount == 0){
+                outRect.bottom = 10;
             }else {
-                outRect.set(10,0,0,10);
+                outRect.left = 10;
+                outRect.bottom = 10;
             }
+
         }else if (layoutManager instanceof StaggeredGridLayoutManager){
             int spanCount = ((StaggeredGridLayoutManager)layoutManager).getSpanCount();
             if (childPosition == 1){

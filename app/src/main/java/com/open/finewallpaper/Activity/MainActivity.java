@@ -1,6 +1,7 @@
 package com.open.finewallpaper.Activity;
 
 
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
@@ -17,17 +18,24 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.PopupWindow;
+import android.widget.Toast;
 
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.ListPreloader;
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.util.FixedPreloadSizeProvider;
 import com.open.finewallpaper.Adapter.MainFragmentAdapter;
 import com.open.finewallpaper.Bean.PictureBean;
 
 import com.open.finewallpaper.Fragment.MainFragment;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.FileUtil;
+import com.open.finewallpaper.Util.GlideApp;
 import com.open.finewallpaper.Util.RvDecoration;
+import com.open.finewallpaper.Util.RvScrollListener;
 import com.open.finewallpaper.Util.ScreenUtil;
-import com.open.finewallpaper.Window.ToolBarScrollView;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +58,9 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     private PopupWindow popUpWindow;
     private TranslateAnimation animation;
     private RecyclerView recyclerView;
+
+    private final int imageWidthPixels = 1024;
+    private final int imageHeightPixels = 768;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,32 +88,9 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         FileUtil.init();
     }
 
-
-
     public void initData(){
         pictureBeen = new ArrayList<>();
 
-        BmobQuery<PictureBean> bmobQuery = new BmobQuery<>();
-        bmobQuery.addQueryKeys("url,picturename,type");
-        bmobQuery.setLimit(12);
-        bmobQuery.order("type");
-        bmobQuery.findObjects(new FindListener<PictureBean>() {
-            @Override
-            public void done(final List<PictureBean> list, BmobException e) {
-
-                if (e == null){
-
-                    for (int i = 0; i < list.size();i++){
-                            pictureBeen.add(list.get(i).getType());
-                    }
-                    adapter.updataData(pictureBeen);
-
-
-                }else {
-                    Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
-                }
-            }
-        });
     }
 
 
@@ -112,17 +100,33 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         screenUtil.setStatusView(getWindow());
 
 
+        ListPreloader.PreloadSizeProvider size = new FixedPreloadSizeProvider(imageWidthPixels,imageHeightPixels);
+
 
         recyclerView = (RecyclerView) findViewById(R.id.current_rv);
         //recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
         recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
+        recyclerView.addOnScrollListener(new RvScrollListener() {
+            @Override
+            public void onLoadMore() {
+                Glide.with(MainActivity.this).resumeRequests();
+            }
+
+            @Override
+            public void onDragLoadMore() {
+                Glide.with(MainActivity.this).pauseRequests();
+            }
+        });
         adapter = new MainFragmentAdapter(MainActivity.this,R.layout.adapter_2,pictureBeen);
         recyclerView.setAdapter(adapter);
-        recyclerView.setNestedScrollingEnabled(false);
         recyclerView.addItemDecoration(new RvDecoration(this));
-
-
-
+        adapter.setOnItemClickListener(new MainFragmentAdapter.OnItemClickListener() {
+            @Override
+            public void onClick(List<String> url, String position) {
+                Intent intent = new Intent(MainActivity.this,NextActivity.class);
+                startActivity(intent);
+            }
+        });
 
 
         /*
@@ -151,10 +155,6 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
 
     public void  initMenu(){
         
-    }
-
-    private void setPullList(){
-
     }
 
     public void addFragment(){
@@ -191,5 +191,18 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         animation.setInterpolator(new AccelerateInterpolator());
         animation.setDuration(300);
         animation.start();
+    }
+
+    private class MyPreLoadModelProvider implements ListPreloader.PreloadModelProvider {
+
+        @Override
+        public List getPreloadItems(int position) {
+            return null;
+        }
+
+        @Override
+        public RequestBuilder getPreloadRequestBuilder(Object item) {
+            return null;
+        }
     }
 }
