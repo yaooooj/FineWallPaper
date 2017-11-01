@@ -1,4 +1,4 @@
-package com.open.finewallpaper.Adapter;
+package com.open.finewallpaper.CoustomView;
 
 import android.content.Context;
 import android.support.v7.widget.GridLayoutManager;

@@ -1,18 +1,13 @@
 package com.open.finewallpaper.CoustomView;
 
-import android.animation.Animator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.PopupWindow;
 import android.widget.ScrollView;
 import android.widget.Scroller;
@@ -209,9 +204,7 @@ public  class FreshViewPager extends ViewGroup {
                 if (getScrollY() < 0){
 
                     scrollBy(0, yDiff / 2);
-                    if (onPullListener !=null){
-                        onPullListener.onMoveLoad(yDiff);
-                    }
+
                     if (header != null && header instanceof HeaderView){
                         if (Math.abs(getScrollY()) >  header.getMeasuredHeight()){
                             updateStatus(PullStatus.DOWN_AFTER);
@@ -248,10 +241,10 @@ public  class FreshViewPager extends ViewGroup {
             case MotionEvent.ACTION_UP:
                 switch (mStatus){
                     case DEFAULT:
-                        scrolltoDefaultStatus(yDiff);
+                        scrollToDefaultStatus(yDiff);
                         break;
                     case DOWN_BEFORE:
-                        scrolltoDefaultStatus(yDiff);
+                        scrollToDefaultStatus(yDiff);
                         break;
                     case DOWN_AFTER:
                         mScroller.startScroll(0, yDiff,0, yDiff - header.getMeasuredHeight(),500);
@@ -259,12 +252,12 @@ public  class FreshViewPager extends ViewGroup {
                         scrollToRefreshStatus(yDiff);
                         break;
                     case UP_BEFORE:
-                        scrolltoDefaultStatus(yDiff);
+                        scrollToDefaultStatus(yDiff);
                         break;
                     case UP_AFTER:
                         mScroller.startScroll(0, yDiff,0, yDiff + bottomScroll + footer.getMeasuredHeight(),500);
                         postInvalidate();
-                        scrolltoLoadStatus(yDiff);
+                        scrollToLoadStatus(yDiff);
                         break;
                     default:
                         break;
@@ -442,7 +435,7 @@ public  class FreshViewPager extends ViewGroup {
     }
 
     //滚动到加载状态
-    private void scrolltoLoadStatus(int yDiff) {
+    private void scrollToLoadStatus(int yDiff) {
 
         updateStatus(PullStatus.LOADMORE_DOING);
         if (onPullListener != null){
@@ -460,20 +453,20 @@ public  class FreshViewPager extends ViewGroup {
     }
 
     //滚动到默认状态
-    private void scrolltoDefaultStatus(int yDiff){
+    private void scrollToDefaultStatus(int yDiff){
         mScroller.startScroll(0,yDiff,0,0,500);
         postInvalidate();
     }
     //停止刷新
     public void stopRefresh(boolean isSuccess) {
         isRefreshSuccess = isSuccess;
-        //scrolltoDefaultStatus(PullStatus.REFRESH_COMPLETE_SCROLLING);
+        //scrollToDefaultStatus(PullStatus.REFRESH_COMPLETE_SCROLLING);
     }
 
     //停止加载更多
     public void stopLoadMore(boolean isSuccess) {
         isLoadSuccess = isSuccess;
-        //scrolltoDefaultStatus(PullStatus.LOADMORE_COMPLETE_SCROLLING);
+        //scrollToDefaultStatus(PullStatus.LOADMORE_COMPLETE_SCROLLING);
     }
 
     //滚动到刷新状态

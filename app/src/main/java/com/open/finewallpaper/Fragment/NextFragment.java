@@ -5,12 +5,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.open.finewallpaper.Adapter.ViewPagerAdapter;
+import com.open.finewallpaper.CoustomView.FreshViewPager;
+import com.open.finewallpaper.CoustomView.HeaderView;
+import com.open.finewallpaper.CoustomView.OnPullListener;
 import com.open.finewallpaper.R;
+import com.open.finewallpaper.SetWallPaper.DownloadImage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +29,7 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class NextFragment extends Fragment {
+    private static final String TAG = "NextFragment";
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -80,6 +86,31 @@ public class NextFragment extends Fragment {
             mViewPager = (ViewPager) view.findViewById(R.id.nextfragment_vp);
             mViewPager.setAdapter(new ViewPagerAdapter(mParam1,mParam2,getActivity()));
             mViewPager.setCurrentItem(mParam2);
+
+
+            FreshViewPager freshViewPager = (FreshViewPager) view.findViewById(R.id.nextfragment_fvp);
+            freshViewPager.addHeader(new HeaderView(getContext()));
+            freshViewPager.setOnPullListener(new OnPullListener() {
+                @Override
+                public boolean onRefresh(int diff) {
+                    Log.e(TAG, "onRefresh: " + "fresh" );
+                    //DownloadImage.downloadImage();
+                    DownloadImage.copyFile(mParam1.get(mViewPager.getCurrentItem()),getContext());
+                    SetWrapperFragment setWrapperFragment =  SetWrapperFragment.Instance(mParam1.get(mViewPager.getCurrentItem()));
+                    setWrapperFragment.show(getFragmentManager(),"dialog");
+                    return true;
+                }
+
+                @Override
+                public boolean onLoadMore() {
+                    return false;
+                }
+
+                @Override
+                public void onMoveLoad(int dx) {
+
+                }
+            });
         }else {
             view = inflater.inflate(R.layout.viewpager_error,container,false);
         }

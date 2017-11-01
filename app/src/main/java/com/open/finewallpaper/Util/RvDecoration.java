@@ -45,6 +45,7 @@ public class RvDecoration extends RecyclerView.ItemDecoration {
     public RvDecoration(Context context){
         this(context,null);
     }
+
     public RvDecoration(Context context,DecorationCallBack call) {
         //this.data = data;
         this.call = call;

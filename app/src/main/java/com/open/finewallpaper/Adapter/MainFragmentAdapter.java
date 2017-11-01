@@ -17,13 +17,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.open.finewallpaper.Activity.NextActivity;
 import com.open.finewallpaper.Bean.PictureBean;
+import com.open.finewallpaper.CoustomView.CustomLayout;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.GlideApp;
-import com.open.finewallpaper.Util.RvDecoration;
 import com.open.finewallpaper.Util.RvScrollListener;
 
 import java.util.ArrayList;

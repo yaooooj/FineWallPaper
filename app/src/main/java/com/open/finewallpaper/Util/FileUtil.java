@@ -18,10 +18,10 @@ public final class FileUtil {
     private final static String LOG = "Log";
     //String Dir
     public static String fineWallPaperPath =
-            Environment.getExternalStorageDirectory() + File.separator + FINEWALLPAPER + File.separator;
+            Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + FINEWALLPAPER + File.separator;
     public static String cachePath = fineWallPaperPath + CACHE;
     public static String wallPaperPath = fineWallPaperPath + WAlLPAPER;
-    public static String lockWallPaperPath = fineWallPaperPath + LOCKWALLPAPER;
+    public static String lockWallPaperPath = fineWallPaperPath + LOCKWALLPAPER + File.separator;
     public static String logPath = fineWallPaperPath + LOG;
 
     //File Path

@@ -6,6 +6,7 @@
 
     <!-- TODO: Update blank fragment layout -->
     <com.open.finewallpaper.CoustomView.FreshViewPager
+        android:id="@+id/nextfragment_fvp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

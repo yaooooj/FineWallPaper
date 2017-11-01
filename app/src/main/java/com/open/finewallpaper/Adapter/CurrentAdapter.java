@@ -25,6 +25,7 @@ import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.DisplayUtil;
 import com.open.finewallpaper.Util.GlideApp;
+import com.open.finewallpaper.Util.GlideUtil;
 import com.open.finewallpaper.Util.RvDecoration;
 
 import java.util.ArrayList;
@@ -100,19 +101,18 @@ public class CurrentAdapter extends RecyclerView.Adapter implements View.OnClick
                 //((CurrentVH) holder).textView.setText(data.get(position).getPicturename());
                 //((CurrentVH) holder).mImageView.setImageResource(R.mipmap.ic_favorite_border_black_24dp);
                 Log.e(TAG, "onBindViewHolder: " +  data.get(position).getUrl());
-                GlideApp.with(mContext)
-                        .load(data.get(position).getUrl())
-                        .placeholder(R.mipmap.ic_favorite_border_black_24dp)
-                        .error(R.mipmap.ic_favorite_border_black_24dp)
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .centerCrop()
-                        .dontAnimate()
-                        .into(((CurrentVH) holder).mImageView);
+                GlideUtil.LoadImageToView(
+                        mContext,data.get(position).getUrl(), ImageView.ScaleType.FIT_XY, (float) 1.5,((CurrentVH) holder).mImageView);
 
                 ((CurrentVH) holder).cardView.setOnClickListener(this);
                 ((CurrentVH) holder).cardView.setOnLongClickListener(this);
                 ((CurrentVH) holder).cardView.setTag(holder.getAdapterPosition());
             }
+
+    }
+
+
+    public void loadImageWithGlide(){
 
     }
 
