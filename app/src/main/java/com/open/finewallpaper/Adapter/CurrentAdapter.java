@@ -22,6 +22,7 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.open.finewallpaper.Activity.MainActivity;
 import com.open.finewallpaper.Bean.PictureBean;
+import com.open.finewallpaper.Bean.SetBean;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.DisplayUtil;
 import com.open.finewallpaper.Util.GlideApp;
@@ -133,9 +134,13 @@ public class CurrentAdapter extends RecyclerView.Adapter implements View.OnClick
     public void onClick(View v) {
         if (onItemLinstener != null && data.size() != 0){
 
-            List<String> urls = new ArrayList<>();
+            ArrayList<SetBean> urls = new ArrayList<>();
+            SetBean setBean;
             for (int i =0 ;i < data.size(); i++){
-                urls.add(data.get(i).getUrl());
+                setBean = new SetBean();
+                setBean.setUrl(data.get(i).getUrl());
+                setBean.setName(data.get(i).getPicturename());
+                urls.add(setBean);
             }
             onItemLinstener.onClick(urls, (Integer) v.getTag());
 
@@ -163,7 +168,7 @@ public class CurrentAdapter extends RecyclerView.Adapter implements View.OnClick
     }
 
     public interface OnItemClickListener {
-        void onClick(List<String> url, int position);
+        void onClick(ArrayList<SetBean> url, int position);
     }
 
     public interface OnItemLongClickListener {

@@ -25,7 +25,7 @@ public class GlideUtil {
                 .load(url)
                 .placeholder(R.mipmap.ic_favorite_border_black_24dp)
                 .error(R.mipmap.ic_favorite_border_black_24dp)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                 .listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {

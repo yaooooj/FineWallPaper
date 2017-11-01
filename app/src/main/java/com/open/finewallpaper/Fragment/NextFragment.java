@@ -3,6 +3,7 @@ package com.open.finewallpaper.Fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.open.finewallpaper.Adapter.ViewPagerAdapter;
+import com.open.finewallpaper.Bean.SetBean;
 import com.open.finewallpaper.CoustomView.FreshViewPager;
 import com.open.finewallpaper.CoustomView.HeaderView;
 import com.open.finewallpaper.CoustomView.OnPullListener;
@@ -38,7 +40,7 @@ public class NextFragment extends Fragment {
     private ViewPager mViewPager;
 
     // TODO: Rename and change types of parameters
-    private List<String> mParam1;
+    private ArrayList<SetBean> mParam1;
     private int mParam2;
 
     private OnFragmentInteractionListener mListener;
@@ -56,11 +58,14 @@ public class NextFragment extends Fragment {
      * @return A new instance of fragment NextFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static NextFragment newInstance(List<String> param1, int param2) {
+    public static NextFragment newInstance(ArrayList<? extends Parcelable> param1, int param2) {
         NextFragment fragment = new NextFragment();
         Bundle args = new Bundle();
         //args.putString(ARG_PARAM1, param1);
-        args.putStringArrayList(ARG_PARAM1, (ArrayList<String>) param1);
+        if (param1 == null){
+            Log.e(TAG, "newInstance: " + "params is null"  );
+        }
+        args.putParcelableArrayList(ARG_PARAM1, param1);
         args.putInt(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
@@ -70,7 +75,7 @@ public class NextFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getStringArrayList(ARG_PARAM1);
+            mParam1 = getArguments().getParcelableArrayList(ARG_PARAM1);
             mParam2 = getArguments().getInt(ARG_PARAM2);
         }
     }
@@ -95,8 +100,8 @@ public class NextFragment extends Fragment {
                 public boolean onRefresh(int diff) {
                     Log.e(TAG, "onRefresh: " + "fresh" );
                     //DownloadImage.downloadImage();
-                    DownloadImage.copyFile(mParam1.get(mViewPager.getCurrentItem()),getContext());
-                    SetWrapperFragment setWrapperFragment =  SetWrapperFragment.Instance(mParam1.get(mViewPager.getCurrentItem()));
+
+                    SetWrapperFragment setWrapperFragment =  SetWrapperFragment.Instance(mParam1);
                     setWrapperFragment.show(getFragmentManager(),"dialog");
                     return true;
                 }

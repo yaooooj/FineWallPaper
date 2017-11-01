@@ -3,6 +3,7 @@ package com.open.finewallpaper.Adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.open.finewallpaper.Activity.NextActivity;
 import com.open.finewallpaper.Bean.PictureBean;
+import com.open.finewallpaper.Bean.SetBean;
 import com.open.finewallpaper.CoustomView.CustomLayout;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.GlideApp;
@@ -27,6 +29,7 @@ import com.open.finewallpaper.Util.RvScrollListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.exception.BmobException;
@@ -65,6 +68,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     public void init(){
         data = new ArrayList<>();
         BmobQuery<PictureBean> bmobQuery = new BmobQuery<>();
+        bmobQuery.setMaxCacheAge(TimeUnit.DAYS.toMillis(1));//此表示缓存一天
         bmobQuery.addQueryKeys("type");
         //bmobQuery.setLimit(12);
         bmobQuery.order("type");
@@ -140,9 +144,9 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
             });
             currentAdapter.setOnItemLinstener(new CurrentAdapter.OnItemClickListener() {
                 @Override
-                public void onClick(List<String> urls, int position) {
+                public void onClick(ArrayList<SetBean> urls, int position) {
                     Bundle bundle = new Bundle();
-                    bundle.putStringArrayList("url", (ArrayList<String>) urls);
+                    bundle.putParcelableArrayList("url",urls);
                     bundle.putInt("position",position);
                     Intent intent = new Intent(mContext, NextActivity.class);
                     intent.putExtra("urls",bundle);

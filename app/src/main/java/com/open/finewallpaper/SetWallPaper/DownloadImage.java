@@ -34,6 +34,7 @@ import java.util.concurrent.FutureTask;
 
 public class DownloadImage {
     private static final String TAG = "DownloadImage";
+    private static File targetDir;
     public static void downloadImage(final String url, final Context context){
 
         Glide.with(context).downloadOnly().load(url).into(new SimpleTarget<File>() {
@@ -80,34 +81,43 @@ public class DownloadImage {
         });
     }
 
-    public static void copyFile(String url, final Context context){
-
+    public static File copyFile(String url, final String name, final Context context){
+        final String target = FileUtil.lockWallPaperPath;
+        targetDir = new File(target);
         Glide.with(context).downloadOnly().load(url).into(new SimpleTarget<File>() {
             @Override
             public void onResourceReady(File resource, Transition<? super File> transition) {
                 String fromPath = resource.getAbsolutePath();
-                Log.e(TAG, "onResourceReady: " + fromPath );
+                Log.e(TAG, "onResourceReady: " + resource.getName() );
                 File fileFrom = new File(fromPath);
-                Log.e(TAG, "onResourceReady: " + "file name " + fileFrom );
                 if (!fileFrom.exists()){
                     return ;
                 }
-                String target = FileUtil.lockWallPaperPath;
-                File targetDir = new File(target);
-                Log.e(TAG, "onResourceReady: " + "target" + target);
-                Log.e(TAG,"targetDir  " + targetDir);
 
                 if (!targetDir.exists() ){
                     boolean io = targetDir.mkdirs();
                     Log.e(TAG, "onResourceReady: "  + io );
                 }
-                if (copySdCardFile(target + System.currentTimeMillis(),fromPath) == 0){
+
+                File[] childFile = targetDir.listFiles();
+
+                for (File aChildFile : childFile) {
+                    if (aChildFile.getName().equals(name)) {
+                        return;
+                    }
+                }
+
+
+                if (copySdCardFile(target + name+".jpg",fromPath) == 0){
                     Log.e(TAG, "onResourceReady: " + "success" );
+
                 }else {
                     Log.e(TAG, "onResourceReady: " + "fail" );
                 }
             }
         });
+
+        return targetDir;
     }
 
     private static int  copySdCardFile(String toFile,String fromFile){

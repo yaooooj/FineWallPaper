@@ -10,6 +10,8 @@ import com.open.finewallpaper.Fragment.MainFragment;
 import com.open.finewallpaper.Fragment.NextFragment;
 import com.open.finewallpaper.R;
 
+import java.util.ArrayList;
+
 public class NextActivity extends AppCompatActivity implements NextFragment.OnFragmentInteractionListener {
     private final static String TAG = "NextActivity";
     @Override
@@ -21,9 +23,12 @@ public class NextActivity extends AppCompatActivity implements NextFragment.OnFr
         init();
         NextFragment nextFragment;
         Bundle bundle = getIntent().getBundleExtra("urls");
+
         if (bundle != null){
-            nextFragment = NextFragment.newInstance(bundle.getStringArrayList("url"),bundle.getInt("position"));
+
+            nextFragment = NextFragment.newInstance(bundle.getParcelableArrayList("url"),bundle.getInt("position"));
         }else {
+
             nextFragment = NextFragment.newInstance(null,-1);
         }
         getSupportFragmentManager().beginTransaction()

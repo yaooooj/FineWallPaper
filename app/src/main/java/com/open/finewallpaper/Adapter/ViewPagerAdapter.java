@@ -16,6 +16,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.open.finewallpaper.Bean.PictureBean;
+import com.open.finewallpaper.Bean.SetBean;
 import com.open.finewallpaper.Util.DisplayUtil;
 import com.open.finewallpaper.Util.GlideApp;
 import com.open.finewallpaper.Util.GlideUtil;
@@ -30,12 +31,12 @@ import java.util.List;
 
 public class ViewPagerAdapter extends PagerAdapter {
     private static final String TAG = "ViewPagerAdapter";
-    private List<String> data = new ArrayList<>();
+    private List<SetBean> data = new ArrayList<>();
     private Context mContext;
     private List<ImageView> mImageViews;
     private int site;
 
-    public ViewPagerAdapter(List<String> data,int position, Context context) {
+    public ViewPagerAdapter(List<SetBean> data, int position, Context context) {
         this.data = data;
         mContext = context;
         site = position;
@@ -74,7 +75,7 @@ public class ViewPagerAdapter extends PagerAdapter {
         ImageView imageView = mImageViews.get(position);
        // imageView.setLayoutParams(params);
 
-        GlideUtil.LoadImageToView(mContext,data.get(position), ImageView.ScaleType.CENTER_CROP, (float) 0.8,imageView);
+        GlideUtil.LoadImageToView(mContext,data.get(position).getUrl(), ImageView.ScaleType.CENTER_CROP, (float) 0.8,imageView);
         container.addView(imageView);
 
         return imageView;
