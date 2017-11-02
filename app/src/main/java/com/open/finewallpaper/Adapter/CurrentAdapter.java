@@ -99,9 +99,7 @@ public class CurrentAdapter extends RecyclerView.Adapter implements View.OnClick
 
 
             if (holder instanceof CurrentVH){
-                //((CurrentVH) holder).textView.setText(data.get(position).getPicturename());
-                //((CurrentVH) holder).mImageView.setImageResource(R.mipmap.ic_favorite_border_black_24dp);
-                Log.e(TAG, "onBindViewHolder: " +  data.get(position).getUrl());
+
                 GlideUtil.LoadImageToView(
                         mContext,data.get(position).getUrl(), ImageView.ScaleType.FIT_XY, (float) 1.5,((CurrentVH) holder).mImageView);
 
@@ -112,10 +110,6 @@ public class CurrentAdapter extends RecyclerView.Adapter implements View.OnClick
 
     }
 
-
-    public void loadImageWithGlide(){
-
-    }
 
     @Override
     public int getItemCount() {

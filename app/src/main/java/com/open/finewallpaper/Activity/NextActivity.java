@@ -1,9 +1,17 @@
 package com.open.finewallpaper.Activity;
 
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.PopupWindow;
 
 import com.open.finewallpaper.Fragment.Fragment1;
 import com.open.finewallpaper.Fragment.MainFragment;
@@ -14,6 +22,7 @@ import java.util.ArrayList;
 
 public class NextActivity extends AppCompatActivity implements NextFragment.OnFragmentInteractionListener {
     private final static String TAG = "NextActivity";
+    private PopupWindow popUpWindow;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +40,8 @@ public class NextActivity extends AppCompatActivity implements NextFragment.OnFr
 
             nextFragment = NextFragment.newInstance(null,-1);
         }
+        View view = LayoutInflater.from(this).inflate(R.layout.popupwindow_layout,null,true);
+        popUpWindow = new PopupWindow(view);
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.next_activity,nextFragment)
                 .show(nextFragment)
@@ -39,7 +50,25 @@ public class NextActivity extends AppCompatActivity implements NextFragment.OnFr
 
     public void init(){
 
+    }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+
+        return super.dispatchTouchEvent(ev);
+    }
+
+    public void showPopUpWindow(){
+        popUpWindow.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
+        popUpWindow.setHeight(500);
+        popUpWindow.setOutsideTouchable(true);
+        popUpWindow.setBackgroundDrawable(new ColorDrawable(0x70000000));
+        View rootView = LayoutInflater.from(NextActivity.this).inflate(R.layout.activity_main,null);
+        popUpWindow.showAtLocation(rootView, Gravity.BOTTOM,0,0);
+    }
+
+    private void backGroudAlpha(){
+        WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
     }
 
     @Override

@@ -7,7 +7,9 @@ import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -30,7 +32,7 @@ import java.util.List;
  * Use the {@link NextFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NextFragment extends Fragment {
+public class NextFragment extends Fragment{
     private static final String TAG = "NextFragment";
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -100,8 +102,12 @@ public class NextFragment extends Fragment {
                 public boolean onRefresh(int diff) {
                     Log.e(TAG, "onRefresh: " + "fresh" );
                     //DownloadImage.downloadImage();
-
-                    SetWrapperFragment setWrapperFragment =  SetWrapperFragment.Instance(mParam1);
+                    ArrayList<SetBean> nameAndUrl = new ArrayList<SetBean>();
+                    SetBean setBean = new SetBean();
+                    setBean.setUrl(mParam1.get(mViewPager.getCurrentItem()).getUrl());
+                    setBean.setName(mParam1.get(mViewPager.getCurrentItem()).getName());
+                    nameAndUrl.add(setBean);
+                    SetWrapperFragment setWrapperFragment =  SetWrapperFragment.Instance(nameAndUrl);
                     setWrapperFragment.show(getFragmentManager(),"dialog");
                     return true;
                 }
@@ -119,16 +125,10 @@ public class NextFragment extends Fragment {
         }else {
             view = inflater.inflate(R.layout.viewpager_error,container,false);
         }
-
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
+
 
     @Override
     public void onAttach(Context context) {
@@ -146,6 +146,7 @@ public class NextFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
+
 
     /**
      * This interface must be implemented by activities that contain this

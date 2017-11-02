@@ -1,20 +1,25 @@
 package com.open.finewallpaper.SetWallPaper;
 
+import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.SimpleResource;
+import com.bumptech.glide.request.RequestFutureTarget;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
+import com.open.finewallpaper.Util.DisplayUtil;
 import com.open.finewallpaper.Util.FileUtil;
 import com.open.finewallpaper.Util.GlideApp;
 
@@ -81,14 +86,16 @@ public class DownloadImage {
         });
     }
 
-    public static File copyFile(String url, final String name, final Context context){
+    public static String copyFile(String url, final String name, final Context context){
         final String target = FileUtil.lockWallPaperPath;
         targetDir = new File(target);
-        Glide.with(context).downloadOnly().load(url).into(new SimpleTarget<File>() {
+        GlideApp.with(context)
+                .downloadOnly()
+                .load(url)
+                .into(new SimpleTarget<File>() {
             @Override
             public void onResourceReady(File resource, Transition<? super File> transition) {
                 String fromPath = resource.getAbsolutePath();
-                Log.e(TAG, "onResourceReady: " + resource.getName() );
                 File fileFrom = new File(fromPath);
                 if (!fileFrom.exists()){
                     return ;
@@ -117,7 +124,7 @@ public class DownloadImage {
             }
         });
 
-        return targetDir;
+        return target + name+".jpg";
     }
 
     private static int  copySdCardFile(String toFile,String fromFile){
@@ -138,5 +145,38 @@ public class DownloadImage {
             return -1;
         }
         return 0;
+    }
+
+    public static void saveToPhoto(String name,Bitmap bitmap,File file){
+        FileOutputStream out;
+        if (file != null){
+            File fi  = new File(file,name + ".jpg");
+            try {
+                out = new FileOutputStream(fi);
+                bitmap.compress(Bitmap.CompressFormat.JPEG,90,out);
+                out.flush();
+                out.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e(TAG, "saveToPhoto: " + "save failed" );
+            }
+
+        }
+    }
+
+    public static String getBitmapPath(String url,Context context){
+        final String[] bitmapPath = new String[1];
+        GlideApp.with(context)
+                .downloadOnly()
+                .load(url)
+                .into(new SimpleTarget<File>() {
+                    @Override
+                    public void onResourceReady(File resource, Transition<? super File> transition) {
+                        bitmapPath[0] = resource.getPath();
+                    }
+                });
+        return bitmapPath[0];
     }
 }

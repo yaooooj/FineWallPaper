@@ -3,7 +3,6 @@ package com.open.finewallpaper.Adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -43,6 +42,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         implements View.OnClickListener, View.OnLongClickListener{
     private final static String TAG = "MainFragmentAdapter";
     private List<String> data;
+
     private Context mContext;
     private Fragment mFragment;
     private int layoutResId;
@@ -121,9 +121,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         }
 
         if (holder instanceof GrindLayoutHolderView){
-            ((GrindLayoutHolderView) holder).textView.setText(data.get(position - 1));
-            ((GrindLayoutHolderView) holder).moreTextView.setTag(holder.getAdapterPosition());
-            ((GrindLayoutHolderView) holder).moreTextView.setOnClickListener(this);
+
 
             CustomLayout layoutManager = new CustomLayout(mContext,3);
             layoutManager.setScrollEnable(false);
@@ -155,6 +153,14 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
                 }
             });
 
+            ((GrindLayoutHolderView) holder).textView.setText(data.get(position - 1));
+            if (currentAdapter.getItemCount() <= 9){
+                ((GrindLayoutHolderView) holder).moreTextView.setVisibility(View.GONE);
+            }else {
+                ((GrindLayoutHolderView) holder).moreTextView.setVisibility(View.VISIBLE);
+                ((GrindLayoutHolderView) holder).moreTextView.setTag(holder.getAdapterPosition());
+                ((GrindLayoutHolderView) holder).moreTextView.setOnClickListener(this);
+            }
         }
     }
 

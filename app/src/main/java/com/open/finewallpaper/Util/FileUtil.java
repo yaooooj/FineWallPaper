@@ -29,11 +29,13 @@ public final class FileUtil {
     public static File wallPaperDir = new File(wallPaperPath);
     public static File lockWallPaperDir = new File(lockWallPaperPath);
     public static File logDir = new File(logPath);
-
+    public static File photoDir;
+    public static File collectionDir;
 
     public  static synchronized void init(){
         FileUtil fileUtil = new FileUtil();
         fileUtil.createPublicStorageDir("FineWallPaper");
+        fileUtil.createExternalStorageDir("Collection");
         fileUtil.createExternalStorageDir(fineWallPaperPath);
         fileUtil.createExternalStorageDir(cachePath);
         fileUtil.createExternalStorageDir(wallPaperPath);
@@ -42,17 +44,25 @@ public final class FileUtil {
     }
 
     private File createPublicStorageDir(String fileName){
-        File file = new File(
+        photoDir = new File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),fileName);
-        if (!file.exists()){
-            if (!file.mkdirs()){
+        if (!photoDir.exists()){
+            if (!photoDir.mkdirs()){
                 Log.e(TAG, "createPublicStorageDir: " +"Directory not create" );
             }else {
                 Log.e(TAG, "createPublicStorageDir: " +"create success" );
             }
 
         }
-        return file;
+        return photoDir;
+    }
+
+    public static File getPhotoDir(){
+        return photoDir;
+    }
+
+    public static File getCollectionDir() {
+        return collectionDir;
     }
 
     public File getExternalStorageDir(String fileName){
