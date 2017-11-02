@@ -99,7 +99,7 @@ public class CurrentAdapter extends RecyclerView.Adapter implements View.OnClick
 
 
             if (holder instanceof CurrentVH){
-
+                Log.e(TAG, "onBindViewHolder: " +  data.get(position).getUrl());
                 GlideUtil.LoadImageToView(
                         mContext,data.get(position).getUrl(), ImageView.ScaleType.FIT_XY, (float) 1.5,((CurrentVH) holder).mImageView);
 

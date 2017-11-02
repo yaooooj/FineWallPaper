@@ -24,6 +24,7 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.util.FixedPreloadSizeProvider;
 import com.open.finewallpaper.Adapter.MainFragmentAdapter;
 
+import com.open.finewallpaper.CoustomView.ToolbarRecycler;
 import com.open.finewallpaper.Fragment.MainFragment;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.FileUtil;
@@ -66,8 +67,9 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         initBmob();
         initFile();
         initData();
-        initView();
         initToolbar();
+        initView();
+
 
     }
 
@@ -98,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
 
 
         recyclerView = (RecyclerView) findViewById(R.id.current_rv);
+
         //recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
         recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
         recyclerView.addOnScrollListener(new RvScrollListener() {
@@ -112,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
             }
         });
         adapter = new MainFragmentAdapter(MainActivity.this,R.layout.adapter_2,pictureBeen);
+        //recyclerView.setNestedScrollingEnabled(false);
         recyclerView.setAdapter(adapter);
         recyclerView.addItemDecoration(new RvDecoration(this));
         adapter.setOnItemClickListener(new MainFragmentAdapter.OnItemClickListener() {

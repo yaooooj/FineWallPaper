@@ -3,11 +3,14 @@ package com.open.finewallpaper.Adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +20,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.bumptech.glide.ListPreloader;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.open.finewallpaper.Activity.NextActivity;
 import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.Bean.SetBean;
@@ -27,6 +33,7 @@ import com.open.finewallpaper.Util.GlideApp;
 import com.open.finewallpaper.Util.RvScrollListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -132,11 +139,12 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
                 @Override
                 public void onLoadMore() {
                     GlideApp.with(mContext).resumeRequests();
-
+                    Log.e(TAG, "onLoadMore: " + "onLoadMore onLoadMore onLoadMore" );
                 }
 
                 @Override
                 public void onDragLoadMore() {
+                    Log.e(TAG, "onDragLoadMore: " );
                    GlideApp.with(mContext).pauseRequests();
                 }
             });
@@ -322,4 +330,6 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
             container.removeView(mImageViews.get(position));
         }
     }
+
+
 }

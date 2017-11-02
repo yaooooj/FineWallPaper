@@ -4,4 +4,6 @@
     <dimen name="sectioned_alignBottom">32dp</dimen>
     <dimen name="leftGap">5dp</dimen>
     <dimen name="rightGap">5dp</dimen>
+    <dimen name="header_height">300dp</dimen>
+    
 </resources>
