@@ -35,9 +35,6 @@ public class AlphaBehavior extends CoordinatorLayout.Behavior<Toolbar> {
 
     @Override
     public boolean onStartNestedScroll(CoordinatorLayout coordinatorLayout, Toolbar child, View directTargetChild, View target, int nestedScrollAxes) {
-        if (directTargetChild.getId() == R.id.current_rv){
-            return true;
-        }
         return (nestedScrollAxes & ViewCompat.SCROLL_AXIS_VERTICAL) != 0;
     }
 
@@ -52,20 +49,23 @@ public class AlphaBehavior extends CoordinatorLayout.Behavior<Toolbar> {
     public void onNestedScroll(CoordinatorLayout coordinatorLayout,
                                Toolbar child, View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
         int startOffset = 0;
+        if (dyConsumed > 0){
 
+        }
         offset += dyConsumed;
-        Log.e(TAG, "onNestedScroll: " + dyConsumed );
+        Log.e(TAG, "onNestedScroll: " + "dyConsumed  "+ dyConsumed  );
+        Log.e(TAG, "onNestedScroll: " + "offSet  " + child.getTranslationY() );
 
-        endOffset = (int) context.getResources().getDimension(R.dimen.header_height);
-        Log.e(TAG, "onNestedPreScroll: " +" offset" + endOffset );
+        endOffset = (int) context.getResources().getDimension(R.dimen.header) - child.getHeight();
+        Log.e(TAG, "onNestedPreScroll: " +" endOffSet  " + endOffset );
 
-        if (offset <= startOffset){
-            child.getBackground().setAlpha(0);
-        }else if (offset < endOffset && offset > startOffset){
-            float percent = (offset - startOffset) / endOffset;
+        if (dyConsumed < endOffset && dyConsumed > startOffset){
+            float percent = (dyConsumed - startOffset) / endOffset;
             child.getBackground().setAlpha((int) (percent * 255));
-        }else {
+        }else if (dyConsumed > endOffset){
             child.getBackground().setAlpha(255);
+        }else {
+            child.getBackground().setAlpha(0);
         }
 
 

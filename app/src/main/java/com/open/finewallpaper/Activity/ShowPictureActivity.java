@@ -1,61 +1,99 @@
 package com.open.finewallpaper.Activity;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.open.finewallpaper.Adapter.ShowAdapter;
 import com.open.finewallpaper.Fragment.Fragment1;
 import com.open.finewallpaper.Fragment.Fragment2;
 import com.open.finewallpaper.R;
 
-public class ShowPictureActivity extends BaseActivity {
+import java.util.ArrayList;
+import java.util.List;
+
+public class ShowPictureActivity extends AppCompatActivity {
     private final static String TAG = "ShowPictureActivity";
-    private Fragment2 fragment2;
+    private List<String> data;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_picture);
-        setNeedGesture(true);
-        fragment2 = new Fragment2();
-        final View view =  fragment2.getView();
+        //setNeedGesture(true);
+        init();
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.show_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
+        recyclerView.setAdapter(new ShowAdapter(data,this));
 
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.showpicture_activity,new Fragment1())
-                .add(R.id.showpicture_activity,fragment2)
-                .hide(fragment2)
-                .addToBackStack(null)
-                .commit();
+        ViewPager viewPager = (ViewPager) findViewById(R.id.show_vp);
+        viewPager.setAdapter(new MyViewPagerAdapter(this,data));
 
-        setSwipeRightListener(new swipeRightListener() {
-            @Override
-            public void swipeRight(float dx) {
-                Log.e(TAG, "swipeRight: " );
-                if (view != null){
-                    Log.e(TAG, "swipeRight: " + "view not null" );
-                    getSupportFragmentManager().beginTransaction()
-                            .show(fragment2)
-                            .commit();
-                    view.scrollBy((int) dx,0);
-                }
+    }
+
+    public void init(){
+        data = new ArrayList<>();
+        for (int i = 0;i < 30;i++){
+            data.add(" find toolbar + " + i);
+        }
+    }
+
+
+    private static class MyViewPagerAdapter extends PagerAdapter{
+        Context context;
+        List<String> data;
+        List<TextView> textViews;
+
+        public MyViewPagerAdapter(Context context,List<String> data) {
+            this.context = context;
+            this.data = data;
+            textViews = new ArrayList<>();
+
+            for (int i =0;i < data.size();i++){
+                textViews.add(new TextView(context));
             }
-        });
+
+        }
+
+        @Override
+        public int getCount() {
+            return 0;
+        }
+
+        @Override
+        public boolean isViewFromObject(View view, Object object) {
+            return false;
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+             ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
+                     ViewPager.LayoutParams.MATCH_PARENT, ViewPager.LayoutParams.MATCH_PARENT);
+
+            TextView textView = textViews.get(position);
+            textView.setLayoutParams(params);
+            textView.setGravity(Gravity.CENTER);
+            textView.setText(data.get(position));
+            container.addView(textView);
+            return textView;
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            container.removeView(textViews.get(position));
+
+        }
     }
 
 
 
-
-    public void addFragment(){
-        getSupportFragmentManager()
-                .beginTransaction()
-                .setCustomAnimations(
-                        R.anim.slide_right_in,R.anim.slide_left_out,
-                        R.anim.slide_left_in ,R.anim.slide_right_out)
-                .replace(R.id.showpicture_activity,new Fragment2())
-                .commit();
-    }
-
-    public void startFragment(){
-
-    }
 
 }

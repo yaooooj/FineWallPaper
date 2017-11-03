@@ -133,8 +133,9 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
             CustomLayout layoutManager = new CustomLayout(mContext,3);
             layoutManager.setScrollEnable(false);
             ((GrindLayoutHolderView) holder).recyclerView.setLayoutManager( layoutManager);
-            CurrentAdapter currentAdapter = new CurrentAdapter(mContext,data.get(position -1));
+            CurrentAdapter currentAdapter = new CurrentAdapter(mContext,data.get(position));
             ((GrindLayoutHolderView) holder).recyclerView.setAdapter(currentAdapter);
+            ((GrindLayoutHolderView) holder).recyclerView.setNestedScrollingEnabled(false);
             ((GrindLayoutHolderView) holder).recyclerView.addOnScrollListener(new RvScrollListener() {
                 @Override
                 public void onLoadMore() {
@@ -161,7 +162,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
                 }
             });
 
-            ((GrindLayoutHolderView) holder).textView.setText(data.get(position - 1));
+            ((GrindLayoutHolderView) holder).textView.setText(data.get(position));
             if (currentAdapter.getItemCount() <= 9){
                 ((GrindLayoutHolderView) holder).moreTextView.setVisibility(View.GONE);
             }else {
@@ -174,14 +175,12 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     @Override
     public int getItemCount() {
-        return data.size()  + 1;
+        return data.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (position  < 1) {
-            return 1;
-        }
+
         return 3;
     }
 

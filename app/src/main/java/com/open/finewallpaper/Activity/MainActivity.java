@@ -5,12 +5,15 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
@@ -24,6 +27,8 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.util.FixedPreloadSizeProvider;
 import com.open.finewallpaper.Adapter.MainFragmentAdapter;
 
+import com.open.finewallpaper.Adapter.ViewPagerAdapter;
+import com.open.finewallpaper.Bean.SetBean;
 import com.open.finewallpaper.CoustomView.ToolbarRecycler;
 import com.open.finewallpaper.Fragment.MainFragment;
 import com.open.finewallpaper.R;
@@ -68,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         initFile();
         initData();
         initToolbar();
+        initViewPager();
         initView();
 
 
@@ -89,6 +95,15 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
 
     }
 
+    public void initViewPager(){
+        List<SetBean> set = new ArrayList<>();
+        SetBean setBean = new SetBean();
+        setBean.setUrl("http://bmob-cdn-14274.b0.upaiyun.com/2017/09/25/178dd21d40e43154806e2bfbd5b0e4a9.jpg");
+        setBean.setName("hah");
+        set.add(setBean);
+        ViewPager viewPager = (ViewPager) findViewById(R.id.main_vp);
+        viewPager.setAdapter(new ViewPagerAdapter(set,0,this));
+    }
 
     public void initView(){
         ScreenUtil screenUtil = new ScreenUtil();
@@ -111,11 +126,12 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
 
             @Override
             public void onDragLoadMore() {
-                Glide.with(MainActivity.this).pauseRequests();
+                Log.e(TAG, "onDragLoadMore: " + "dragMore" );
+               // Glide.with(MainActivity.this).pauseRequests();
             }
         });
         adapter = new MainFragmentAdapter(MainActivity.this,R.layout.adapter_2,pictureBeen);
-        //recyclerView.setNestedScrollingEnabled(false);
+       // recyclerView.setNestedScrollingEnabled(false);
         recyclerView.setAdapter(adapter);
         recyclerView.addItemDecoration(new RvDecoration(this));
         adapter.setOnItemClickListener(new MainFragmentAdapter.OnItemClickListener() {
@@ -139,6 +155,24 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.nvg:
+                //intentActivity(LoginActivity.class, NULL_BUNDLE);
+                break;
+            case R.id.favorite:
+                Intent intent = new Intent(MainActivity.this,ShowPictureActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.setting:
+               // intentActivity(SettingActivity.class, NULL_BUNDLE);
+            default:
+                break;
+        }
         return true;
     }
 
