@@ -79,7 +79,7 @@ public class ToolBarBehavior extends CoordinatorLayout.Behavior<RecyclerView> {
     public boolean onDependentViewChanged(CoordinatorLayout parent, RecyclerView child, View dependency) {
 
         Resources resources = getDependentView().getResources();
-        Log.e(TAG, "onDependentViewChanged: " + child.getTranslationY() );
+       // Log.e(TAG, "onDependentViewChanged: " + child.getTranslationY() );
         final float progress =
                 Math.abs(dependency.getTranslationY() / dependency.getHeight());
 
@@ -112,7 +112,7 @@ public class ToolBarBehavior extends CoordinatorLayout.Behavior<RecyclerView> {
 
     @Override
     public void onNestedPreScroll(CoordinatorLayout coordinatorLayout, RecyclerView child, View target, int dx, int dy, int[] consumed) {
-        Log.e(TAG, "onNestedPreScroll: " + "dy --" + dy );
+        Log.e(TAG, "onNestedPreScroll: " + "dy    " + dy );
         if (dy  < 0){
             return;
         }
@@ -136,12 +136,13 @@ public class ToolBarBehavior extends CoordinatorLayout.Behavior<RecyclerView> {
             dependentView.setTranslationY(transY);
         }
 
-        Log.e(TAG, "onNestedScroll: " + "offset  " + dyConsumed +"    "+ child.getTranslationY());
+        Log.e(TAG, "onNestedScroll: " + "dyConsumed   " + dyConsumed );
     }
 
     @Override
     public boolean onNestedPreFling(CoordinatorLayout coordinatorLayout,
                                     RecyclerView child, View target, float velocityX, float velocityY) {
+        Log.e(TAG, "onNestedPreFling: " + "velocityY  "  + velocityY);
         return onUseStopDragging(velocityY);
     }
 

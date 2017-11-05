@@ -1,9 +1,6 @@
 package com.open.finewallpaper.Adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,21 +10,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.request.transition.Transition;
-import com.open.finewallpaper.Activity.MainActivity;
 import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.Bean.SetBean;
 import com.open.finewallpaper.R;
-import com.open.finewallpaper.Util.DisplayUtil;
-import com.open.finewallpaper.Util.GlideApp;
 import com.open.finewallpaper.Util.GlideUtil;
-import com.open.finewallpaper.Util.RvDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,24 +33,39 @@ public class CurrentAdapter extends RecyclerView.Adapter implements View.OnClick
     private Context mContext;
     private String type;
 
-    private OnItemClickListener onItemLinstener;
+    private OnItemClickListener onItemListener;
     private OnItemLongClickListener onItemLongLinstener;
 
-    public CurrentAdapter(Context context,String type) {
+    private boolean isFresh;
+    private List<SetBean> url;
+
+
+
+    public CurrentAdapter(Context context,List<SetBean> url,boolean isFresh) {
         this.mContext = context;
-        this.type = type;
+        this.url = url;
+        this.isFresh = isFresh;
         inflate = LayoutInflater.from(context);
-        init();
+        //init();
     }
 
     private void init(){
         data = new ArrayList<>();
-
+        /*
         BmobQuery<PictureBean> bmobQuery = new BmobQuery<>();
         //bmobQuery.addQueryKeys("url,picturename,type");
         bmobQuery.addWhereEqualTo("type",type);
         bmobQuery.setLimit(9);
-        bmobQuery.setCachePolicy(BmobQuery.CachePolicy.CACHE_ELSE_NETWORK);
+        boolean isCache = bmobQuery.hasCachedResult(PictureBean.class);
+        if (isFresh){
+            bmobQuery.setCachePolicy(BmobQuery.CachePolicy.NETWORK_ELSE_CACHE);
+        }else {
+            if (isCache){
+                bmobQuery.setCachePolicy(BmobQuery.CachePolicy.CACHE_ELSE_NETWORK);
+            }else {
+                bmobQuery.setCachePolicy(BmobQuery.CachePolicy.NETWORK_ELSE_CACHE);
+            }
+        }
         //bmobQuery.order("type");
         bmobQuery.findObjects(new FindListener<PictureBean>() {
             @Override
@@ -81,6 +82,7 @@ public class CurrentAdapter extends RecyclerView.Adapter implements View.OnClick
                 }
             }
         });
+        */
     }
     public  void  updataData (List<PictureBean> data ){
         this.data =  data;
@@ -99,9 +101,9 @@ public class CurrentAdapter extends RecyclerView.Adapter implements View.OnClick
 
 
             if (holder instanceof CurrentVH){
-                Log.e(TAG, "onBindViewHolder: " +  data.get(position).getUrl());
+                //Log.e(TAG, "onBindViewHolder: " +  data.get(position).getUrl());
                 GlideUtil.LoadImageToView(
-                        mContext,data.get(position).getUrl(), ImageView.ScaleType.FIT_XY, (float) 1.5,((CurrentVH) holder).mImageView);
+                        mContext,url.get(position).getUrl(), ImageView.ScaleType.FIT_XY, (float) 1.5,((CurrentVH) holder).mImageView);
 
                 ((CurrentVH) holder).cardView.setOnClickListener(this);
                 ((CurrentVH) holder).cardView.setOnLongClickListener(this);
@@ -113,11 +115,11 @@ public class CurrentAdapter extends RecyclerView.Adapter implements View.OnClick
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return url.size();
     }
 
-    public void setOnItemLinstener(OnItemClickListener itemClickListener) {
-        this.onItemLinstener = itemClickListener;
+    public void setOnItemListener(OnItemClickListener itemClickListener) {
+        this.onItemListener = itemClickListener;
     }
 
     public void setOnItemLongLinstener(OnItemLongClickListener longClickListener) {
@@ -126,17 +128,17 @@ public class CurrentAdapter extends RecyclerView.Adapter implements View.OnClick
 
     @Override
     public void onClick(View v) {
-        if (onItemLinstener != null && data.size() != 0){
+        if (onItemListener != null && url.size() != 0){
 
             ArrayList<SetBean> urls = new ArrayList<>();
             SetBean setBean;
-            for (int i =0 ;i < data.size(); i++){
+            for (int i =0 ;i < url.size(); i++){
                 setBean = new SetBean();
-                setBean.setUrl(data.get(i).getUrl());
-                setBean.setName(data.get(i).getPicturename());
+                setBean.setUrl(url.get(i).getUrl());
+                setBean.setName(url.get(i).getName());
                 urls.add(setBean);
             }
-            onItemLinstener.onClick(urls, (Integer) v.getTag());
+            onItemListener.onClick(urls, (Integer) v.getTag());
 
         }
 

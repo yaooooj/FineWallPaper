@@ -323,7 +323,7 @@ public  class FreshViewPager extends ViewGroup {
             if (lp instanceof MarginLayoutParams) {
                 topMargin = ((MarginLayoutParams) lp).topMargin;
             }
-            int top = view.getTop() - topMargin;
+            int top = view.getTop() - view.getPaddingTop() - topMargin;
             minY = Math.min(minY, top);
         }
         return minY >= 0;

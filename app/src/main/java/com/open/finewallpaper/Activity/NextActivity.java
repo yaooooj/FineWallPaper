@@ -4,12 +4,14 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 
@@ -26,9 +28,14 @@ public class NextActivity extends AppCompatActivity implements NextFragment.OnFr
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Window window = getWindow();
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        window.addFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_next);
         //BackUtil.attach(this);
         Log.e(TAG, "onCreate: " );
+
         init();
         NextFragment nextFragment;
         Bundle bundle = getIntent().getBundleExtra("urls");
@@ -58,14 +65,7 @@ public class NextActivity extends AppCompatActivity implements NextFragment.OnFr
         return super.dispatchTouchEvent(ev);
     }
 
-    public void showPopUpWindow(){
-        popUpWindow.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
-        popUpWindow.setHeight(500);
-        popUpWindow.setOutsideTouchable(true);
-        popUpWindow.setBackgroundDrawable(new ColorDrawable(0x70000000));
-        View rootView = LayoutInflater.from(NextActivity.this).inflate(R.layout.activity_main,null);
-        popUpWindow.showAtLocation(rootView, Gravity.BOTTOM,0,0);
-    }
+
 
     private void backGroudAlpha(){
         WindowManager.LayoutParams layoutParams = getWindow().getAttributes();

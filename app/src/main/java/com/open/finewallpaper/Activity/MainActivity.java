@@ -3,8 +3,9 @@ package com.open.finewallpaper.Activity;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.support.design.widget.AppBarLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,27 +22,32 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.ListPreloader;
-import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.util.FixedPreloadSizeProvider;
 import com.open.finewallpaper.Adapter.MainFragmentAdapter;
 
 import com.open.finewallpaper.Adapter.ViewPagerAdapter;
+import com.open.finewallpaper.Bean.FinePic;
+import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.Bean.SetBean;
-import com.open.finewallpaper.CoustomView.ToolbarRecycler;
+import com.open.finewallpaper.CoustomView.FreshViewPager;
+import com.open.finewallpaper.CoustomView.HeaderView;
+import com.open.finewallpaper.CoustomView.OnPullListener;
+import com.open.finewallpaper.CoustomView.WrapContentLinearLayoutManager;
 import com.open.finewallpaper.Fragment.MainFragment;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.FileUtil;
-import com.open.finewallpaper.Util.RvDecoration;
 import com.open.finewallpaper.Util.RvScrollListener;
 import com.open.finewallpaper.Util.ScreenUtil;
+import com.open.finewallpaper.Util.SpaceDecoration;
 
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import cn.bmob.v3.Bmob;
+import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.FindListener;
 
 import static android.graphics.Color.TRANSPARENT;
 
@@ -50,15 +56,18 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     private final static String TAG = "MainActivity";
 
     private List<String> pictureBeen;
+    private ArrayList<SetBean> mPicBeanList;
+
     private MainFragmentAdapter adapter;
     private int lastMotionY;
     private int lastMotionX;
 
     private Toolbar mToolbar;
+    private AppBarLayout appBarLayout;
 
     private TranslateAnimation animation;
     private RecyclerView recyclerView;
-
+    private ViewPager viewPager;
     private final int imageWidthPixels = 1024;
     private final int imageHeightPixels = 768;
     @Override
@@ -68,14 +77,14 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         window.addFlags(
          WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_current_activtiy);
+        setContentView(R.layout.activity_main);
         initBmob();
         initFile();
         initData();
         initToolbar();
         initViewPager();
         initView();
-
+        initFreshView();
 
     }
 
@@ -92,36 +101,61 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
 
     public void initData(){
         pictureBeen = new ArrayList<>();
+        mPicBeanList = new ArrayList<>();
 
+        BmobQuery<FinePic> query = new BmobQuery<>();
+        query.setMaxCacheAge(TimeUnit.DAYS.toMillis(1));
+        query.setCachePolicy(BmobQuery.CachePolicy.CACHE_ELSE_NETWORK);
+        query.addQueryKeys("pic_name,pic_url");
+        query.order("-createdAt");
+        query.findObjects(new FindListener<FinePic>() {
+            @Override
+            public void done(List<FinePic> list, BmobException e) {
+                if (e == null){
+                    SetBean finePic;
+                    for (int i =0 ;i < list.size();i++){
+                        finePic = new SetBean();
+                        finePic.setName(list.get(i).getPic_name());
+                        finePic.setUrl(list.get(i).getPic_url());
+                        mPicBeanList.add(finePic);
+                    }
+                    ViewPagerAdapter adapter = new ViewPagerAdapter(mPicBeanList,0,MainActivity.this);
+                    viewPager.setAdapter(adapter);
+                    adapter.setListener(new ViewPagerAdapter.OnViewPagerItemListener() {
+                        @Override
+                        public void click(int position) {
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelableArrayList("url",mPicBeanList);
+                            bundle.putInt("position",position);
+                            Intent in = new Intent(MainActivity.this,NextActivity.class);
+                            in.putExtra("urls",bundle);
+                            startActivity(in);
+                        }
+                    });
+                }else {
+                    Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
+                }
+            }
+        });
     }
 
     public void initViewPager(){
-        List<SetBean> set = new ArrayList<>();
-        SetBean setBean = new SetBean();
-        setBean.setUrl("http://bmob-cdn-14274.b0.upaiyun.com/2017/09/25/178dd21d40e43154806e2bfbd5b0e4a9.jpg");
-        setBean.setName("hah");
-        set.add(setBean);
-        ViewPager viewPager = (ViewPager) findViewById(R.id.main_vp);
-        viewPager.setAdapter(new ViewPagerAdapter(set,0,this));
+
+        viewPager = (ViewPager) findViewById(R.id.main_vp);
+
     }
 
     public void initView(){
-        ScreenUtil screenUtil = new ScreenUtil();
-        screenUtil.setColor(TRANSPARENT);
-        screenUtil.setStatusView(getWindow());
-
-
-        ListPreloader.PreloadSizeProvider size = new FixedPreloadSizeProvider(imageWidthPixels,imageHeightPixels);
 
 
         recyclerView = (RecyclerView) findViewById(R.id.current_rv);
 
         //recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
-        recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
-        recyclerView.addOnScrollListener(new RvScrollListener() {
+        recyclerView.setLayoutManager(new WrapContentLinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
+        recyclerView.addOnScrollListener(new RvScrollListener(appBarLayout) {
             @Override
             public void onLoadMore() {
-                Glide.with(MainActivity.this).resumeRequests();
+                //Glide.with(MainActivity.this).resumeRequests();
             }
 
             @Override
@@ -133,11 +167,15 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         adapter = new MainFragmentAdapter(MainActivity.this,R.layout.adapter_2,pictureBeen);
        // recyclerView.setNestedScrollingEnabled(false);
         recyclerView.setAdapter(adapter);
-        recyclerView.addItemDecoration(new RvDecoration(this));
+        recyclerView.addItemDecoration(new SpaceDecoration(SpaceDecoration.VERTICAL_LIST));
         adapter.setOnItemClickListener(new MainFragmentAdapter.OnItemClickListener() {
             @Override
-            public void onClick(List<String> url, int position) {
-                Intent intent = new Intent(MainActivity.this,NextActivity.class);
+            public void onClick(List url, String type) {
+
+                Bundle bundle = new Bundle();
+                bundle.putString("type",type);
+                Intent intent = new Intent(MainActivity.this,ShowPictureActivity.class);
+                intent.putExtra("bundle",bundle);
                 startActivity(intent);
             }
         });
@@ -145,9 +183,67 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     }
 
     public void initToolbar(){
+        ScreenUtil screenUtil = new ScreenUtil();
+        screenUtil.setColor(TRANSPARENT);
+        screenUtil.setStatusView(getWindow());
+
+
+        appBarLayout = (AppBarLayout) findViewById(R.id.main_abl);
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                mToolbar.setBackgroundColor(changeAlpha(Color.GRAY,
+                        Math.abs(verticalOffset*1.0f)/appBarLayout.getTotalScrollRange()));
+            }
+        });
+
         mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         mToolbar.getBackground().setAlpha(5);
+        mToolbar.setOverflowIcon(ContextCompat.getDrawable(this,R.drawable.ic_menu_white_36dp));
         setSupportActionBar(mToolbar);
+
+    }
+
+    public void initFreshView(){
+        FreshViewPager refreshLayout = (FreshViewPager) findViewById(R.id.main_fresh);
+        refreshLayout.addHeader(new HeaderView(this));
+        refreshLayout.setOnPullListener(new OnPullListener() {
+            @Override
+            public boolean onRefresh(int diff) {
+                BmobQuery<PictureBean> query = new BmobQuery<>();
+                boolean isCache = query.hasCachedResult(PictureBean.class);
+                if (isCache){
+                    query.clearCachedResult(PictureBean.class);
+                }else {
+                    query.setMaxCacheAge(TimeUnit.DAYS.toMillis(1));//此表示缓存一天
+                    query.setCachePolicy(BmobQuery.CachePolicy.CACHE_ELSE_NETWORK);
+                    query.addQueryKeys("type");
+                    query.order("type");
+                }
+                query.findObjects(new FindListener<PictureBean>() {
+                    @Override
+                    public void done(List<PictureBean> list, BmobException e) {
+                        if (e == null){
+
+                            adapter.updataData(true);
+                        }else {
+                            Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
+                        }
+                    }
+                });
+                return true;
+            }
+
+            @Override
+            public boolean onLoadMore() {
+                return false;
+            }
+
+            @Override
+            public void onMoveLoad(int dx) {
+
+            }
+        });
 
     }
 
@@ -162,14 +258,10 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.nvg:
-                //intentActivity(LoginActivity.class, NULL_BUNDLE);
-                break;
-            case R.id.favorite:
-                Intent intent = new Intent(MainActivity.this,ShowPictureActivity.class);
+                Intent intent = new Intent(MainActivity.this,SetActivity.class);
                 startActivity(intent);
                 break;
-            case R.id.setting:
-               // intentActivity(SettingActivity.class, NULL_BUNDLE);
+
             default:
                 break;
         }
@@ -191,5 +283,13 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         animation.start();
     }
 
+
+    public int changeAlpha(int color, float fraction) {
+        int red = Color.red(color);
+        int green = Color.green(color);
+        int blue = Color.blue(color);
+        int alpha = (int) (Color.alpha(color) * fraction *0.7);
+        return Color.argb(alpha, red, green, blue);
+    }
 
 }

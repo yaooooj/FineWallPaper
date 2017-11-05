@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/set_activity"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.open.finewallpaper.Activity.SetActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/abp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/set_tb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+
+    <fragment
+        android:id="@+id/set_fg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/abp"
+        android:name="com.open.finewallpaper.Fragment.SettingFragment"
+        />
+
+</RelativeLayout>

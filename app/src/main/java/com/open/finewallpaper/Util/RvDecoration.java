@@ -119,6 +119,7 @@ public class RvDecoration extends RecyclerView.ItemDecoration {
             int spanCount = ((GridLayoutManager) layoutManager).getSpanCount();
             Log.e(TAG, "getItemOffsets: " + spanCount +1 );
             if (childPosition % spanCount == 0){
+                outRect.top = 10;
                 outRect.bottom = 10;
             }else {
                 outRect.left = 10;

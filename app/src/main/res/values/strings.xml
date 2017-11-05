@@ -1,4 +1,37 @@
 <resources>
     <string name="app_name">FineWallPaper</string>
 
+    <string-array name="pref_entries">
+        <item>string1</item>
+        <item>string2</item>
+    </string-array>
+
+    <string name="defualt">0</string>
+
+    <!--设置清除缓存-->
+
+    <string name="clear_cache">Clear Cache</string>
+    <string name="clear_cache_summary">Remove the cache from this device</string>
+
+    <!--设置自动更新选择-->
+    <string-array name="auto_updata_entries">
+        <item>Dont Updata Auto</item>
+        <item>Updata in anytime,maybe need some costs</item>
+        <item>Only in the WIFI</item>
+    </string-array>
+
+    <string-array name="auto_updata_value">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string name="auto_updata_defualt">2</string>
+
+    <!--设置源码连接地址-->
+    <string name="about">About</string>
+
+    <!--透明状态栏-->
+    <string name="version">Version</string>
+
 </resources>

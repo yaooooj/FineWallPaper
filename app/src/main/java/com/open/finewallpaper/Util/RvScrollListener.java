@@ -1,6 +1,7 @@
 package com.open.finewallpaper.Util;
 
 import android.content.Context;
+import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,8 +19,15 @@ public abstract class RvScrollListener extends RecyclerView.OnScrollListener {
     private int firstVisibleItem;
     private int lastVisibleItem;
     private int span = 0;
-    public RvScrollListener() {
+    private AppBarLayout appbar;
+
+    public RvScrollListener(AppBarLayout appBarLayout) {
         super();
+        appbar = appBarLayout;
+
+    }
+
+    public RvScrollListener(){
 
     }
 
@@ -31,9 +39,13 @@ public abstract class RvScrollListener extends RecyclerView.OnScrollListener {
         int visibleItemCount = layoutManager.getChildCount();
         int totalItemCount = layoutManager.getItemCount();
         int count = adapter.getItemCount();
-        Log.e(TAG, "onScrollStateChanged: "  + visibleItemCount +" + " + totalItemCount + "  + " + lastVisibleItem);
+        //Log.e(TAG, "onScrollStateChanged: "  + visibleItemCount +" + " + totalItemCount + "  + " + lastVisibleItem);
         switch (newState){
             case RecyclerView.SCROLL_STATE_IDLE:
+
+                if (firstVisibleItem == 0 && appbar != null)  {
+                    appbar.setExpanded(true, true);
+                }
                 onLoadMore();
                 break;
             case RecyclerView.SCROLL_STATE_DRAGGING:

@@ -35,6 +35,7 @@ public class ViewPagerAdapter extends PagerAdapter {
     private Context mContext;
     private List<ImageView> mImageViews;
     private int site;
+    private OnViewPagerItemListener mListener;
 
     public ViewPagerAdapter(List<SetBean> data, int position, Context context) {
         this.data = data;
@@ -64,7 +65,7 @@ public class ViewPagerAdapter extends PagerAdapter {
     }
 
     @Override
-    public Object instantiateItem(ViewGroup container, int position) {
+    public Object instantiateItem(ViewGroup container, final int position) {
        // ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
        //         ViewPager.LayoutParams.MATCH_PARENT, ViewPager.LayoutParams.MATCH_PARENT
        // );
@@ -73,6 +74,16 @@ public class ViewPagerAdapter extends PagerAdapter {
             return null;
         }
         ImageView imageView = mImageViews.get(position);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (mListener != null){
+                    mListener.click(position);
+                }
+
+            }
+        });
        // imageView.setLayoutParams(params);
 
         GlideUtil.LoadImageToView(mContext,data.get(position).getUrl(), ImageView.ScaleType.CENTER_CROP, (float) 0.8,imageView);
@@ -85,5 +96,13 @@ public class ViewPagerAdapter extends PagerAdapter {
     public void destroyItem(ViewGroup container, int position, Object object) {
 
         container.removeView(mImageViews.get(position));
+    }
+
+    public void setListener(OnViewPagerItemListener listener) {
+        mListener = listener;
+    }
+
+    public interface OnViewPagerItemListener{
+        void click(int position);
     }
 }

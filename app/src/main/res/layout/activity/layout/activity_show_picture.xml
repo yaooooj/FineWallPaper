@@ -8,34 +8,28 @@
     android:layout_height="match_parent"
     tools:context="com.open.finewallpaper.Activity.ShowPictureActivity">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <android.support.v4.view.ViewPager
-            android:id="@+id/show_vp"
-            android:layout_width="match_parent"
-            android:layout_height="300dp">
-
-        </android.support.v4.view.ViewPager>
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/show_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@+id/show_vp">
-
-        </android.support.v7.widget.RecyclerView>
-    </RelativeLayout>
-
-
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/show_apb"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        >
         <android.support.v7.widget.Toolbar
+            android:id="@+id/show_tb"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="#50000000"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:layout_scrollFlags="scroll|enterAlways|">
 
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
 
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/show_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        >
+    </android.support.v7.widget.RecyclerView>
 </android.support.design.widget.CoordinatorLayout>

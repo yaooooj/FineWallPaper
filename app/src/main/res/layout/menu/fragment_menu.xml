@@ -2,13 +2,12 @@
 <menu
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
         android:id="@+id/nvg"
-        android:title="nvg"
-        android:icon="@mipmap/ic_menu_white_36dp"
+        android:title="like"
+        android:icon="@mipmap/ic_favorite_border_white_36dp"
         android:orderInCategory="100"
         app:showAsAction="always">
-
     </item>
-
 </menu>

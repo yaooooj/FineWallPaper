@@ -1,98 +1,135 @@
 package com.open.finewallpaper.Activity;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.open.finewallpaper.Adapter.ShowAdapter;
+import com.open.finewallpaper.Bean.PictureBean;
+import com.open.finewallpaper.Bean.SetBean;
+import com.open.finewallpaper.CoustomView.ToolbarRecycler;
 import com.open.finewallpaper.Fragment.Fragment1;
 import com.open.finewallpaper.Fragment.Fragment2;
 import com.open.finewallpaper.R;
+import com.open.finewallpaper.Util.GlideApp;
+import com.open.finewallpaper.Util.RvDecoration;
+import com.open.finewallpaper.Util.RvScrollListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.FindListener;
+
 public class ShowPictureActivity extends AppCompatActivity {
     private final static String TAG = "ShowPictureActivity";
     private List<String> data;
+    private RecyclerView recyclerView;
+    private ShowAdapter mShowAdapter;
+    private Toolbar toolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Window window = getWindow();
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        window.addFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_show_picture);
-        //setNeedGesture(true);
+
+        final Bundle bundle = getIntent().getBundleExtra("bundle");
+        String type = bundle.getString("type");
+
         init();
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.show_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
-        recyclerView.setAdapter(new ShowAdapter(data,this));
+        initToolbar();
+        recyclerView = (RecyclerView) findViewById(R.id.show_recycler_view);
+        recyclerView.setLayoutManager(new GridLayoutManager(this,3));
+        recyclerView.addItemDecoration(new RvDecoration(this));
+        mShowAdapter = new ShowAdapter(ShowPictureActivity.this,type);
+        recyclerView.setAdapter(mShowAdapter);
+        mShowAdapter.setOnItemListener(new ShowAdapter.OnItemListener() {
+            @Override
+            public void itemClick(ArrayList<SetBean> data, int position) {
 
-        ViewPager viewPager = (ViewPager) findViewById(R.id.show_vp);
-        viewPager.setAdapter(new MyViewPagerAdapter(this,data));
+                Bundle bundle1 = new Bundle();
+                bundle1.putParcelableArrayList("url",data);
+                bundle1.putInt("position",position);
+                Intent intent = new Intent(ShowPictureActivity.this,NextActivity.class);
+                intent.putExtra("urls",bundle1);
+                startActivity(intent);
 
+            }
+        });
+        recyclerView.addOnScrollListener(new RvScrollListener() {
+            @Override
+            public void onLoadMore() {
+                GlideApp.with(ShowPictureActivity.this).resumeRequests();
+            }
+
+            @Override
+            public void onDragLoadMore() {
+                GlideApp.with(ShowPictureActivity.this).pauseRequests();
+            }
+        });
     }
 
     public void init(){
         data = new ArrayList<>();
-        for (int i = 0;i < 30;i++){
-            data.add(" find toolbar + " + i);
-        }
+
     }
 
-
-    private static class MyViewPagerAdapter extends PagerAdapter{
-        Context context;
-        List<String> data;
-        List<TextView> textViews;
-
-        public MyViewPagerAdapter(Context context,List<String> data) {
-            this.context = context;
-            this.data = data;
-            textViews = new ArrayList<>();
-
-            for (int i =0;i < data.size();i++){
-                textViews.add(new TextView(context));
+    public void initToolbar(){
+        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.show_apb);
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                toolbar.setBackgroundColor(changeAlpha(Color.GRAY,
+                        Math.abs(verticalOffset*1.0f)/appBarLayout.getTotalScrollRange()));
             }
-
+        });
+        toolbar = (Toolbar) findViewById(R.id.show_tb);
+        toolbar.getBackground().setAlpha(5);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
-        @Override
-        public int getCount() {
-            return 0;
-        }
 
-        @Override
-        public boolean isViewFromObject(View view, Object object) {
-            return false;
-        }
-
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-             ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
-                     ViewPager.LayoutParams.MATCH_PARENT, ViewPager.LayoutParams.MATCH_PARENT);
-
-            TextView textView = textViews.get(position);
-            textView.setLayoutParams(params);
-            textView.setGravity(Gravity.CENTER);
-            textView.setText(data.get(position));
-            container.addView(textView);
-            return textView;
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-            container.removeView(textViews.get(position));
-
-        }
     }
 
+
+    public int changeAlpha(int color, float fraction) {
+        int red = Color.red(color);
+        int green = Color.green(color);
+        int blue = Color.blue(color);
+        int alpha = (int) (Color.alpha(color) * fraction *0.7);
+        return Color.argb(alpha, red, green, blue);
+    }
 
 
 

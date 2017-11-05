@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+
+        android:key="homescreen"
+
+        android:layout="@layout/preference_item_layout"
+        >
+    </Preference>
+
+    <Preference
+        android:key="lockscreen"
+        android:title="Lock Screen">
+    </Preference>
+    <Preference
+        android:key="both"
+        android:title="Home Screnn And Lock Screen">
+    </Preference>
+    <Preference
+        android:key="cancel"
+        android:title="Cancel">
+    </Preference>
+</PreferenceScreen>

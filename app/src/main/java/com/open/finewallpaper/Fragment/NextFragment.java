@@ -1,17 +1,25 @@
 package com.open.finewallpaper.Fragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.open.finewallpaper.Adapter.ViewPagerAdapter;
 import com.open.finewallpaper.Bean.SetBean;
@@ -89,7 +97,27 @@ public class NextFragment extends Fragment{
 
         View view;
         if (mParam1 != null){
+
             view = inflater.inflate(R.layout.fragment_next, container, false);
+            Toolbar toolbar = (Toolbar)view.findViewById(R.id.next_tb);
+            toolbar.getBackground().setAlpha(2);
+            toolbar.setOverflowIcon(ContextCompat.getDrawable(getContext(),R.drawable.ic_favorite_border_black_24dp));
+
+            final AppCompatActivity activity = (AppCompatActivity) getActivity();
+            setHasOptionsMenu(true);
+            activity.setSupportActionBar(toolbar);
+            if (activity.getSupportActionBar()!= null){
+                activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+            }
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    activity.finish();
+                }
+            });
+
             mViewPager = (ViewPager) view.findViewById(R.id.nextfragment_vp);
             mViewPager.setAdapter(new ViewPagerAdapter(mParam1,mParam2,getActivity()));
             mViewPager.setCurrentItem(mParam2);
@@ -129,6 +157,25 @@ public class NextFragment extends Fragment{
     }
 
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.fragment_menu,menu);
+        //super.onCreateOptionsMenu(menu, inflater);
+
+    }
+
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.nvg:
+                Toast.makeText(getContext(),"like",Toast.LENGTH_SHORT).show();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void onAttach(Context context) {

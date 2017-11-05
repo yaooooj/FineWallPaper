@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <Preference
+        android:key="account"
+        android:title="Account">
+    </Preference>
+
+    <CheckBoxPreference
+        android:key="pref_sync"
+        android:title="argu1"
+        android:summary="this is a summary"
+        android:defaultValue="true"
+        />
+
+    <ListPreference
+        android:dependency="pref_sync"
+        android:key="pref_syncConnectionType"
+        android:title="this is a List Title"
+        android:dialogTitle="this is dialog title"
+        android:entries="@array/pref_entries"
+        android:entryValues="@array/pref_entries"
+        android:defaultValue="@string/defualt">
+
+    </ListPreference>
+
+
+    <Preference
+        android:title="@string/clear_cache"
+        android:summary="@string/clear_cache_summary"
+        >
+    </Preference>
+
+    <ListPreference
+        android:key="pref_auto_updata"
+        android:title="Auto Updata"
+        android:summary="choose the ways to updata in the different stuation"
+        android:dialogTitle="Auto Updata"
+        android:entries="@array/auto_updata_entries"
+        android:entryValues="@array/auto_updata_value"
+        android:defaultValue="@string/auto_updata_defualt"
+        >
+    </ListPreference>
+
+    <PreferenceScreen
+        android:title="Share"
+        android:summary="share this app">
+        <Preference
+            android:title="@string/about">
+        </Preference>
+    </PreferenceScreen>
+
+    <Preference
+        android:title="@string/about"
+        android:summary="https://github.com/github">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://github.com/github"/>
+    </Preference>
+
+    <Preference
+        android:title="@string/version"
+        android:summary="version 1.0">
+    </Preference>
+</PreferenceScreen>
