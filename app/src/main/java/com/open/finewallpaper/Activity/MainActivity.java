@@ -9,8 +9,10 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -35,6 +37,7 @@ import com.open.finewallpaper.CoustomView.WrapContentLinearLayoutManager;
 import com.open.finewallpaper.Fragment.MainFragment;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.FileUtil;
+import com.open.finewallpaper.Util.GlideApp;
 import com.open.finewallpaper.Util.RvScrollListener;
 import com.open.finewallpaper.Util.ScreenUtil;
 import com.open.finewallpaper.Util.SpaceDecoration;
@@ -45,6 +48,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import cn.bmob.v3.Bmob;
+import cn.bmob.v3.BmobObject;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
@@ -84,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         initToolbar();
         initViewPager();
         initView();
-        initFreshView();
+        //initFreshView();
 
     }
 
@@ -150,24 +154,25 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
 
         recyclerView = (RecyclerView) findViewById(R.id.current_rv);
 
-        //recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
-        recyclerView.setLayoutManager(new WrapContentLinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
+        //recyclerView.setLayoutManager(new StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.VERTICAL));
+       // recyclerView.setLayoutManager(new WrapContentLinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
+        recyclerView.setLayoutManager(new GridLayoutManager(this,3));
         recyclerView.addOnScrollListener(new RvScrollListener(appBarLayout) {
             @Override
             public void onLoadMore() {
-                //Glide.with(MainActivity.this).resumeRequests();
+                GlideApp.with(MainActivity.this).resumeRequests();
             }
 
             @Override
             public void onDragLoadMore() {
                 Log.e(TAG, "onDragLoadMore: " + "dragMore" );
-               // Glide.with(MainActivity.this).pauseRequests();
+               GlideApp.with(MainActivity.this).pauseRequests();
             }
         });
         adapter = new MainFragmentAdapter(MainActivity.this,R.layout.adapter_2,pictureBeen);
        // recyclerView.setNestedScrollingEnabled(false);
         recyclerView.setAdapter(adapter);
-        recyclerView.addItemDecoration(new SpaceDecoration(SpaceDecoration.VERTICAL_LIST));
+        //recyclerView.addItemDecoration(new SpaceDecoration(SpaceDecoration.VERTICAL_LIST));
         adapter.setOnItemClickListener(new MainFragmentAdapter.OnItemClickListener() {
             @Override
             public void onClick(List url, String type) {

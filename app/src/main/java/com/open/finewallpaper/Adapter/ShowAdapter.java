@@ -1,17 +1,14 @@
 package com.open.finewallpaper.Adapter;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.open.finewallpaper.Activity.ShowPictureActivity;
 import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.Bean.SetBean;
 import com.open.finewallpaper.R;
@@ -71,7 +68,7 @@ public class ShowAdapter extends RecyclerView.Adapter implements View.OnClickLis
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new MyViewHolder(LayoutInflater.from(context).inflate(R.layout.adapter_2_backup,parent,false));
+        return new MyViewHolder(LayoutInflater.from(context).inflate(R.layout.adapter_item,parent,false));
     }
 
     @Override
@@ -115,8 +112,8 @@ public class ShowAdapter extends RecyclerView.Adapter implements View.OnClickLis
         ImageView mImageView;
         public MyViewHolder(View itemView) {
             super(itemView);
-            textView = (TextView) itemView.findViewById(R.id.show_tv);
-            mImageView = (ImageView) itemView.findViewById(R.id.show_im);
+            textView = (TextView) itemView.findViewById(R.id.item_tv);
+            mImageView = (ImageView) itemView.findViewById(R.id.item_im);
         }
     }
 

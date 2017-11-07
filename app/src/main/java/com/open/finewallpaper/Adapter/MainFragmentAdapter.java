@@ -4,8 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
@@ -17,18 +16,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.open.finewallpaper.Activity.NextActivity;
 import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.Bean.SetBean;
 import com.open.finewallpaper.CoustomView.CustomLayout;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.GlideApp;
+import com.open.finewallpaper.Util.GlideUtil;
 import com.open.finewallpaper.Util.RvScrollListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -45,6 +43,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         implements View.OnClickListener, View.OnLongClickListener{
     private final static String TAG = "MainFragmentAdapter";
     private List<String> data;
+    private List<SetBean> urlList;
     private Map<String,List<SetBean>> map;
 
     private Context mContext;
@@ -74,6 +73,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     public void init(){
         data = new ArrayList<>();
         map = new HashMap<>();
+        urlList = new ArrayList<>();
         getDataFromNet(isFresh);
     }
 
@@ -107,6 +107,17 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     }
 
     private void sortData(List<PictureBean> list){
+
+        for (int i =0 ;i < list.size();i++){
+            SetBean setBean = new SetBean();
+            setBean.setName(list.get(i).getType());
+            setBean.setUrl(list.get(i).getUrl());
+            urlList.add(setBean);
+        }
+
+    }
+
+    private void sortData1(List<PictureBean> list){
         //data.add(list.get(0).getType());
         data.add(list.get(0).getType());
 
@@ -146,9 +157,11 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         RecyclerView.ViewHolder viewHolder = null;
-         if (viewType == 3){
+         if (viewType == 1){
             viewHolder = new GrindLayoutHolderView(inflate.inflate(R.layout.adapter_3,parent,false));
-        }
+        }else {
+             viewHolder = new ItemViewHolderView(inflate.inflate(R.layout.adapter_item,parent,false));
+         }
         return viewHolder;
     }
 
@@ -157,65 +170,31 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         //holder.itemView.setBackgroundResource(R.drawable.item_selector);
 
         if (holder instanceof ItemViewHolderView) {
-            ((ItemViewHolderView) holder).mTextView.setText(data.get(position));
+            ((ItemViewHolderView) holder).mTextView.setText(urlList.get(position).getName());
+            GlideUtil.LoadImageToView(
+                    mContext,urlList.get(position).getUrl(), ImageView.ScaleType.FIT_XY, (float) 1.5,((ItemViewHolderView) holder).mImageView);
+
         }
 
         if (holder instanceof GrindLayoutHolderView){
 
-
-            CustomLayout layoutManager = new CustomLayout(mContext,3);
-            layoutManager.setScrollEnable(false);
-            ((GrindLayoutHolderView) holder).recyclerView.setLayoutManager( layoutManager);
-            Log.e(TAG, "onBindViewHolder: " + data.get(1) );
-            Log.e(TAG, "onBindViewHolder: "+ data.get(position));
-            CurrentAdapter currentAdapter = new CurrentAdapter(mContext,map.get(data.get(position)),isFresh);
-            ((GrindLayoutHolderView) holder).recyclerView.setAdapter(currentAdapter);
-            ((GrindLayoutHolderView) holder).recyclerView.setNestedScrollingEnabled(false);
-            ((GrindLayoutHolderView) holder).recyclerView.addOnScrollListener(new RvScrollListener() {
-                @Override
-                public void onLoadMore() {
-                    GlideApp.with(mContext).resumeRequests();
-                    Log.e(TAG, "onLoadMore: " + "onLoadMore onLoadMore onLoadMore" );
-                }
-
-                @Override
-                public void onDragLoadMore() {
-                    Log.e(TAG, "onDragLoadMore: " );
-                   GlideApp.with(mContext).pauseRequests();
-                }
-            });
-            currentAdapter.setOnItemListener(new CurrentAdapter.OnItemClickListener() {
-                @Override
-                public void onClick(ArrayList<SetBean> urls, int position) {
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelableArrayList("url",urls);
-                    bundle.putInt("position",position);
-                    Intent intent = new Intent(mContext, NextActivity.class);
-                    intent.putExtra("urls",bundle);
-                    mContext.startActivity(intent);
-                    Toast.makeText(mContext,"click " + position,Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            ((GrindLayoutHolderView) holder).textView.setText(data.get(position));
-            if (currentAdapter.getItemCount() <= 9){
-                ((GrindLayoutHolderView) holder).moreTextView.setVisibility(View.GONE);
-            }else {
                 ((GrindLayoutHolderView) holder).moreTextView.setVisibility(View.VISIBLE);
-                ((GrindLayoutHolderView) holder).moreTextView.setTag(data.get(position));
+                ((GrindLayoutHolderView) holder).moreTextView.setTag(urlList.get(position).getName());
                 ((GrindLayoutHolderView) holder).moreTextView.setOnClickListener(this);
-            }
+
         }
     }
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return urlList.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-
+        if (isFirstInGroup(position)){
+            return 1;
+        }
         return 3;
     }
 
@@ -232,15 +211,33 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         }
     }
 
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+        if (layoutManager instanceof GridLayoutManager){
+            final GridLayoutManager gridLayoutManager = (GridLayoutManager) layoutManager;
+            gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    int viewType = getItemViewType(position);
+                    if (viewType == 1 ){
+                        return gridLayoutManager.getSpanCount();
+                    }
+                    return 1;
+                }
+            });
+        }
+
+    }
+
     private boolean isFirstInGroup(int pos){
         Log.e(TAG, "isFirstInGroup: " + pos );
-        if (pos == 1){
-            return true;
-        }else if (pos == 0){
-            return  false;
+        if (pos == 0){
+            return false;
         }else {
-            String preGroupId = data.get(pos-1);
-            String groupId = data.get(pos);
+            String preGroupId = urlList.get(pos-1).getName();
+            String groupId = urlList.get(pos).getName();
             return !preGroupId .equals( groupId);
         }
     }
@@ -283,27 +280,70 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
 
     private class ItemViewHolderView extends RecyclerView.ViewHolder {
+        ImageView mImageView;
         TextView mTextView;
         public ItemViewHolderView(View itemView) {
             super(itemView);
-            mTextView = (TextView) itemView.findViewById(R.id.adapter_2_tv);
+            mImageView = (ImageView) itemView.findViewById(R.id.item_im);
+            mTextView = (TextView) itemView.findViewById(R.id.item_tv);
         }
     }
 
     private class GrindLayoutHolderView extends RecyclerView.ViewHolder{
-        RecyclerView recyclerView;
-        TextView textView;
+
+        ImageView mImageView;
+        TextView mTextView;
         TextView moreTextView;
         public GrindLayoutHolderView(View itemView) {
             super(itemView);
-            recyclerView = (RecyclerView) itemView.findViewById(R.id.adapter_3_rv);
-            textView = (TextView) itemView.findViewById(R.id.adapter_3_tv);
+            mImageView = (ImageView) itemView.findViewById(R.id.adapter_3_iv);
+            mTextView = (TextView) itemView.findViewById(R.id.adapter_3_tv);
             moreTextView = (TextView) itemView.findViewById(R.id.adapter_more_tv);
+
         }
     }
 
 
 
+    public  void hey(){
+        /*
+        CustomLayout layoutManager = new CustomLayout(mContext,3);
+        layoutManager.setScrollEnable(false);
+        ((GrindLayoutHolderView) holder).recyclerView.setLayoutManager( layoutManager);
+        Log.e(TAG, "onBindViewHolder: " + data.get(1) );
+        Log.e(TAG, "onBindViewHolder: "+ data.get(position));
+        CurrentAdapter currentAdapter = new CurrentAdapter(mContext,map.get(data.get(position)),isFresh);
+        ((GrindLayoutHolderView) holder).recyclerView.setAdapter(currentAdapter);
+        ((GrindLayoutHolderView) holder).recyclerView.setNestedScrollingEnabled(false);
+        ((GrindLayoutHolderView) holder).recyclerView.addOnScrollListener(new RvScrollListener() {
+            @Override
+            public void onLoadMore() {
+                GlideApp.with(mContext).resumeRequests();
+                Log.e(TAG, "onLoadMore: " + "onLoadMore onLoadMore onLoadMore" );
+            }
+
+            @Override
+            public void onDragLoadMore() {
+                Log.e(TAG, "onDragLoadMore: " );
+                GlideApp.with(mContext).pauseRequests();
+            }
+        });
+        currentAdapter.setOnItemListener(new CurrentAdapter.OnItemClickListener() {
+            @Override
+            public void onClick(ArrayList<SetBean> urls, int position) {
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList("url",urls);
+                bundle.putInt("position",position);
+                Intent intent = new Intent(mContext, NextActivity.class);
+                intent.putExtra("urls",bundle);
+                mContext.startActivity(intent);
+                Toast.makeText(mContext,"click " + position,Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        ((GrindLayoutHolderView) holder).mTextView.setText(data.get(position));
+        */
+    }
 
 
 }
