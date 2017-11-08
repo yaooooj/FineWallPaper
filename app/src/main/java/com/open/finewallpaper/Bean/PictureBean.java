@@ -17,6 +17,15 @@ public class PictureBean extends BmobObject  {
     private BmobFile wrapper;
     private String picturename;
     private String type;
+    private int order;
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
 
     public String getType() {
         return type;

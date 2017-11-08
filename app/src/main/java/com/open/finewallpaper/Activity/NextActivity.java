@@ -41,7 +41,7 @@ public class NextActivity extends AppCompatActivity implements NextFragment.OnFr
         Bundle bundle = getIntent().getBundleExtra("urls");
 
         if (bundle != null){
-
+            Log.e(TAG, "onCreate: " + "bundle  not null" );
             nextFragment = NextFragment.newInstance(bundle.getParcelableArrayList("url"),bundle.getInt("position"));
         }else {
 

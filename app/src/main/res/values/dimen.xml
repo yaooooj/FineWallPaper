@@ -6,5 +6,6 @@
     <dimen name="rightGap">5dp</dimen>
     <dimen name="header_height">250dp</dimen>
     <dimen name="header">100dp</dimen>
+    <dimen name="textSize">14sp</dimen>
     
 </resources>

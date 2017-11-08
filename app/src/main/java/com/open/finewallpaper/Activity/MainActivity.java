@@ -4,6 +4,7 @@ package com.open.finewallpaper.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
@@ -14,6 +15,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +30,8 @@ import com.open.finewallpaper.Adapter.MainFragmentAdapter;
 
 import com.open.finewallpaper.Adapter.ViewPagerAdapter;
 import com.open.finewallpaper.Bean.FinePic;
+import com.open.finewallpaper.Bean.ImageBean;
+import com.open.finewallpaper.Bean.ItemBean;
 import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.Bean.SetBean;
 import com.open.finewallpaper.CoustomView.FreshViewPager;
@@ -63,8 +67,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     private ArrayList<SetBean> mPicBeanList;
 
     private MainFragmentAdapter adapter;
-    private int lastMotionY;
-    private int lastMotionX;
+
 
     private Toolbar mToolbar;
     private AppBarLayout appBarLayout;
@@ -72,8 +75,10 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     private TranslateAnimation animation;
     private RecyclerView recyclerView;
     private ViewPager viewPager;
-    private final int imageWidthPixels = 1024;
-    private final int imageHeightPixels = 768;
+
+    private List<ItemBean> itemList;
+    private boolean isFresh = false;
+    private int maxCount = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,7 +111,84 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     public void initData(){
         pictureBeen = new ArrayList<>();
         mPicBeanList = new ArrayList<>();
+        itemList = new ArrayList<>();
+        getViewPagerData();
+        getDataFromNet(true);
 
+    }
+
+    private void getDataFromNet(boolean isFresh){
+        BmobQuery<PictureBean> bmobQuery = new BmobQuery<>();
+        bmobQuery.setMaxCacheAge(TimeUnit.DAYS.toMillis(1));//此表示缓存一天
+        bmobQuery.addQueryKeys("type,url,name,order");
+        bmobQuery.order("order");
+        boolean isCache = bmobQuery.hasCachedResult(PictureBean.class);
+        if (isFresh){
+            bmobQuery.setCachePolicy(BmobQuery.CachePolicy.NETWORK_ELSE_CACHE);
+        }else {
+            if (isCache){
+                //bmobQuery.setCachePolicy(BmobQuery.CachePolicy.NETWORK_ELSE_CACHE);
+                bmobQuery.setCachePolicy(BmobQuery.CachePolicy.CACHE_ELSE_NETWORK);
+            }else {
+                bmobQuery.setCachePolicy(BmobQuery.CachePolicy.NETWORK_ELSE_CACHE);
+            }
+        }
+        bmobQuery.findObjects(new FindListener<PictureBean>() {
+            @Override
+            public void done(final List<PictureBean> list, BmobException e) {
+                if (e == null){
+                    sortData2(list);
+                    adapter.upData(itemList);
+
+                }else {
+                    Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
+                }
+            }
+        });
+    }
+
+    private void sortData2(List<PictureBean> list){
+        ItemBean itemBean;
+        ImageBean imgBean;
+        for (int i =0 ;i < list.size();i++) {
+            if (isDiffType(list,i)){
+                itemBean = new ItemBean();
+                imgBean = new ImageBean();
+                if (maxCount > 9 || i==0){
+                    itemBean.setMore(true);
+                }else {
+                    itemBean.setMore(false);
+                }
+                itemBean.setImgType(list.get(i).getType());
+                itemBean.setImgBean(imgBean);
+                itemList.add(itemBean);
+                maxCount = 0;
+            }
+            maxCount++;
+            imgBean = new ImageBean();
+            imgBean.setImgName(list.get(i).getPicturename());
+            imgBean.setImgUrl(list.get(i).getUrl());
+            itemBean = new ItemBean();
+            itemBean.setImgBean(imgBean);
+            itemBean.setImgType(list.get(i).getType());
+            itemList.add(itemBean);
+        }
+
+    }
+
+
+    private boolean isDiffType(List<PictureBean> list,int pos){
+        if (pos == 0){
+            return true;
+        }else {
+            String preGroupId = list.get(pos-1).getType();
+            String groupId = list.get(pos).getType();
+            return !preGroupId .equals(groupId);
+        }
+
+    }
+
+    public void getViewPagerData(){
         BmobQuery<FinePic> query = new BmobQuery<>();
         query.setMaxCacheAge(TimeUnit.DAYS.toMillis(1));
         query.setCachePolicy(BmobQuery.CachePolicy.CACHE_ELSE_NETWORK);
@@ -136,6 +218,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
                             startActivity(in);
                         }
                     });
+
                 }else {
                     Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
                 }
@@ -156,7 +239,17 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
 
         //recyclerView.setLayoutManager(new StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.VERTICAL));
        // recyclerView.setLayoutManager(new WrapContentLinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
-        recyclerView.setLayoutManager(new GridLayoutManager(this,3));
+        final GridLayoutManager layoutManager = new GridLayoutManager(this,3);
+        layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if (!TextUtils.isEmpty(itemList.get(position).getImgType())){
+                    return 3;
+                }
+                return 1;
+            }
+        });
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.addOnScrollListener(new RvScrollListener(appBarLayout) {
             @Override
             public void onLoadMore() {
@@ -169,14 +262,26 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
                GlideApp.with(MainActivity.this).pauseRequests();
             }
         });
-        adapter = new MainFragmentAdapter(MainActivity.this,R.layout.adapter_2,pictureBeen);
-       // recyclerView.setNestedScrollingEnabled(false);
+        adapter = new MainFragmentAdapter(MainActivity.this,R.layout.adapter_2,itemList);
         recyclerView.setAdapter(adapter);
         //recyclerView.addItemDecoration(new SpaceDecoration(SpaceDecoration.VERTICAL_LIST));
         adapter.setOnItemClickListener(new MainFragmentAdapter.OnItemClickListener() {
             @Override
-            public void onClick(List url, String type) {
-
+            public void onClick(ArrayList<SetBean> url, int position) {
+                if (url !=null){
+                    Log.e(TAG, "onClick: " + "url not null" );
+                }
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList("url",url);
+                bundle.putInt("position",position);
+                Intent intent = new Intent(MainActivity.this, NextActivity.class);
+                intent.putExtra("urls",bundle);
+                startActivity(intent);
+            }
+        });
+        adapter.setOnTextViewClickListener(new MainFragmentAdapter.OnTextViewClickListener() {
+            @Override
+            public void onClick(List<String> url, String type) {
                 Bundle bundle = new Bundle();
                 bundle.putString("type",type);
                 Intent intent = new Intent(MainActivity.this,ShowPictureActivity.class);

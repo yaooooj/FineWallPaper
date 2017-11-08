@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,8 @@ import android.widget.Toast;
 
 
 import com.open.finewallpaper.Activity.NextActivity;
+import com.open.finewallpaper.Bean.ImageBean;
+import com.open.finewallpaper.Bean.ItemBean;
 import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.Bean.SetBean;
 import com.open.finewallpaper.CoustomView.CustomLayout;
@@ -44,23 +47,27 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     private final static String TAG = "MainFragmentAdapter";
     private List<String> data;
     private List<SetBean> urlList;
-    private Map<String,List<SetBean>> map;
+    private List<ItemBean> itemList;
+
 
     private Context mContext;
     private Fragment mFragment;
     private int layoutResId;
     private LayoutInflater inflate;
     private OnItemClickListener mOnItemClickListener;
+    private OnTextViewClickListener mOnTextViewClickListener;
     private OnItemLongClickListener mOnItemLongClickListener;
+
+    private int maxCount = 0;
 
     private boolean isFresh = false;
 
-    public MainFragmentAdapter(Context context, int layoutResId,List<String> data) {
-        this.data = data;
+    public MainFragmentAdapter(Context context, int layoutResId,List<ItemBean> data) {
+        this.itemList = data;
         this.mContext = context;
         this.layoutResId = layoutResId;
         inflate = LayoutInflater.from(context);
-        init();
+        //init();
 
     }
 
@@ -71,87 +78,32 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         inflate = LayoutInflater.from(fragment.getContext());
     }
     public void init(){
-        data = new ArrayList<>();
-        map = new HashMap<>();
+
         urlList = new ArrayList<>();
-        getDataFromNet(isFresh);
+        itemList = new ArrayList<>();
     }
 
-    private void getDataFromNet(boolean isFresh){
-        BmobQuery<PictureBean> bmobQuery = new BmobQuery<>();
-        bmobQuery.setMaxCacheAge(TimeUnit.DAYS.toMillis(1));//此表示缓存一天
-        bmobQuery.addQueryKeys("type,url,name");
-        bmobQuery.order("type");
-        boolean isCache = bmobQuery.hasCachedResult(PictureBean.class);
-        if (isFresh){
-            bmobQuery.setCachePolicy(BmobQuery.CachePolicy.NETWORK_ELSE_CACHE);
+
+
+    private boolean isFirstInGroup(int pos){
+        Log.e(TAG, "isFirstInGroup: " + pos );
+        if (pos == 0){
+            return true;
         }else {
-            if (isCache){
-                //bmobQuery.setCachePolicy(BmobQuery.CachePolicy.NETWORK_ELSE_CACHE);
-                bmobQuery.setCachePolicy(BmobQuery.CachePolicy.CACHE_ELSE_NETWORK);
-            }else {
-                bmobQuery.setCachePolicy(BmobQuery.CachePolicy.NETWORK_ELSE_CACHE);
-            }
+            String preGroupId = itemList.get(pos-1).getImgType();
+            String groupId = itemList.get(pos).getImgType();
+            return !preGroupId .equals( groupId);
         }
-        bmobQuery.findObjects(new FindListener<PictureBean>() {
-            @Override
-            public void done(final List<PictureBean> list, BmobException e) {
-                if (e == null){
-                    sortData(list);
-                    notifyDataSetChanged();
-                }else {
-                    Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
-                }
-            }
-        });
     }
 
-    private void sortData(List<PictureBean> list){
-
-        for (int i =0 ;i < list.size();i++){
-            SetBean setBean = new SetBean();
-            setBean.setName(list.get(i).getType());
-            setBean.setUrl(list.get(i).getUrl());
-            urlList.add(setBean);
-        }
-
-    }
-
-    private void sortData1(List<PictureBean> list){
-        //data.add(list.get(0).getType());
-        data.add(list.get(0).getType());
-
-        List<SetBean> urls = new ArrayList<>();
-        SetBean setBean = new SetBean();
-        setBean.setName(list.get(0).getPicturename());
-        setBean.setUrl(list.get(0).getUrl());
-        urls.add(setBean);
-
-        map.put(list.get(0).getType(),urls);
-        for (int i = 1 ;i < list.size();i++){
-
-                if (!list.get(i-1).getType().equals(list.get(i).getType())){
-                    //Log.e(TAG, "done: " +list.get(i).getType()  );
-                    data.add(list.get(i).getType());
-                    Log.e(TAG, "sortData: " + list.get(i).getUrl() );
-                    urls = new ArrayList<>();
-                    map.put(list.get(i).getType(),urls);
-
-                    //urls.add(list.get(i).getUrl());
-
-                }
-            setBean = new SetBean();
-            setBean.setName(list.get(i).getPicturename());
-            setBean.setUrl(list.get(i).getUrl());
-            urls.add(setBean);
-        }
-
-
+    public void upData(List<ItemBean> data){
+        this.itemList = data;
+        notifyDataSetChanged();
     }
 
     public  void  updataData (boolean isFresh){
         data.clear();
-        getDataFromNet(isFresh);
+
     }
 
     @Override
@@ -168,26 +120,39 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         //holder.itemView.setBackgroundResource(R.drawable.item_selector);
-
+        final int realPosition = position;
         if (holder instanceof ItemViewHolderView) {
-            ((ItemViewHolderView) holder).mTextView.setText(urlList.get(position).getName());
-            GlideUtil.LoadImageToView(
-                    mContext,urlList.get(position).getUrl(), ImageView.ScaleType.FIT_XY, (float) 1.5,((ItemViewHolderView) holder).mImageView);
+            ((ItemViewHolderView) holder).mTextView.setText(itemList.get(position).getImgBean().getImgName());
 
+            GlideUtil.LoadImageToView(
+                    mContext,itemList.get(position).getImgBean().getImgUrl(), ImageView.ScaleType.FIT_XY, (float) 1.5,((ItemViewHolderView) holder).mImageView);
+
+            holder.itemView.setOnClickListener(this);
+            holder.itemView.setTag(position);
         }
 
         if (holder instanceof GrindLayoutHolderView){
 
+            if (itemList.get(position).isMore()){
                 ((GrindLayoutHolderView) holder).moreTextView.setVisibility(View.VISIBLE);
-                ((GrindLayoutHolderView) holder).moreTextView.setTag(urlList.get(position).getName());
-                ((GrindLayoutHolderView) holder).moreTextView.setOnClickListener(this);
+            }else {
+                ((GrindLayoutHolderView) holder).moreTextView.setVisibility(View.GONE);
+            }
+            ((GrindLayoutHolderView) holder).mTextView.setText(itemList.get(position).getImgType());
+            ((GrindLayoutHolderView) holder).moreTextView.setTag(itemList.get(position).getImgType());
+            ((GrindLayoutHolderView) holder).moreTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mOnTextViewClickListener.onClick(data, itemList.get(realPosition).getImgType());
+                }
+            });
 
         }
     }
 
     @Override
     public int getItemCount() {
-        return urlList.size();
+        return itemList.size();
     }
 
     @Override
@@ -198,18 +163,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         return 3;
     }
 
-    @Override
-    public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
-        super.onViewAttachedToWindow(holder);
-        int viewType = holder.getItemViewType();
-        if (viewType ==  1){
-            ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
-            if (lp != null && lp instanceof StaggeredGridLayoutManager.LayoutParams){
-                StaggeredGridLayoutManager.LayoutParams p = (StaggeredGridLayoutManager.LayoutParams)lp;
-                p.setFullSpan(true);
-            }
-        }
-    }
+
 
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
@@ -231,16 +185,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     }
 
-    private boolean isFirstInGroup(int pos){
-        Log.e(TAG, "isFirstInGroup: " + pos );
-        if (pos == 0){
-            return false;
-        }else {
-            String preGroupId = urlList.get(pos-1).getName();
-            String groupId = urlList.get(pos).getName();
-            return !preGroupId .equals( groupId);
-        }
-    }
+
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         mOnItemClickListener = onItemClickListener;
     }
@@ -249,11 +194,34 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         mOnItemLongClickListener = onItemLongClickListener;
     }
 
+    public void setOnTextViewClickListener(OnTextViewClickListener onTextViewClickListener) {
+        mOnTextViewClickListener = onTextViewClickListener;
+    }
+
     @Override
     public void onClick(View v) {
-        if (mOnItemClickListener != null){
 
-            mOnItemClickListener.onClick(data, (String) v.getTag());
+        if (mOnItemClickListener != null){
+            ArrayList<SetBean> url = new ArrayList<>();
+            SetBean setBean;
+            for (int i=0;i< itemList.size();i++){
+                if (v.getTag() != null){
+                    Log.e(TAG, "onClick: " + itemList.get((Integer) v.getTag()).getImgType() );
+                    if (itemList.get((Integer) v.getTag()).getImgType().equals(itemList.get(i).getImgType())){
+                        if (itemList.get(i).getImgBean().getImgUrl() != null){
+                            setBean = new SetBean();
+                            setBean.setUrl(itemList.get(i).getImgBean().getImgUrl());
+                            setBean.setName(itemList.get(i).getImgBean().getImgName());
+                            url.add(setBean);
+                        }
+
+                    }
+                }
+
+
+            }
+
+            mOnItemClickListener.onClick(url,(int)v.getTag()-1);
         }
     }
 
@@ -265,10 +233,12 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         return true;
     }
 
-
+    public interface OnTextViewClickListener{
+        void onClick(List<String> url, String type);
+    }
 
     public interface OnItemClickListener {
-        void onClick(List<String> url, String type);
+        void onClick(ArrayList<SetBean> url, int position);
     }
 
     public interface OnItemLongClickListener {
