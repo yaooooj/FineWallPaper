@@ -1,17 +1,18 @@
 package com.open.finewallpaper.Util;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.open.finewallpaper.Adapter.CurrentAdapter;
 import com.open.finewallpaper.R;
 
 /**
@@ -43,15 +44,33 @@ public class GlideUtil {
                         }
 
                         ViewGroup.LayoutParams params = mImageView.getLayoutParams();
-                        int width = mImageView.getWidth() - mImageView.getPaddingLeft() - mImageView.getPaddingRight();
-                        float scale = width / resource.getIntrinsicWidth();
-                        int height =  Math.round((resource.getIntrinsicHeight() * scale) * ration);
-                        params.height = height + mImageView.getPaddingTop() + mImageView.getPaddingBottom();
+                        float itemWidth = DisplayUtil.getsWidthPixles(mImageView.getContext()) / 3;
+                        params.width = (int) itemWidth;
+                        float scale = itemWidth / resource.getIntrinsicWidth();
+                        float itemHeight = resource.getIntrinsicHeight() * scale;
+                        params.height = (int) itemHeight;
                         mImageView.setLayoutParams(params);
                         return false;
                     }
                 })
                 .dontAnimate()
+                .into(mImageView);
+    }
+    public static void LoadImage(final Context context, final String url, final ImageView.ScaleType type,
+                                 final float ration, final ImageView mImageView){
+
+        float itemWidth = (DisplayUtil.getsWidthPixles(mImageView.getContext()) + 5 *3) / 3;
+        //final int width = mImageView.getMeasuredWidth() / 3;
+        float itemHeight = itemWidth * ration;
+        GlideApp.with(context)
+                .asBitmap()
+                .load(url)
+                .dontAnimate()
+                .placeholder(R.mipmap.ic_favorite_border_black_24dp)
+                .error(R.mipmap.ic_favorite_border_black_24dp)
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                .override((int)itemWidth,(int)itemHeight)
+                .centerCrop()
                 .into(mImageView);
     }
 }

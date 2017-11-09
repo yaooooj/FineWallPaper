@@ -8,6 +8,7 @@ import android.os.Parcelable;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -34,17 +35,13 @@ import com.open.finewallpaper.Bean.ImageBean;
 import com.open.finewallpaper.Bean.ItemBean;
 import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.Bean.SetBean;
-import com.open.finewallpaper.CoustomView.FreshViewPager;
-import com.open.finewallpaper.CoustomView.HeaderView;
-import com.open.finewallpaper.CoustomView.OnPullListener;
-import com.open.finewallpaper.CoustomView.WrapContentLinearLayoutManager;
-import com.open.finewallpaper.Fragment.MainFragment;
+
 import com.open.finewallpaper.R;
+
 import com.open.finewallpaper.Util.FileUtil;
 import com.open.finewallpaper.Util.GlideApp;
 import com.open.finewallpaper.Util.RvScrollListener;
 import com.open.finewallpaper.Util.ScreenUtil;
-import com.open.finewallpaper.Util.SpaceDecoration;
 
 
 import java.util.ArrayList;
@@ -52,7 +49,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import cn.bmob.v3.Bmob;
-import cn.bmob.v3.BmobObject;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
@@ -60,14 +56,14 @@ import cn.bmob.v3.listener.FindListener;
 import static android.graphics.Color.TRANSPARENT;
 
 
-public class MainActivity extends AppCompatActivity implements MainFragment.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity{
     private final static String TAG = "MainActivity";
 
     private List<String> pictureBeen;
     private ArrayList<SetBean> mPicBeanList;
 
     private MainFragmentAdapter adapter;
-
+    private SwipeRefreshLayout refreshLayout;
 
     private Toolbar mToolbar;
     private AppBarLayout appBarLayout;
@@ -93,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         initToolbar();
         initViewPager();
         initView();
-        //initFreshView();
+        initFreshView();
 
     }
 
@@ -155,6 +151,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
                 itemBean = new ItemBean();
                 imgBean = new ImageBean();
                 if (maxCount > 9 || i==0){
+                    Log.e(TAG, "sortData2: " + list.get(i).getType());
                     itemBean.setMore(true);
                 }else {
                     itemBean.setMore(false);
@@ -236,9 +233,6 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
 
 
         recyclerView = (RecyclerView) findViewById(R.id.current_rv);
-
-        //recyclerView.setLayoutManager(new StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.VERTICAL));
-       // recyclerView.setLayoutManager(new WrapContentLinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
         final GridLayoutManager layoutManager = new GridLayoutManager(this,3);
         layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
@@ -264,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         });
         adapter = new MainFragmentAdapter(MainActivity.this,R.layout.adapter_2,itemList);
         recyclerView.setAdapter(adapter);
-        //recyclerView.addItemDecoration(new SpaceDecoration(SpaceDecoration.VERTICAL_LIST));
+       // recyclerView.addItemDecoration(new SpaceDecoration(SpaceDecoration.VERTICAL_LIST));
         adapter.setOnItemClickListener(new MainFragmentAdapter.OnItemClickListener() {
             @Override
             public void onClick(ArrayList<SetBean> url, int position) {
@@ -315,11 +309,10 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     }
 
     public void initFreshView(){
-        FreshViewPager refreshLayout = (FreshViewPager) findViewById(R.id.main_fresh);
-        refreshLayout.addHeader(new HeaderView(this));
-        refreshLayout.setOnPullListener(new OnPullListener() {
+        refreshLayout = (SwipeRefreshLayout) findViewById(R.id.main_fresh);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
-            public boolean onRefresh(int diff) {
+            public void onRefresh() {
                 BmobQuery<PictureBean> query = new BmobQuery<>();
                 boolean isCache = query.hasCachedResult(PictureBean.class);
                 if (isCache){
@@ -334,24 +327,13 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
                     @Override
                     public void done(List<PictureBean> list, BmobException e) {
                         if (e == null){
-
-                            adapter.updataData(true);
+                            refreshLayout.setRefreshing(false);
+                            //adapter.updataData(true);
                         }else {
                             Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
                         }
                     }
                 });
-                return true;
-            }
-
-            @Override
-            public boolean onLoadMore() {
-                return false;
-            }
-
-            @Override
-            public void onMoveLoad(int dx) {
-
             }
         });
 
@@ -376,11 +358,6 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
                 break;
         }
         return true;
-    }
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
     }
 
 

@@ -23,22 +23,15 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.open.finewallpaper.Adapter.ShowAdapter;
-import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.Bean.SetBean;
-import com.open.finewallpaper.CoustomView.ToolbarRecycler;
-import com.open.finewallpaper.Fragment.Fragment1;
-import com.open.finewallpaper.Fragment.Fragment2;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.GlideApp;
-import com.open.finewallpaper.Util.RvDecoration;
+
 import com.open.finewallpaper.Util.RvScrollListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.bmob.v3.BmobQuery;
-import cn.bmob.v3.exception.BmobException;
-import cn.bmob.v3.listener.FindListener;
 
 public class ShowPictureActivity extends AppCompatActivity {
     private final static String TAG = "ShowPictureActivity";
@@ -46,6 +39,7 @@ public class ShowPictureActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ShowAdapter mShowAdapter;
     private Toolbar toolbar;
+    private String type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,13 +51,11 @@ public class ShowPictureActivity extends AppCompatActivity {
         setContentView(R.layout.activity_show_picture);
 
         final Bundle bundle = getIntent().getBundleExtra("bundle");
-        String type = bundle.getString("type");
-
+        type = bundle.getString("type");
         init();
         initToolbar();
         recyclerView = (RecyclerView) findViewById(R.id.show_recycler_view);
         recyclerView.setLayoutManager(new GridLayoutManager(this,3));
-        recyclerView.addItemDecoration(new RvDecoration(this));
         mShowAdapter = new ShowAdapter(ShowPictureActivity.this,type);
         recyclerView.setAdapter(mShowAdapter);
         mShowAdapter.setOnItemListener(new ShowAdapter.OnItemListener() {
@@ -98,16 +90,11 @@ public class ShowPictureActivity extends AppCompatActivity {
     }
 
     public void initToolbar(){
-        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.show_apb);
-        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-            @Override
-            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                toolbar.setBackgroundColor(changeAlpha(Color.GRAY,
-                        Math.abs(verticalOffset*1.0f)/appBarLayout.getTotalScrollRange()));
-            }
-        });
+
         toolbar = (Toolbar) findViewById(R.id.show_tb);
-        toolbar.getBackground().setAlpha(5);
+        toolbar.getBackground().setAlpha(255);
+        TextView textView = (TextView) findViewById(R.id.show_tb_tv);
+        textView.setText(type);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -118,10 +105,18 @@ public class ShowPictureActivity extends AppCompatActivity {
                 finish();
             }
         });
+        /*
+        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.show_apb);
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                toolbar.setBackgroundColor(changeAlpha(Color.GRAY,
+                        Math.abs(verticalOffset*1.0f)/appBarLayout.getTotalScrollRange()));
+            }
+        });
 
-
+        */
     }
-
 
     public int changeAlpha(int color, float fraction) {
         int red = Color.red(color);

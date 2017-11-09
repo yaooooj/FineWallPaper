@@ -76,7 +76,7 @@ public class ShowAdapter extends RecyclerView.Adapter implements View.OnClickLis
         if (holder instanceof MyViewHolder){
             ((MyViewHolder) holder).textView.setText(data.get(position).getName());
 
-            GlideUtil.LoadImageToView(context,data.get(position).getUrl(),
+            GlideUtil.LoadImage(context,data.get(position).getUrl(),
                     ImageView.ScaleType.CENTER_CROP, (float) 1.5,((MyViewHolder) holder).mImageView);
             ((MyViewHolder) holder).itemView.setTag(holder.getAdapterPosition());
             holder.itemView.setOnClickListener(this);

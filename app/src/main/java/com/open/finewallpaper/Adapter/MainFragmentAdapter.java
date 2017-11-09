@@ -17,26 +17,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.open.finewallpaper.Activity.NextActivity;
-import com.open.finewallpaper.Bean.ImageBean;
+
 import com.open.finewallpaper.Bean.ItemBean;
-import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.Bean.SetBean;
-import com.open.finewallpaper.CoustomView.CustomLayout;
 import com.open.finewallpaper.R;
-import com.open.finewallpaper.Util.GlideApp;
 import com.open.finewallpaper.Util.GlideUtil;
-import com.open.finewallpaper.Util.RvScrollListener;
+
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import cn.bmob.v3.BmobQuery;
-import cn.bmob.v3.exception.BmobException;
-import cn.bmob.v3.listener.FindListener;
 
 /**
  * Created by SEELE on 2017/10/15.
@@ -77,13 +66,11 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         this.layoutResId = layoutResId;
         inflate = LayoutInflater.from(fragment.getContext());
     }
-    public void init(){
 
+    public void init(){
         urlList = new ArrayList<>();
         itemList = new ArrayList<>();
     }
-
-
 
     private boolean isFirstInGroup(int pos){
         Log.e(TAG, "isFirstInGroup: " + pos );
@@ -108,7 +95,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        RecyclerView.ViewHolder viewHolder = null;
+        RecyclerView.ViewHolder viewHolder;
          if (viewType == 1){
             viewHolder = new GrindLayoutHolderView(inflate.inflate(R.layout.adapter_3,parent,false));
         }else {
@@ -124,8 +111,9 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         if (holder instanceof ItemViewHolderView) {
             ((ItemViewHolderView) holder).mTextView.setText(itemList.get(position).getImgBean().getImgName());
 
-            GlideUtil.LoadImageToView(
-                    mContext,itemList.get(position).getImgBean().getImgUrl(), ImageView.ScaleType.FIT_XY, (float) 1.5,((ItemViewHolderView) holder).mImageView);
+            GlideUtil.LoadImage(
+                    mContext,itemList.get(position).getImgBean().getImgUrl(), ImageView.ScaleType.FIT_XY,
+                    (float) 1.5,((ItemViewHolderView) holder).mImageView);
 
             holder.itemView.setOnClickListener(this);
             holder.itemView.setTag(position);
@@ -200,28 +188,26 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     @Override
     public void onClick(View v) {
-
+        int position=0;
         if (mOnItemClickListener != null){
             ArrayList<SetBean> url = new ArrayList<>();
             SetBean setBean;
             for (int i=0;i< itemList.size();i++){
-                if (v.getTag() != null){
-                    Log.e(TAG, "onClick: " + itemList.get((Integer) v.getTag()).getImgType() );
-                    if (itemList.get((Integer) v.getTag()).getImgType().equals(itemList.get(i).getImgType())){
-                        if (itemList.get(i).getImgBean().getImgUrl() != null){
-                            setBean = new SetBean();
-                            setBean.setUrl(itemList.get(i).getImgBean().getImgUrl());
-                            setBean.setName(itemList.get(i).getImgBean().getImgName());
-                            url.add(setBean);
+                // Log.e(TAG, "onClick: " + itemList.get((Integer) v.getTag()).getImgType() );
+                if (itemList.get((Integer) v.getTag()).getImgType().equals(itemList.get(i).getImgType())){
+                    if (itemList.get(i).getImgBean().getImgUrl() != null){
+                        if (position <=0 ){
+                            position = i;
                         }
-
+                        setBean = new SetBean();
+                        setBean.setUrl(itemList.get(i).getImgBean().getImgUrl());
+                        setBean.setName(itemList.get(i).getImgBean().getImgName());
+                        url.add(setBean);
                     }
                 }
 
-
             }
-
-            mOnItemClickListener.onClick(url,(int)v.getTag()-1);
+            mOnItemClickListener.onClick(url,(int) v.getTag() - position);
         }
     }
 
@@ -272,48 +258,5 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
         }
     }
-
-
-
-    public  void hey(){
-        /*
-        CustomLayout layoutManager = new CustomLayout(mContext,3);
-        layoutManager.setScrollEnable(false);
-        ((GrindLayoutHolderView) holder).recyclerView.setLayoutManager( layoutManager);
-        Log.e(TAG, "onBindViewHolder: " + data.get(1) );
-        Log.e(TAG, "onBindViewHolder: "+ data.get(position));
-        CurrentAdapter currentAdapter = new CurrentAdapter(mContext,map.get(data.get(position)),isFresh);
-        ((GrindLayoutHolderView) holder).recyclerView.setAdapter(currentAdapter);
-        ((GrindLayoutHolderView) holder).recyclerView.setNestedScrollingEnabled(false);
-        ((GrindLayoutHolderView) holder).recyclerView.addOnScrollListener(new RvScrollListener() {
-            @Override
-            public void onLoadMore() {
-                GlideApp.with(mContext).resumeRequests();
-                Log.e(TAG, "onLoadMore: " + "onLoadMore onLoadMore onLoadMore" );
-            }
-
-            @Override
-            public void onDragLoadMore() {
-                Log.e(TAG, "onDragLoadMore: " );
-                GlideApp.with(mContext).pauseRequests();
-            }
-        });
-        currentAdapter.setOnItemListener(new CurrentAdapter.OnItemClickListener() {
-            @Override
-            public void onClick(ArrayList<SetBean> urls, int position) {
-                Bundle bundle = new Bundle();
-                bundle.putParcelableArrayList("url",urls);
-                bundle.putInt("position",position);
-                Intent intent = new Intent(mContext, NextActivity.class);
-                intent.putExtra("urls",bundle);
-                mContext.startActivity(intent);
-                Toast.makeText(mContext,"click " + position,Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        ((GrindLayoutHolderView) holder).mTextView.setText(data.get(position));
-        */
-    }
-
 
 }

@@ -16,9 +16,10 @@ import android.view.View;
  */
 
 public class SpaceDecoration extends RecyclerView.ItemDecoration {
-    private int dividerLeft = 20;
-    private int dividerRight = 20;
-    private int dividerHeight = 1;
+    private int dividerLeft = 5;
+    private int dividerRight = 5;
+    private int dividerHeight = 5;
+    private int count = 0;
     public static final int HORIZONTAL_LIST = LinearLayoutManager.HORIZONTAL;
     public static final int VERTICAL_LIST = LinearLayoutManager.VERTICAL;
     private int orientation;
@@ -58,11 +59,24 @@ public class SpaceDecoration extends RecyclerView.ItemDecoration {
         }
 
         if (layoutManager instanceof GridLayoutManager){
+            int  viewType = layoutManager.getItemViewType(view);
             int spanCount = ((GridLayoutManager) layoutManager).getSpanCount();
-            if ((childPosition + 1) % spanCount == 0){
-                outRect.set(dividerLeft,0,dividerRight,dividerHeight);
-            }else {
-                outRect.set(dividerLeft,0,0,dividerHeight);
+            int realPosition = childPosition;
+            if (viewType == 1){
+                if (childPosition == 0){
+                    outRect.set(0,0,0,dividerHeight);
+                    return;
+                }else {
+                    realPosition -= 1;
+                }
+            }
+            realPosition-=1;
+            if (viewType == 3){
+                if (realPosition  % spanCount == 0){
+                    outRect.set(dividerLeft,0,dividerRight,dividerHeight);
+                }else {
+                    outRect.set(0,0,dividerRight,dividerHeight);
+                }
             }
         }
 
@@ -71,24 +85,28 @@ public class SpaceDecoration extends RecyclerView.ItemDecoration {
     @Override
     public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
         RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
+        //startDraw(layoutManager,c,parent);
 
-        if (orientation ==VERTICAL_LIST){
-            if (layoutManager instanceof StaggeredGridLayoutManager){
-                drawStaggerVertical(c,parent);
+
+    }
+   private void startDraw(RecyclerView.LayoutManager layoutManager,Canvas c, RecyclerView parent) {
+        if (orientation == HORIZONTAL_LIST) {
+            if (layoutManager instanceof StaggeredGridLayoutManager) {
+                drawStaggerVertical(c, parent);
             }
 
-            if (layoutManager instanceof LinearLayoutManager){
-                drawVertical(c,parent);
+            if (layoutManager instanceof LinearLayoutManager) {
+                drawVertical(c, parent);
             }
 
-        }else {
+        } else {
 
-            if (layoutManager instanceof StaggeredGridLayoutManager){
-                drawStaggerHerizontal(c,parent);
+            if (layoutManager instanceof StaggeredGridLayoutManager) {
+                drawStaggerHerizontal(c, parent);
             }
 
-            if (layoutManager instanceof LinearLayoutManager){
-                drawHorizontal(c,parent);
+            if (layoutManager instanceof LinearLayoutManager) {
+                drawHorizontal(c, parent);
             }
 
         }

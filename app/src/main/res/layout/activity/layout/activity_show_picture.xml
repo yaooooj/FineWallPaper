@@ -12,15 +12,21 @@
         android:id="@+id/show_apb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_scrollFlags="scroll|enterAlways|"
         >
         <android.support.v7.widget.Toolbar
             android:id="@+id/show_tb"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#50000000"
+            android:background="#00ffffff"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:layout_scrollFlags="scroll|enterAlways|">
-
+            >
+            <TextView
+                android:id="@+id/show_tb_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textColor="#99000000"/>
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
 
@@ -29,6 +35,7 @@
         android:id="@+id/show_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="2dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         >
     </android.support.v7.widget.RecyclerView>
