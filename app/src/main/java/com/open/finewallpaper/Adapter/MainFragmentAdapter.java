@@ -3,6 +3,8 @@ package com.open.finewallpaper.Adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.constraint.solver.widgets.Animator;
+import android.support.v4.animation.AnimatorCompatHelper;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,7 +14,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -89,7 +94,8 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     }
 
     public  void  updataData (boolean isFresh){
-        data.clear();
+        itemList.clear();
+        notifyDataSetChanged();
 
     }
 
@@ -98,7 +104,10 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         RecyclerView.ViewHolder viewHolder;
          if (viewType == 1){
             viewHolder = new GrindLayoutHolderView(inflate.inflate(R.layout.adapter_3,parent,false));
-        }else {
+         }else if (viewType == 2){
+             viewHolder = new EmptyViewHolder(inflate.inflate(R.layout.adapter_empty,parent,false));
+         }
+        else {
              viewHolder = new ItemViewHolderView(inflate.inflate(R.layout.adapter_item,parent,false));
          }
         return viewHolder;
@@ -117,9 +126,11 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
             holder.itemView.setOnClickListener(this);
             holder.itemView.setTag(position);
-        }
-
-        if (holder instanceof GrindLayoutHolderView){
+        }else if (holder instanceof EmptyViewHolder){
+            Log.e(TAG, "onBindViewHolder: " );
+            //Animation a = AnimationUtils.loadAnimation(((EmptyViewHolder) holder).mProgressBar.getContext(),R.anim.ro);
+            //((EmptyViewHolder) holder).mProgressBar.startAnimation(a);
+        }else if (holder instanceof GrindLayoutHolderView){
 
             if (itemList.get(position).isMore()){
                 ((GrindLayoutHolderView) holder).moreTextView.setVisibility(View.VISIBLE);
@@ -140,12 +151,18 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     @Override
     public int getItemCount() {
+        if (itemList.isEmpty()){
+            return 1;
+        }
         return itemList.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (isFirstInGroup(position)){
+        if (itemList.isEmpty()){
+            Log.e(TAG, "getItemViewType: " + "empty" );
+            return 2;
+        }else if (isFirstInGroup(position)){
             return 1;
         }
         return 3;
@@ -232,7 +249,13 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     }
 
-
+    private class EmptyViewHolder extends RecyclerView.ViewHolder{
+        //ImageView mProgressBar;
+        public EmptyViewHolder(View itemView) {
+            super(itemView);
+           /// mProgressBar = (ImageView) itemView.findViewById(R.id.empty_load);
+        }
+    }
 
 
     private class ItemViewHolderView extends RecyclerView.ViewHolder {

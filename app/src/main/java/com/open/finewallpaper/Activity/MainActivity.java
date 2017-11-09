@@ -83,13 +83,14 @@ public class MainActivity extends AppCompatActivity{
         window.addFlags(
          WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
+        initFreshView();
         initBmob();
         initFile();
         initData();
         initToolbar();
         initViewPager();
         initView();
-        initFreshView();
+
 
     }
 
@@ -108,6 +109,7 @@ public class MainActivity extends AppCompatActivity{
         pictureBeen = new ArrayList<>();
         mPicBeanList = new ArrayList<>();
         itemList = new ArrayList<>();
+        refreshLayout.setRefreshing(true);
         getViewPagerData();
         getDataFromNet(true);
 
@@ -134,8 +136,8 @@ public class MainActivity extends AppCompatActivity{
             public void done(final List<PictureBean> list, BmobException e) {
                 if (e == null){
                     sortData2(list);
-                    adapter.upData(itemList);
-
+                    //adapter.upData(itemList);
+                    refreshLayout.setRefreshing(false);
                 }else {
                     Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
                 }
@@ -328,7 +330,7 @@ public class MainActivity extends AppCompatActivity{
                     public void done(List<PictureBean> list, BmobException e) {
                         if (e == null){
                             refreshLayout.setRefreshing(false);
-                            //adapter.updataData(true);
+                            adapter.updataData(true);
                         }else {
                             Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
                         }

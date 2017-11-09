@@ -54,6 +54,9 @@ public abstract class RvScrollListener extends RecyclerView.OnScrollListener {
                         onDragLoadMore();
                     }
                 }else {
+                    if (lastVisibleItem + 1 == layoutManager.getItemCount()){
+
+                    }
                     onDragLoadMore();
                 }
                 break;
