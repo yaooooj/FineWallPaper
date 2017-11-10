@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity{
             public void done(final List<PictureBean> list, BmobException e) {
                 if (e == null){
                     sortData2(list);
-                    //adapter.upData(itemList);
+                    adapter.upData(itemList);
                     refreshLayout.setRefreshing(false);
                 }else {
                     Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
@@ -249,7 +249,7 @@ public class MainActivity extends AppCompatActivity{
         recyclerView.addOnScrollListener(new RvScrollListener(appBarLayout) {
             @Override
             public void onLoadMore() {
-                GlideApp.with(MainActivity.this).resumeRequests();
+                adapter.setFooterLayout(1,R.layout.adapter_footer);
             }
 
             @Override

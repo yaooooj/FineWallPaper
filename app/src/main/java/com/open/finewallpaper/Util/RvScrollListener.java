@@ -9,6 +9,7 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
+import com.open.finewallpaper.Activity.MainActivity;
 
 /**
  * Created by yaojian on 2017/10/31.
@@ -46,7 +47,11 @@ public abstract class RvScrollListener extends RecyclerView.OnScrollListener {
                 if (firstVisibleItem == 0 && appbar != null)  {
                     appbar.setExpanded(true, true);
                 }
-                onLoadMore();
+                GlideApp.with(recyclerView.getContext()).resumeRequests();
+                if (lastVisibleItem + 1  == layoutManager.getItemCount()){
+                    onLoadMore();
+                }
+
                 break;
             case RecyclerView.SCROLL_STATE_DRAGGING:
                 if (span != 0){
@@ -54,9 +59,6 @@ public abstract class RvScrollListener extends RecyclerView.OnScrollListener {
                         onDragLoadMore();
                     }
                 }else {
-                    if (lastVisibleItem + 1 == layoutManager.getItemCount()){
-
-                    }
                     onDragLoadMore();
                 }
                 break;
@@ -87,6 +89,10 @@ public abstract class RvScrollListener extends RecyclerView.OnScrollListener {
 
                 lastVisibleItem = getLastPosition(((StaggeredGridLayoutManager) layoutManager).findLastVisibleItemPositions(positions));
             }
+        }
+
+        if (layoutManager != null && lastVisibleItem + 1 == layoutManager.getItemCount()) {
+                onLoadMore();
         }
     }
 

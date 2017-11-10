@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +45,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     private List<ItemBean> itemList;
 
 
+
     private Context mContext;
     private Fragment mFragment;
     private int layoutResId;
@@ -51,7 +53,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     private OnItemClickListener mOnItemClickListener;
     private OnTextViewClickListener mOnTextViewClickListener;
     private OnItemLongClickListener mOnItemLongClickListener;
-
+    private int footerView;
     private int maxCount = 0;
 
     private boolean isFresh = false;
@@ -61,7 +63,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         this.mContext = context;
         this.layoutResId = layoutResId;
         inflate = LayoutInflater.from(context);
-        //init();
+        init();
 
     }
 
@@ -75,16 +77,22 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     public void init(){
         urlList = new ArrayList<>();
         itemList = new ArrayList<>();
+
     }
 
     private boolean isFirstInGroup(int pos){
         Log.e(TAG, "isFirstInGroup: " + pos );
-        if (pos == 0){
-            return true;
+        if (pos == itemList.size()){
+            return false;
         }else {
-            String preGroupId = itemList.get(pos-1).getImgType();
-            String groupId = itemList.get(pos).getImgType();
-            return !preGroupId .equals( groupId);
+            if (pos == 0){
+                return true;
+            }else {
+                Log.e(TAG, "isFirstInGroup: " + itemList.size() + " pos = " +pos );
+                String preGroupId = itemList.get(pos-1).getImgType();
+                String groupId = itemList.get(pos).getImgType();
+                return !preGroupId .equals( groupId);
+            }
         }
     }
 
@@ -106,6 +114,8 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
             viewHolder = new GrindLayoutHolderView(inflate.inflate(R.layout.adapter_3,parent,false));
          }else if (viewType == 2){
              viewHolder = new EmptyViewHolder(inflate.inflate(R.layout.adapter_empty,parent,false));
+         }else if (viewType == 4){
+             viewHolder = new FooterViewHolder(inflate.inflate(footerView,parent,false));
          }
         else {
              viewHolder = new ItemViewHolderView(inflate.inflate(R.layout.adapter_item,parent,false));
@@ -130,7 +140,11 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
             Log.e(TAG, "onBindViewHolder: " );
             //Animation a = AnimationUtils.loadAnimation(((EmptyViewHolder) holder).mProgressBar.getContext(),R.anim.ro);
             //((EmptyViewHolder) holder).mProgressBar.startAnimation(a);
-        }else if (holder instanceof GrindLayoutHolderView){
+        }
+        else if (holder instanceof FooterViewHolder){
+            Log.e(TAG, "onBindViewHolder: " + "footer" );
+
+        } else if (holder instanceof GrindLayoutHolderView){
 
             if (itemList.get(position).isMore()){
                 ((GrindLayoutHolderView) holder).moreTextView.setVisibility(View.VISIBLE);
@@ -154,7 +168,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         if (itemList.isEmpty()){
             return 1;
         }
-        return itemList.size();
+        return itemList.size() + 1;
     }
 
     @Override
@@ -162,7 +176,9 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         if (itemList.isEmpty()){
             Log.e(TAG, "getItemViewType: " + "empty" );
             return 2;
-        }else if (isFirstInGroup(position)){
+        }else if (position == itemList.size()){
+            return 4;
+        }else if (isFirstInGroup(position) ){
             return 1;
         }
         return 3;
@@ -180,7 +196,9 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
                 @Override
                 public int getSpanSize(int position) {
                     int viewType = getItemViewType(position);
-                    if (viewType == 1 ){
+                    if (viewType == 1 || viewType == 2){
+                        return gridLayoutManager.getSpanCount();
+                    }else if (viewType == 4){
                         return gridLayoutManager.getSpanCount();
                     }
                     return 1;
@@ -190,6 +208,15 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     }
 
+    public void setFooterLayout(int type,int layoutResId){
+        if (layoutResId != 0 && type != -1){
+
+            footerView = layoutResId;
+        }else {
+           throw new IllegalArgumentException("argument set exception");
+        }
+
+    }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         mOnItemClickListener = onItemClickListener;
@@ -249,6 +276,12 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     }
 
+    private class FooterViewHolder extends RecyclerView.ViewHolder{
+
+        public FooterViewHolder(View itemView) {
+            super(itemView);
+        }
+    }
     private class EmptyViewHolder extends RecyclerView.ViewHolder{
         //ImageView mProgressBar;
         public EmptyViewHolder(View itemView) {
