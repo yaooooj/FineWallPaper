@@ -81,14 +81,14 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     }
 
     private boolean isFirstInGroup(int pos){
-        Log.e(TAG, "isFirstInGroup: " + pos );
+        //Log.e(TAG, "isFirstInGroup: " + pos );
         if (pos == itemList.size()){
             return false;
         }else {
             if (pos == 0){
                 return true;
             }else {
-                Log.e(TAG, "isFirstInGroup: " + itemList.size() + " pos = " +pos );
+                //Log.e(TAG, "isFirstInGroup: " + itemList.size() + " pos = " +pos );
                 String preGroupId = itemList.get(pos-1).getImgType();
                 String groupId = itemList.get(pos).getImgType();
                 return !preGroupId .equals( groupId);
@@ -107,13 +107,21 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     }
 
+    public void showError(){
+        if (itemList != null){
+            setFooterLayout(R.layout.adapter_footer_error);
+        }
+        //itemList.clear();
+        notifyDataSetChanged();
+    }
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         RecyclerView.ViewHolder viewHolder;
          if (viewType == 1){
             viewHolder = new GrindLayoutHolderView(inflate.inflate(R.layout.adapter_3,parent,false));
          }else if (viewType == 2){
-             viewHolder = new EmptyViewHolder(inflate.inflate(R.layout.adapter_empty,parent,false));
+             viewHolder = new EmptyViewHolder(inflate.inflate(R.layout.adapter_error,parent,false));
          }else if (viewType == 4){
              viewHolder = new FooterViewHolder(inflate.inflate(footerView,parent,false));
          }
@@ -174,7 +182,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     @Override
     public int getItemViewType(int position) {
         if (itemList.isEmpty()){
-            Log.e(TAG, "getItemViewType: " + "empty" );
+
             return 2;
         }else if (position == itemList.size()){
             return 4;
@@ -208,8 +216,8 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     }
 
-    public void setFooterLayout(int type,int layoutResId){
-        if (layoutResId != 0 && type != -1){
+    public void setFooterLayout(int layoutResId){
+        if (layoutResId != 0 ){
 
             footerView = layoutResId;
         }else {

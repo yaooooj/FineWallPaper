@@ -1,4 +1,4 @@
-package com.open.finewallpaper.Activity;
+package com.open.finewallpaper.View;
 
 
 import android.net.Uri;

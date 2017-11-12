@@ -62,11 +62,15 @@ public class GlideUtil {
         float itemWidth = (DisplayUtil.getsWidthPixles(mImageView.getContext()) + 5 *3) / 3;
         //final int width = mImageView.getMeasuredWidth() / 3;
         float itemHeight = itemWidth * ration;
+        ViewGroup.LayoutParams params = mImageView.getLayoutParams();
+        params.width = (int) itemWidth;
+        params.height = (int) itemHeight;
+        mImageView.setLayoutParams(params);
         GlideApp.with(context)
                 .asBitmap()
                 .load(url)
                 .dontAnimate()
-                .placeholder(R.mipmap.ic_favorite_border_black_24dp)
+                .placeholder(R.drawable.background)
                 .error(R.mipmap.ic_favorite_border_black_24dp)
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                 .override((int)itemWidth,(int)itemHeight)

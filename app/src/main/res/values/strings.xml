@@ -4,7 +4,7 @@
     <string name="footer">已经到底部了</string>
     <string name="footer_error">哎呀，出错了，点击重试</string>
     <string name="footer_load">正在加载</string>
-
+    <string name="activity_error">出错了，点击重试</string>
     <string-array name="pref_entries">
         <item>string1</item>
         <item>string2</item>

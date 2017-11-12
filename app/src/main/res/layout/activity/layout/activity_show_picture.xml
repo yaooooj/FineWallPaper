@@ -6,7 +6,7 @@
     android:id="@+id/showpicture_activity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.open.finewallpaper.Activity.ShowPictureActivity">
+    tools:context="com.open.finewallpaper.View.ShowPictureActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/show_apb"

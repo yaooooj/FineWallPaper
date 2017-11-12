@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.open.finewallpaper.Activity.BaseActivity">
+    tools:context="com.open.finewallpaper.BaseActivity">
     <android.support.v7.widget.Toolbar
         android:id="@+id/base_tb"
         android:layout_width="match_parent"
