@@ -47,8 +47,9 @@ public class MainActivity extends BaseActivity implements ActivityView  {
     private List<ItemBean> itemList;
 
     private Dialog mCustomDialog;
-
     private LoadPresenterImp mLoadPresenterImp;
+
+    private int page = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -134,6 +135,11 @@ public class MainActivity extends BaseActivity implements ActivityView  {
 
 
     public void isShowFooterError(boolean isShow){
+        if (isShow){
+            adapter.setFooterLayout(R.layout.adapter_footer_error);
+        }else {
+            adapter.setFooterLayout(R.layout.adapter_footer);
+        }
 
     }
 
@@ -184,6 +190,7 @@ public class MainActivity extends BaseActivity implements ActivityView  {
     }
 
     public void initRecyclerView(){
+
         mLoadPresenterImp = new LoadPresenterImp(this);
         itemList = new ArrayList<>();
         recyclerView = (RecyclerView) findViewById(R.id.current_rv);
@@ -202,8 +209,20 @@ public class MainActivity extends BaseActivity implements ActivityView  {
         recyclerView.addOnScrollListener(new RvScrollListener(appBarLayout) {
             @Override
             public void onLoadMore() {
+
                 adapter.setFooterLayout(R.layout.adapter_footer_load);
-                mLoadPresenterImp.loadBmobToRV(false);
+                if (page <= 1){
+                    Log.e(TAG, "onLoadMore: " + " first load more" );
+                    //展示用的数据，API返回的数据太多，只需要一页就够了
+                    //adapter.setFooterLayout(R.layout.adapter_footer);
+                    //adapter.setFooterLayout(R.layout.adapter_footer_load);
+                    mLoadPresenterImp.loadApiToRV(MainActivity.this,4001, page);
+                    page++;
+                }else {
+                    //显示一页后就不在显示了，直接显示没有已经到底部了
+                    Log.e(TAG, "onLoadMore: " + " second load more" );
+                    adapter.setFooterLayout(R.layout.adapter_footer);
+                }
 
             }
 

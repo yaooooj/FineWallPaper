@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import com.open.finewallpaper.Bean.FinePic;
 import com.open.finewallpaper.Bean.ItemBean;
@@ -19,6 +20,7 @@ import java.util.List;
  */
 
 public class LoadPresenterImp implements LoadPresenter,OnLoadFinishListener {
+    private final static String TAG = "LoadPresenterImp";
 
     private ActivityView mActivityView;
     private LoadUrlModel mLoadUrlModel;
@@ -34,13 +36,17 @@ public class LoadPresenterImp implements LoadPresenter,OnLoadFinishListener {
         if (mActivityView != null){
             mActivityView.isShowProgress(true);
         }
+
+        //对recyclerView加载数据
         mLoadUrlModel.loadUrlForVP(isFresh,this);
+        //对首页展示banner进行加载数据
         mLoadUrlModel.loadUrlForRV(isFresh,this);
 
     }
 
     @Override
     public void loadApiToRV(Context context, int type, int page) {
+        Log.e(TAG, "loadApiToRV: " + "go to model" );
         mLoadUrlModel.loadUrlFromAPI(context,type,page,this);
     }
 
@@ -56,6 +62,7 @@ public class LoadPresenterImp implements LoadPresenter,OnLoadFinishListener {
     public void onFailed(String message,int type) {
         switch (type){
             case 1:
+
                 mActivityView.isShowProgress(false);
                 mActivityView.isShowError(true);
                 break;
@@ -64,8 +71,16 @@ public class LoadPresenterImp implements LoadPresenter,OnLoadFinishListener {
                 mActivityView.isShowError(true);
                 break;
             case 3:
-
-
+                if (message.equals("null")){
+                    //显示没有更多的数据
+                    mActivityView.isShowFooterError(false);
+                }else {
+                    //加载数据出错
+                    mActivityView.isShowFooterError(true);
+                }
+                break;
+            default:
+                break;
         }
 
     }
@@ -84,7 +99,7 @@ public class LoadPresenterImp implements LoadPresenter,OnLoadFinishListener {
 
     @Override
     public void onSuccessAPI(List<ItemBean> itemList) {
-        mActivityView.isShowProgress(false);
+        Log.e(TAG, "onSuccessAPI: " + "to activity" );
         mActivityView.showDataRV(itemList);
     }
 

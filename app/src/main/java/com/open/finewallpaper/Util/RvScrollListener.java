@@ -5,6 +5,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 
 /**
  * Created by yaojian on 2017/10/31.
@@ -32,10 +33,11 @@ public abstract class RvScrollListener extends RecyclerView.OnScrollListener {
         super.onScrollStateChanged(recyclerView, newState);
         RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
         RecyclerView.Adapter adapter = recyclerView.getAdapter();
+        int count = adapter.getItemCount();
         int visibleItemCount = layoutManager.getChildCount();
         int totalItemCount = layoutManager.getItemCount();
-        int count = adapter.getItemCount();
-        //Log.e(TAG, "onScrollStateChanged: "  + visibleItemCount +" + " + totalItemCount + "  + " + lastVisibleItem);
+
+       // Log.e(TAG, "onScrollStateChanged: "  + visibleItemCount +" + " + totalItemCount + "  + " + lastVisibleItem);
         switch (newState){
             case RecyclerView.SCROLL_STATE_IDLE:
 
@@ -43,7 +45,8 @@ public abstract class RvScrollListener extends RecyclerView.OnScrollListener {
                     appbar.setExpanded(true, true);
                 }
                 GlideApp.with(recyclerView.getContext()).resumeRequests();
-                if (lastVisibleItem + 1  == layoutManager.getItemCount()){
+                if (lastVisibleItem  == layoutManager.getItemCount() - 1 && (count > 1)){
+                    Log.e(TAG, "onScrollStateChanged: " + "execute" );
                     onLoadMore();
                 }
 
@@ -68,26 +71,41 @@ public abstract class RvScrollListener extends RecyclerView.OnScrollListener {
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
         super.onScrolled(recyclerView, dx, dy);
         RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+        RecyclerView.Adapter adapter = recyclerView.getAdapter();
+        int totalItemCount = 0;
+        int count = adapter.getItemCount();
+        int spanCount = 0;
         if (layoutManager != null) {
+            totalItemCount = layoutManager.getItemCount();
+
             if (layoutManager instanceof LinearLayoutManager) {
                 firstVisibleItem = ((LinearLayoutManager) layoutManager).findFirstVisibleItemPosition();
                 lastVisibleItem = ((LinearLayoutManager) layoutManager).findLastVisibleItemPosition();
 
-            } else if (layoutManager instanceof GridLayoutManager) {
-                firstVisibleItem = ((GridLayoutManager) layoutManager).findFirstVisibleItemPosition();
-                lastVisibleItem = ((GridLayoutManager) layoutManager).findLastVisibleItemPosition();
-            } else if (layoutManager instanceof StaggeredGridLayoutManager) {
+            }
+
+            if (layoutManager instanceof StaggeredGridLayoutManager) {
                 span = ((StaggeredGridLayoutManager) layoutManager).getSpanCount();
                 int[] positions = new int[span];
                 // ((StaggeredGridLayoutManager) layoutManager).findFirstVisibleItemPositions(positions);
                 firstVisibleItem = getFirstPosition(((StaggeredGridLayoutManager) layoutManager).findFirstVisibleItemPositions(positions));
-
                 lastVisibleItem = getLastPosition(((StaggeredGridLayoutManager) layoutManager).findLastVisibleItemPositions(positions));
             }
+
+
+            if (layoutManager instanceof GridLayoutManager) {
+                spanCount = ((GridLayoutManager) layoutManager).getSpanCount();
+                firstVisibleItem = ((GridLayoutManager) layoutManager).findFirstVisibleItemPosition();
+                lastVisibleItem = ((GridLayoutManager) layoutManager).findLastVisibleItemPosition();
+            }
+
         }
 
-        if (layoutManager != null && lastVisibleItem + 1 == layoutManager.getItemCount()) {
-                onLoadMore();
+        Log.e(TAG, "onScroll: "  + " + " + totalItemCount + "  + " + lastVisibleItem);
+
+        if (layoutManager != null && lastVisibleItem == layoutManager.getItemCount()  && (count > 1)) {
+            Log.e(TAG, "onScrolled: " + "execute" );
+            onLoadMore();
         }
     }
 

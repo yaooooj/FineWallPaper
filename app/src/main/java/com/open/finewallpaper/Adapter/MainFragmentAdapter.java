@@ -53,7 +53,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     private OnItemClickListener mOnItemClickListener;
     private OnTextViewClickListener mOnTextViewClickListener;
     private OnItemLongClickListener mOnItemLongClickListener;
-    private int footerView;
+    private int footerView = R.layout.adapter_footer_load;
     private int maxCount = 0;
 
     private boolean isFresh = false;
@@ -101,6 +101,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
             this.itemList = data;
             notifyDataSetChanged();
         }else {
+            Log.e(TAG, "upData: "+ "have data");
             for (int i = 0;i < data.size();i++){
                 itemList.add(data.get(i));
             }
@@ -110,11 +111,6 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     }
 
-    public  void  updataData (boolean isFresh){
-        itemList.clear();
-        notifyDataSetChanged();
-
-    }
 
     public void showError(){
         if (itemList != null){
@@ -191,7 +187,6 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     @Override
     public int getItemViewType(int position) {
         if (itemList.isEmpty()){
-
             return 2;
         }else if (position == itemList.size()){
             return 4;
@@ -227,8 +222,9 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     public void setFooterLayout(int layoutResId){
         if (layoutResId != 0 ){
-
             footerView = layoutResId;
+
+            notifyItemChanged(itemList.size()+1);
         }else {
            throw new IllegalArgumentException("argument set exception");
         }

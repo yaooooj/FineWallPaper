@@ -32,6 +32,9 @@ public class LoadUrlModelImp implements LoadUrlModel{
     private List<ItemBean> itemList ;
     private List<SetBean> mFinePics;
     private List<ItemBean> apiItemList;
+
+
+
     @Override
     public void loadUrlForRV(boolean fresh, final OnLoadFinishListener onLoadFinishListener) {
         itemList = new ArrayList<>();
@@ -44,9 +47,10 @@ public class LoadUrlModelImp implements LoadUrlModel{
             bmobQuery.setCachePolicy(BmobQuery.CachePolicy.NETWORK_ELSE_CACHE);
         }else {
             if (isCache){
-                //bmobQuery.setCachePolicy(BmobQuery.CachePolicy.NETWORK_ELSE_CACHE);
+                //必须从缓存中获取数据
                 bmobQuery.setCachePolicy(BmobQuery.CachePolicy.CACHE_ELSE_NETWORK);
             }else {
+                //必须从网络获取数据
                 bmobQuery.setCachePolicy(BmobQuery.CachePolicy.NETWORK_ELSE_CACHE);
             }
         }
@@ -54,10 +58,11 @@ public class LoadUrlModelImp implements LoadUrlModel{
             @Override
             public void done(final List<PictureBean> list, BmobException e) {
                 if (e == null){
+                    //对返回的数据进行分组，按照类型分类，整合到一个list中
                     sortData2(list);
-                    Log.e(TAG, "done: "+ " have data" );
                     onLoadFinishListener.onSuccessRV(itemList);
                 }else {
+
                     onLoadFinishListener.onFailed("done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode(),1);
                     Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
                 }
@@ -79,6 +84,7 @@ public class LoadUrlModelImp implements LoadUrlModel{
             public void done(List<FinePic> list, BmobException e) {
                 if (e == null){
                     SetBean finePic;
+                    //对数据进行整理，按照类型整理
                     for (int i =0 ;i < list.size();i++){
                         finePic = new SetBean();
                         finePic.setName(list.get(i).getPic_name());
@@ -95,18 +101,29 @@ public class LoadUrlModelImp implements LoadUrlModel{
         });
     }
 
+
+
+
+
     @Override
     public void loadUrlFromAPI(Context context, int type, int page,final OnLoadFinishListener onLoadFinishListener) {
         apiItemList = new ArrayList<>();
-        OkHttpUtil.ResultCallback resultCallback = new OkHttpUtil.ResultCallback() {
+        OkHttpUtil.ResultCallback<PictureBeanAPI> resultCallback = new OkHttpUtil.ResultCallback<PictureBeanAPI>() {
             @Override
-            public void onSuccess(Object response) {
-                factoryItemBean(PhraseUrl.phraseUrl((PictureBeanAPI) response));
+            public void onSuccess(PictureBeanAPI response) {
+                //Log.e(TAG, "onSuccess: " + "success" );
+                //API获取的数据和Bmob获取的数据不一样，手动进行转换
+                factoryItemBean(PhraseUrl.phraseUrl(response));
                 onLoadFinishListener.onSuccessAPI(apiItemList);
+
+                if (response == null){
+                    onLoadFinishListener.onFailed("null",3);
+                }
             }
 
             @Override
             public void onFailure(Exception e) {
+                Log.e(TAG, "onFailure: " + e );
                 onLoadFinishListener.onFailed(e.getMessage(),3);
             }
         };

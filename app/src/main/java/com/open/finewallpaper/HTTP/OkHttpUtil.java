@@ -3,6 +3,7 @@ package com.open.finewallpaper.HTTP;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 
 import com.google.gson.internal.$Gson$Types;
@@ -60,7 +61,8 @@ public class OkHttpUtil {
     }
 
     private void getRequest(String url,final ResultCallback callback) {
-        CacheControl cacheControl1 = new CacheControl.Builder()
+        //设置缓存最大保存时间
+        final CacheControl cacheControl1 = new CacheControl.Builder()
                 .maxAge(9600, TimeUnit.MILLISECONDS)
                 .build();
 
@@ -89,11 +91,12 @@ public class OkHttpUtil {
                     if (callback.mType == String.class) {
                         sendSuccessCallBack(callback, str);
                     } else {
-                        Object object = GsonUtil.deserialize(response.body().string(),callback.mType);
+
+                        Object object = GsonUtil.deserialize(str,callback.mType);
                         sendSuccessCallBack(callback, object);
                     }
-                } catch (final Exception e) {
-                    // LogUtils.e(TAG, "convert json failure", e);
+                } catch (Exception e) {
+
                     sendFailCallback(callback, e);
                 }
 
@@ -136,8 +139,7 @@ public class OkHttpUtil {
                 if (!connected){
                     request = request.newBuilder().cacheControl(CacheControl.FORCE_CACHE).build();
                 }
-                Response response = chain.proceed(request);
-                return response;
+                return chain.proceed(request);
             }
         };
     }

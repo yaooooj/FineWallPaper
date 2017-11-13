@@ -20,6 +20,8 @@ public interface ActivityView {
 
     void isShowError(boolean isShow);
 
+    void isShowFooterError(boolean isShow);
+
     void onRefresh();
 
 

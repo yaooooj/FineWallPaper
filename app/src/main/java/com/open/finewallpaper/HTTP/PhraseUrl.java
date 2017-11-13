@@ -7,6 +7,7 @@ import com.open.finewallpaper.Bean.APIBean.PictureList;
 import com.open.finewallpaper.Bean.APIBean.PicturePageBean;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,6 +25,7 @@ public class PhraseUrl {
 
 
     public static List<String> phraseUrl(PictureBeanAPI pictureBeanAPI){
+        bitmapList = new ArrayList<>();
         if (pictureBeanAPI != null) {
             if (pictureBeanAPI.getShowapi_res_body() != null) {
                 pictureBody = pictureBeanAPI.getShowapi_res_body();

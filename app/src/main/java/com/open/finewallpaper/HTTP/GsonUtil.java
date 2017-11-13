@@ -1,5 +1,7 @@
 package com.open.finewallpaper.HTTP;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -12,6 +14,7 @@ import java.lang.reflect.Type;
  */
 
 public class GsonUtil {
+    private final static String TAG = "GsonUtil";
     private static Gson gson = new Gson();
 
     public static <T> T  phraseJsonWithGson(String jsonData,Class<T> type ) throws JsonSyntaxException{
@@ -27,6 +30,7 @@ public class GsonUtil {
      * @return
      */
     public static <T> T deserialize(String json, Type type) throws JsonSyntaxException {
+        Log.e(TAG, "deserialize: " + "have type" );
         return gson.fromJson(json, type);
     }
 
