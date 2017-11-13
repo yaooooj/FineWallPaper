@@ -2,7 +2,6 @@ package com.open.finewallpaper.Model;
 
 import android.content.Context;
 
-import com.open.finewallpaper.HTTP.LoadSuccess;
 import com.open.finewallpaper.Presenter.OnLoadFinishListener;
 
 /**
@@ -15,5 +14,5 @@ public interface LoadUrlModel {
 
     void loadUrlForVP(boolean fresh, OnLoadFinishListener onLoadFinishListener);
 
-    void loadUrlFromAPI(Context context, int type, int page);
+    void loadUrlFromAPI(Context context, int type, int page,OnLoadFinishListener onLoadFinishListener);
 }

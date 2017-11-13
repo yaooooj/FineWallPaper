@@ -4,7 +4,7 @@ package com.open.finewallpaper.Bean.APIBean;
  * Created by yaojian on 2017/7/23.
  */
 
-public class PictureBean {
+public class PictureBeanAPI {
     private String showapi_res_code;
     private String showapi_res_error;
     private PictureBody showapi_res_body;

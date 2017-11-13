@@ -89,7 +89,6 @@ public class MainActivity extends BaseActivity implements ActivityView  {
         if (isShow){
             mCustomDialog.show();
         }else {
-
             mCustomDialog.dismiss();
             if (refreshLayout.isRefreshing()){
                 refreshLayout.setRefreshing(false);
@@ -133,6 +132,10 @@ public class MainActivity extends BaseActivity implements ActivityView  {
         mLoadPresenterImp.loadBmobToRV(false);
     }
 
+
+    public void isShowFooterError(boolean isShow){
+
+    }
 
     public void initFreshView(){
         refreshLayout = (SwipeRefreshLayout) findViewById(R.id.main_fresh);
@@ -199,7 +202,9 @@ public class MainActivity extends BaseActivity implements ActivityView  {
         recyclerView.addOnScrollListener(new RvScrollListener(appBarLayout) {
             @Override
             public void onLoadMore() {
-                adapter.setFooterLayout(R.layout.adapter_footer);
+                adapter.setFooterLayout(R.layout.adapter_footer_load);
+                mLoadPresenterImp.loadBmobToRV(false);
+
             }
 
             @Override

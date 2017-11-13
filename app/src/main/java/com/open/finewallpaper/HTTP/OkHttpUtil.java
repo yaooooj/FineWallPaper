@@ -2,15 +2,15 @@ package com.open.finewallpaper.HTTP;
 
 import android.content.Context;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.text.TextUtils;
-import android.util.Log;
+import android.os.Looper;
 
 
-import com.open.finewallpaper.Bean.APIBean.PictureBean;
+import com.google.gson.internal.$Gson$Types;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
@@ -30,92 +30,158 @@ import okhttp3.Response;
 public class OkHttpUtil {
 
     private static final String TAG = "OkHttp3Util";
-    public static final String showapi_appid = "42731";
-    public static final String showapi_sign = "96039fbf84ee42afaad5d66f14159c31";
 
-    private final static String url = "http://route.showapi.com/852-2?showapi_appid=myappid&type=&page=&showapi_sign=mysecret";
 
+    private OkHttpClient mOkHttpClient;
     private static OkHttpUtil mOkHttpUtil;
+    private Context context;
+    private Handler handler;
 
-    private OkHttpUtil() {
+    private OkHttpUtil(Context context) {
+        this.context = context;
+        File httpCacheDirectory  = new File(context.getCacheDir(),"mOkHttpResponse");
+        Cache cache = new Cache(httpCacheDirectory,10 * 1024 * 1024);
 
+        OkHttpClient.Builder clientBuilder = new OkHttpClient().newBuilder();
+        clientBuilder.readTimeout(30,TimeUnit.SECONDS);
+        clientBuilder.connectTimeout(10,TimeUnit.SECONDS);
+        clientBuilder.writeTimeout(60,TimeUnit.SECONDS);
+        clientBuilder.cache(cache);
+        clientBuilder.addInterceptor(CacheIntercept());
+        mOkHttpClient = clientBuilder.build();
+        handler = new Handler(Looper.getMainLooper());
     }
 
-    public static OkHttpUtil newInstance(){
+    private static OkHttpUtil getInstance(Context context){
         if (mOkHttpUtil == null){
-            mOkHttpUtil = new OkHttpUtil();
+            mOkHttpUtil = new OkHttpUtil(context);
         }
         return mOkHttpUtil;
     }
 
-    private Interceptor mInterceptor = new Interceptor() {
-        @Override
-        public Response intercept(Chain chain) throws IOException {
-            Request request = chain.request();
-            Response response1 = chain.proceed(request);
-            String cacheControl = request.cacheControl().toString();
-            if (TextUtils.isEmpty(cacheControl)){
-                cacheControl = "public,max-age=60";
-            }
-
-            return response1.newBuilder()
-                    .header("Cache-Control",cacheControl)
-                    .removeHeader("Pragma")
-                    .build();
-        }
-    };
-
-
-    public void executeGet(Context context, int type, int page, final Class<?> claszz) {
-        String url = "http://route.showapi.com/852-2?showapi_appid="+ showapi_appid +
-                "&type=" + type+"&page="+ page +"&showapi_sign="+showapi_sign;
-
-        File httpCacheDirectory  = new File(context.getCacheDir(),"mOkHttpResponse");
-
-
-        Cache cache = new Cache(httpCacheDirectory,10 * 1024 * 1024);
+    private void getRequest(String url,final ResultCallback callback) {
         CacheControl cacheControl1 = new CacheControl.Builder()
-                .maxAge(10, TimeUnit.MILLISECONDS)
+                .maxAge(9600, TimeUnit.MILLISECONDS)
                 .build();
 
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .cache(cache)
-                .build();
-
-        Request request2 = new Request.Builder()
+        final Request request = new Request.Builder()
                 .url(url)
                 .cacheControl(cacheControl1)
                 .build();
 
+        deliveryResult(callback, request);
+    }
 
-        okHttpClient.newCall(request2).enqueue(new Callback() {
+    private void deliveryResult(final ResultCallback callback, Request request) {
+
+        mOkHttpClient.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(@NonNull Call call, IOException e) {
-                Log.e(TAG, "onFailure: " + "failure execute  request");
+            public void onFailure(Call call, IOException e) {
+                sendFailCallback(callback, e);
             }
 
             @Override
-            public void onResponse(Call call, okhttp3.Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) throw new IOException("Unexpected code" + response);
 
-                if (response.code() != 504){
-
-                    Object object;
-                    if (response.code() == 200){
-                        Log.e(TAG, "From NetWorkCacheControl: " + "NetWork NetWork NetWork NetWork NetWork ");
-                        try {
-                            object = GsonUtil.phraseJsonWithGson(response.body().string(),claszz);
-                            PhraseUrl.phraserUrl((PictureBean) object);
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }
+                try {
+                    String str = response.body().string();
+                    if (callback.mType == String.class) {
+                        sendSuccessCallBack(callback, str);
+                    } else {
+                        Object object = GsonUtil.deserialize(response.body().string(),callback.mType);
+                        sendSuccessCallBack(callback, object);
                     }
+                } catch (final Exception e) {
+                    // LogUtils.e(TAG, "convert json failure", e);
+                    sendFailCallback(callback, e);
+                }
 
-                }else {
-                    Log.e(TAG, "onResponse: " + "The resource was not cached " );
+
+            }
+        });
+    }
+
+
+    private void sendFailCallback(final ResultCallback callback, final Exception e) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (callback != null) {
+                    callback.onFailure(e);
                 }
             }
         });
+    }
+
+    private void sendSuccessCallBack(final ResultCallback callback, final Object obj) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (callback != null) {
+                    callback.onSuccess(obj);
+                }
+            }
+        });
+    }
+
+
+
+    private Interceptor CacheIntercept(){
+        return  new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request request = chain.request();
+                boolean connected = NetWorkUtils.isNetworkConnected(context);
+                if (!connected){
+                    request = request.newBuilder().cacheControl(CacheControl.FORCE_CACHE).build();
+                }
+                Response response = chain.proceed(request);
+                return response;
+            }
+        };
+    }
+
+    /**********************对外接口************************/
+
+    /**
+     * get请求
+     * @param url  请求url
+     * @param callback  请求回调
+     */
+    public static void get(Context context,String url, ResultCallback callback) {
+        getInstance(context).getRequest(url, callback);
+    }
+
+
+    public static abstract class ResultCallback<T> {
+
+        Type mType;
+
+        public ResultCallback(){
+            mType = getSuperclassTypeParameter(getClass());
+        }
+
+        static Type getSuperclassTypeParameter(Class<?> subclass) {
+            Type superclass = subclass.getGenericSuperclass();
+            if (superclass instanceof Class) {
+                throw new RuntimeException("Missing type parameter.");
+            }
+            ParameterizedType parameterized = (ParameterizedType) superclass;
+            return $Gson$Types.canonicalize(parameterized.getActualTypeArguments()[0]);
+        }
+
+        /**
+         * 请求成功回调
+         * @param response
+         */
+        public abstract void onSuccess(T response);
+
+        /**
+         * 请求失败回调
+         * @param e
+         */
+        public abstract void onFailure(Exception e);
     }
 
 }

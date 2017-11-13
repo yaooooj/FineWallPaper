@@ -97,8 +97,17 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     }
 
     public void upData(List<ItemBean> data){
-        this.itemList = data;
-        notifyDataSetChanged();
+        if (itemList.size() == 0){
+            this.itemList = data;
+            notifyDataSetChanged();
+        }else {
+            for (int i = 0;i < data.size();i++){
+                itemList.add(data.get(i));
+            }
+            notifyItemRangeChanged(itemList.size(),data.size());
+        }
+
+
     }
 
     public  void  updataData (boolean isFresh){

@@ -3,13 +3,15 @@ package com.open.finewallpaper.Model;
 import android.content.Context;
 import android.util.Log;
 
+import com.open.finewallpaper.Bean.APIBean.PictureBeanAPI;
 import com.open.finewallpaper.Bean.FinePic;
 import com.open.finewallpaper.Bean.ImageBean;
 import com.open.finewallpaper.Bean.ItemBean;
 import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.Bean.SetBean;
-import com.open.finewallpaper.HTTP.LoadSuccess;
 import com.open.finewallpaper.HTTP.OkHttpUtil;
+import com.open.finewallpaper.HTTP.PhraseUrl;
+import com.open.finewallpaper.HTTP.Urls;
 import com.open.finewallpaper.Presenter.OnLoadFinishListener;
 
 import java.util.ArrayList;
@@ -29,7 +31,7 @@ public class LoadUrlModelImp implements LoadUrlModel{
     private int maxCount = 0;
     private List<ItemBean> itemList ;
     private List<SetBean> mFinePics;
-
+    private List<ItemBean> apiItemList;
     @Override
     public void loadUrlForRV(boolean fresh, final OnLoadFinishListener onLoadFinishListener) {
         itemList = new ArrayList<>();
@@ -56,7 +58,7 @@ public class LoadUrlModelImp implements LoadUrlModel{
                     Log.e(TAG, "done: "+ " have data" );
                     onLoadFinishListener.onSuccessRV(itemList);
                 }else {
-                    onLoadFinishListener.onFailed("done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
+                    onLoadFinishListener.onFailed("done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode(),1);
                     Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
                 }
             }
@@ -86,6 +88,7 @@ public class LoadUrlModelImp implements LoadUrlModel{
                     onLoadFinishListener.onSuccessVP(mFinePics);
 
                 }else {
+                    onLoadFinishListener.onFailed("done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode(),2);
                     Log.e(TAG, "done: " + "bmob失败：" +e.getMessage()+","+e.getErrorCode());
                 }
             }
@@ -93,9 +96,24 @@ public class LoadUrlModelImp implements LoadUrlModel{
     }
 
     @Override
-    public void loadUrlFromAPI(Context context, int type, int page) {
-        OkHttpUtil.newInstance().executeGet(context,type,page,PictureBean.class);
+    public void loadUrlFromAPI(Context context, int type, int page,final OnLoadFinishListener onLoadFinishListener) {
+        apiItemList = new ArrayList<>();
+        OkHttpUtil.ResultCallback resultCallback = new OkHttpUtil.ResultCallback() {
+            @Override
+            public void onSuccess(Object response) {
+                factoryItemBean(PhraseUrl.phraseUrl((PictureBeanAPI) response));
+                onLoadFinishListener.onSuccessAPI(apiItemList);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                onLoadFinishListener.onFailed(e.getMessage(),3);
+            }
+        };
+
+        OkHttpUtil.get(context, Urls.Urls(type,page),resultCallback);
     }
+
 
 
 
@@ -138,6 +156,21 @@ public class LoadUrlModelImp implements LoadUrlModel{
             return !preGroupId .equals(groupId);
         }
 
+    }
+
+    private void factoryItemBean(List<String> list){
+        ItemBean itemBean;
+        ImageBean imgBean;
+        for (int i = 0; i < list.size();i++){
+            imgBean = new ImageBean();
+            imgBean.setImgName("api_pic" + i);
+            imgBean.setImgUrl(list.get(i));
+            itemBean = new ItemBean();
+            itemBean.setImgBean(imgBean);
+            itemBean.setImgType("api_pic");
+            itemBean.setMore(false);
+            apiItemList.add(itemBean);
+        }
     }
 
 

@@ -1,5 +1,10 @@
 package com.open.finewallpaper.Presenter;
 
+import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+
 import com.open.finewallpaper.Bean.FinePic;
 import com.open.finewallpaper.Bean.ItemBean;
 import com.open.finewallpaper.Bean.SetBean;
@@ -29,15 +34,15 @@ public class LoadPresenterImp implements LoadPresenter,OnLoadFinishListener {
         if (mActivityView != null){
             mActivityView.isShowProgress(true);
         }
-
         mLoadUrlModel.loadUrlForVP(isFresh,this);
-
         mLoadUrlModel.loadUrlForRV(isFresh,this);
-
 
     }
 
-
+    @Override
+    public void loadApiToRV(Context context, int type, int page) {
+        mLoadUrlModel.loadUrlFromAPI(context,type,page,this);
+    }
 
     @Override
     public void onDestroy() {
@@ -48,9 +53,20 @@ public class LoadPresenterImp implements LoadPresenter,OnLoadFinishListener {
 
 
     @Override
-    public void onFailed(String message) {
-        mActivityView.isShowProgress(false);
-        mActivityView.isShowError(true);
+    public void onFailed(String message,int type) {
+        switch (type){
+            case 1:
+                mActivityView.isShowProgress(false);
+                mActivityView.isShowError(true);
+                break;
+            case 2:
+                mActivityView.isShowProgress(false);
+                mActivityView.isShowError(true);
+                break;
+            case 3:
+
+
+        }
 
     }
 
@@ -58,13 +74,18 @@ public class LoadPresenterImp implements LoadPresenter,OnLoadFinishListener {
     public void  onSuccessRV(List<ItemBean> itemList) {
         mActivityView.isShowProgress(false);
         mActivityView.showDataRV(itemList);
-
     }
 
     @Override
     public void onSuccessVP(List<SetBean> itemList) {
         mActivityView.isShowProgress(false);
         mActivityView.showDataVP(itemList);
+    }
+
+    @Override
+    public void onSuccessAPI(List<ItemBean> itemList) {
+        mActivityView.isShowProgress(false);
+        mActivityView.showDataRV(itemList);
     }
 
 

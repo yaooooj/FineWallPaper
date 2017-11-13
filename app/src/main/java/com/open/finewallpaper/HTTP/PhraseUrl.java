@@ -1,6 +1,6 @@
 package com.open.finewallpaper.HTTP;
 
-import com.open.finewallpaper.Bean.APIBean.PictureBean;
+import com.open.finewallpaper.Bean.APIBean.PictureBeanAPI;
 import com.open.finewallpaper.Bean.APIBean.PictureBody;
 import com.open.finewallpaper.Bean.APIBean.PictureContentList;
 import com.open.finewallpaper.Bean.APIBean.PictureList;
@@ -23,10 +23,10 @@ public class PhraseUrl {
     private static List<String> bitmapList;
 
 
-    public static List<String> phraserUrl(PictureBean pictureBean){
-        if (pictureBean != null) {
-            if (pictureBean.getShowapi_res_body() != null) {
-                pictureBody = pictureBean.getShowapi_res_body();
+    public static List<String> phraseUrl(PictureBeanAPI pictureBeanAPI){
+        if (pictureBeanAPI != null) {
+            if (pictureBeanAPI.getShowapi_res_body() != null) {
+                pictureBody = pictureBeanAPI.getShowapi_res_body();
             }
             if (pictureBody.getPagebean() != null) {
                 picturePageBean = pictureBody.getPagebean();

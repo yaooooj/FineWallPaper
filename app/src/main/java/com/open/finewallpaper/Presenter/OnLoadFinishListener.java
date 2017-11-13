@@ -12,9 +12,11 @@ import java.util.List;
 
 public interface OnLoadFinishListener {
 
-    void onFailed(String message);
+    void onFailed(String message,int type);
 
     void onSuccessRV(List<ItemBean> itemList);
 
     void onSuccessVP(List<SetBean> itemList);
+
+    void onSuccessAPI(List<ItemBean> itemList);
 }
