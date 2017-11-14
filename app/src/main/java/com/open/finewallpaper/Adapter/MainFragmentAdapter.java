@@ -45,6 +45,9 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
     private List<ItemBean> itemList;
 
 
+    private ArrayList<View> mHeaderViews = new ArrayList<>();
+    private ArrayList<View> mFooterViews = new ArrayList<>();
+
 
     private Context mContext;
     private Fragment mFragment;
@@ -128,7 +131,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
          }else if (viewType == 2){
              viewHolder = new EmptyViewHolder(inflate.inflate(R.layout.adapter_error,parent,false));
          }else if (viewType == 4){
-             viewHolder = new FooterViewHolder(inflate.inflate(footerView,parent,false));
+             viewHolder = new FooterViewHolder(mFooterViews.get(0));
          }
         else {
              viewHolder = new ItemViewHolderView(inflate.inflate(R.layout.adapter_item,parent,false));
@@ -181,7 +184,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         if (itemList.isEmpty()){
             return 1;
         }
-        return itemList.size() + 1;
+        return itemList.size() + mHeaderViews.size() + mFooterViews.size();
     }
 
     @Override
@@ -229,6 +232,36 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
            throw new IllegalArgumentException("argument set exception");
         }
 
+    }
+
+    public void addHeaderView(View view){
+        if (view == null){
+            throw  new RuntimeException("header is null");
+        }
+        mHeaderViews.add(view);
+        notifyDataSetChanged();
+    }
+
+    public View getHeaderView(){
+        return mHeaderViews.size() > 0 ? mHeaderViews.get(0) : null;
+    }
+
+    public void addFooterView(View view){
+        if (view == null){
+            throw  new RuntimeException("footer is null");
+        }
+        mFooterViews.add(view);
+        notifyDataSetChanged();
+    }
+
+
+    public View getFooterView(){
+        return mFooterViews.size() > 0 ? mFooterViews.get(0) : null;
+    }
+
+
+    public int getFooterViewSize(){
+        return mFooterViews.size();
     }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {

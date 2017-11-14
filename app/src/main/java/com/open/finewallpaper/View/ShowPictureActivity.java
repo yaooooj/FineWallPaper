@@ -63,7 +63,7 @@ public class ShowPictureActivity extends AppCompatActivity {
         });
         recyclerView.addOnScrollListener(new RvScrollListener() {
             @Override
-            public void onLoadMore() {
+            public void onLoadMore(View view) {
                 GlideApp.with(ShowPictureActivity.this).resumeRequests();
             }
 

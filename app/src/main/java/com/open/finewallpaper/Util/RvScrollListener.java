@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
+import android.view.View;
 
 /**
  * Created by yaojian on 2017/10/31.
@@ -47,7 +48,7 @@ public abstract class RvScrollListener extends RecyclerView.OnScrollListener {
                 GlideApp.with(recyclerView.getContext()).resumeRequests();
                 if (lastVisibleItem  == layoutManager.getItemCount() - 1 && (count > 1)){
                     Log.e(TAG, "onScrollStateChanged: " + "execute" );
-                    onLoadMore();
+                    onLoadMore(recyclerView);
                 }
 
                 break;
@@ -103,9 +104,9 @@ public abstract class RvScrollListener extends RecyclerView.OnScrollListener {
 
         Log.e(TAG, "onScroll: "  + " + " + totalItemCount + "  + " + lastVisibleItem);
 
-        if (layoutManager != null && lastVisibleItem == layoutManager.getItemCount()  && (count > 1)) {
+        if (layoutManager != null && lastVisibleItem == layoutManager.getItemCount() - 1  && (count > 1)) {
             Log.e(TAG, "onScrolled: " + "execute" );
-            onLoadMore();
+            onLoadMore(recyclerView);
         }
     }
 
@@ -128,7 +129,7 @@ public abstract class RvScrollListener extends RecyclerView.OnScrollListener {
         return last;
     }
 
-    public abstract void onLoadMore();
+    public abstract void onLoadMore(View view);
 
     public abstract void onDragLoadMore();
 }

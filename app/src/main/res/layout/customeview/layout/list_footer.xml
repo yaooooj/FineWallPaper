@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/footer_height"
+    android:orientation="vertical">
+    <ViewStub
+        android:id="@+id/footer_viewstub"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/footer_height"
+        android:layout="@layout/adapter_footer"/>
+    <ViewStub
+        android:id="@+id/load_viewstub"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/footer_height"
+        android:layout="@layout/adapter_footer_load"/>
+    <ViewStub
+        android:id="@+id/error_viewstub"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/footer_height"
+        android:layout="@layout/adapter_footer_error"/>
+
+</LinearLayout>

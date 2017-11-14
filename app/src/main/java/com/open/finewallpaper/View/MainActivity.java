@@ -23,10 +23,12 @@ import com.open.finewallpaper.Adapter.ViewPagerAdapter;
 import com.open.finewallpaper.BaseActivity;
 import com.open.finewallpaper.Bean.ItemBean;
 import com.open.finewallpaper.Bean.SetBean;
+import com.open.finewallpaper.CoustomView.LoadingFooter;
 import com.open.finewallpaper.CoustomView.MyCustom;
 import com.open.finewallpaper.Presenter.LoadPresenterImp;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.GlideApp;
+import com.open.finewallpaper.Util.RecyclerViewStateUtils;
 import com.open.finewallpaper.Util.RvScrollListener;
 import com.open.finewallpaper.Util.ScreenUtil;
 
@@ -208,20 +210,21 @@ public class MainActivity extends BaseActivity implements ActivityView  {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addOnScrollListener(new RvScrollListener(appBarLayout) {
             @Override
-            public void onLoadMore() {
+            public void onLoadMore(View view) {
+                LoadingFooter.State state = RecyclerViewStateUtils.getFooterViewState(recyclerView);
 
-                adapter.setFooterLayout(R.layout.adapter_footer_load);
+
+
+
                 if (page <= 1){
                     Log.e(TAG, "onLoadMore: " + " first load more" );
-                    //展示用的数据，API返回的数据太多，只需要一页就够了
-                    //adapter.setFooterLayout(R.layout.adapter_footer);
-                    //adapter.setFooterLayout(R.layout.adapter_footer_load);
+                    RecyclerViewStateUtils.setFooterViewState(MainActivity.this, recyclerView,30, LoadingFooter.State.Loading, null);
                     mLoadPresenterImp.loadApiToRV(MainActivity.this,4001, page);
                     page++;
                 }else {
                     //显示一页后就不在显示了，直接显示没有已经到底部了
                     Log.e(TAG, "onLoadMore: " + " second load more" );
-                    adapter.setFooterLayout(R.layout.adapter_footer);
+                    RecyclerViewStateUtils.setFooterViewState(MainActivity.this, recyclerView,30, LoadingFooter.State.TheEnd, null);
                 }
 
             }
