@@ -1,28 +1,36 @@
 package com.open.finewallpaper;
 
 
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.open.finewallpaper.CoustomView.CustomDialog;
+import com.open.finewallpaper.HTTP.NetWorkUtils;
 import com.open.finewallpaper.Util.FileUtil;
+import com.open.finewallpaper.View.ErrorActivity;
+import com.open.finewallpaper.View.MainActivity;
 
 import cn.bmob.v3.Bmob;
 
 
 public abstract class BaseActivity extends AppCompatActivity {
+    private final static String TAG = "BaseActivity";
     private boolean isShowToolbar;
     private boolean mAllowFullScreen = true;
     private boolean isSetStatusBar = true;
     private boolean isAllowScreenRoate;
 
     private CustomDialog mCustomDialog;
+    private boolean isNetworkEnable = true;
+    private OnResultListener resultListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,16 +40,28 @@ public abstract class BaseActivity extends AppCompatActivity {
             requestWindowFeature(Window.FEATURE_NO_TITLE);
         }
         super.onCreate(savedInstanceState);
-        mCustomDialog = new CustomDialog(this,R.style.progress_dialog_loading,"拼命加载中。。。");
         initBmob();
         initFile();
-
-
-
-
         if (isSetStatusBar){
             steepStatusBar();
         }
+
+        if (!NetWorkUtils.isNetworkConnected(this)){
+            Log.e(TAG, "onCreate: "  + "network not work" );
+            Intent intent = new Intent(BaseActivity.this,ErrorActivity.class);
+            isNetworkEnable = false;
+            startActivityForResult(intent,1);
+        }
+
+        if (!isNetworkEnable){
+            Log.e(TAG, "onCreate: " + " normal" );
+            return;
+        }
+
+
+        mCustomDialog = new CustomDialog(this,R.style.progress_dialog_loading,"拼命加载中。。。");
+
+
 
         /*
         if (!isAllowScreenRoate) {
@@ -50,17 +70,8 @@ public abstract class BaseActivity extends AppCompatActivity {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
         */
-
-        initView();
-
-        initEvent();
-
     }
 
-    public abstract void initView();
-
-
-    public abstract void initEvent();
 
     public void initBmob(){
         //第一：默认初始化
@@ -100,6 +111,16 @@ public abstract class BaseActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         exit();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == 1){
+            Log.e(TAG, "onActivityResult: "  + "code " + resultCode  );
+            isNetworkEnable = true;
+            onCreate(null);
+        }
     }
 
     private long lastClickTime;
@@ -172,6 +193,10 @@ public abstract class BaseActivity extends AppCompatActivity {
         isAllowScreenRoate = allowScreenRoate;
     }
 
+
+    public interface OnResultListener{
+        void OnResult(boolean isNetworkEnable);
+    }
 }
 
 

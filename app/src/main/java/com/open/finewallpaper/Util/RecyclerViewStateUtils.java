@@ -2,6 +2,7 @@ package com.open.finewallpaper.Util;
 
 import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 
 import com.open.finewallpaper.Adapter.MainFragmentAdapter;
@@ -12,7 +13,7 @@ import com.open.finewallpaper.CoustomView.LoadingFooter;
  */
 
 public class RecyclerViewStateUtils {
-
+    private final static String TAG = "RecyclerViewStateUtils";
     public static void setFooterViewState(Activity instance, RecyclerView recyclerView, int pageItemSize, LoadingFooter.State state, View.OnClickListener errorListener) {
 
         if(instance==null || instance.isFinishing()) {
@@ -36,6 +37,7 @@ public class RecyclerViewStateUtils {
 
         //已经有footerView了
         if (adapter.getFooterViewSize() > 0) {
+            Log.e(TAG, "setFooterViewState: " + "set footer view" );
             footerView = (LoadingFooter) adapter.getFooterView();
             footerView.setState(state);
 
@@ -44,6 +46,7 @@ public class RecyclerViewStateUtils {
             }
             recyclerView.scrollToPosition(adapter.getItemCount() - 1);
         } else {
+            Log.e(TAG, "setFooterViewState: "  + " init footer view " );
             footerView = new LoadingFooter(instance);
             footerView.setState(state);
 

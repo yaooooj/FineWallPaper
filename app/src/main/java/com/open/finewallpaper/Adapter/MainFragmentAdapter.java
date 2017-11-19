@@ -99,19 +99,24 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
         }
     }
 
-    public void upData(List<ItemBean> data){
-        if (itemList.size() == 0){
+    public void upData(List<ItemBean> data,boolean isFresh){
+        if (itemList.size() == 0 || isFresh){
             this.itemList = data;
             notifyDataSetChanged();
         }else {
-            Log.e(TAG, "upData: "+ "have data");
             for (int i = 0;i < data.size();i++){
                 itemList.add(data.get(i));
             }
             notifyItemRangeChanged(itemList.size(),data.size());
         }
 
+    }
 
+    public void  freshData(List<ItemBean> data,boolean isFresh){
+        if (isFresh){
+            this.itemList.clear();
+            this.itemList = data;
+        }
     }
 
 
@@ -248,7 +253,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter
 
     public void addFooterView(View view){
         if (view == null){
-            throw  new RuntimeException("footer is null");
+            throw  new RuntimeException("footer view is null");
         }
         mFooterViews.add(view);
         notifyDataSetChanged();

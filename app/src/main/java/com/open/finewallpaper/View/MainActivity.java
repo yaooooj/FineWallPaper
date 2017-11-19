@@ -3,6 +3,7 @@ package com.open.finewallpaper.View;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.NetworkOnMainThreadException;
 import android.os.Parcelable;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.content.ContextCompat;
@@ -25,6 +26,7 @@ import com.open.finewallpaper.Bean.ItemBean;
 import com.open.finewallpaper.Bean.SetBean;
 import com.open.finewallpaper.CoustomView.LoadingFooter;
 import com.open.finewallpaper.CoustomView.MyCustom;
+import com.open.finewallpaper.HTTP.NetWorkUtils;
 import com.open.finewallpaper.Presenter.LoadPresenterImp;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.GlideApp;
@@ -51,10 +53,11 @@ public class MainActivity extends BaseActivity implements ActivityView  {
     private Dialog mCustomDialog;
     private LoadPresenterImp mLoadPresenterImp;
 
+    private boolean isFresh = false;
     private int page = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setAllowFullScreen(true);
         setContentView(R.layout.activity_main);
@@ -65,19 +68,7 @@ public class MainActivity extends BaseActivity implements ActivityView  {
         initViewPager();
         initRecyclerView();
         mLoadPresenterImp = new LoadPresenterImp(this);
-
     }
-
-    @Override
-    public void initView() {
-
-    }
-
-    @Override
-    public void initEvent() {
-
-    }
-
 
     @Override
     protected void onDestroy() {
@@ -96,19 +87,24 @@ public class MainActivity extends BaseActivity implements ActivityView  {
             if (refreshLayout.isRefreshing()){
                 refreshLayout.setRefreshing(false);
             }
+
         }
     }
 
     @Override
     public  void showDataRV(List<ItemBean> itemList) {
-        Log.e(TAG, "showDataRV: " + "have data" );
-
-        adapter.upData(itemList);
+        if (page > 1){
+            //在这里临时设置显示不需要在加载更多数据
+            RecyclerViewStateUtils.setFooterViewState(MainActivity.this, recyclerView,30, LoadingFooter.State.TheEnd, null);
+        }
+        //更新RecyclerView中的数据
+        adapter.upData(itemList,isFresh);
+        isFresh = false;
     }
 
     @Override
     public  void showDataVP(final List<SetBean> finPics) {
-        Log.e(TAG, "showDataVP: " + "have have data" );
+        //更新ViewPager中的数据
         ViewPagerAdapter adapter = new ViewPagerAdapter(finPics,0,MainActivity.this);
         viewPager.setAdapter(adapter);
         adapter.setListener(new ViewPagerAdapter.OnViewPagerItemListener() {
@@ -138,9 +134,11 @@ public class MainActivity extends BaseActivity implements ActivityView  {
 
     public void isShowFooterError(boolean isShow){
         if (isShow){
-            adapter.setFooterLayout(R.layout.adapter_footer_error);
+            //没有更多数据
+            RecyclerViewStateUtils.setFooterViewState(recyclerView,LoadingFooter.State.TheEnd);
         }else {
-            adapter.setFooterLayout(R.layout.adapter_footer);
+            //网络出错或其他原因
+            RecyclerViewStateUtils.setFooterViewState(recyclerView, LoadingFooter.State.NetWorkError);
         }
 
     }
@@ -150,6 +148,7 @@ public class MainActivity extends BaseActivity implements ActivityView  {
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                isFresh = true;
                 mLoadPresenterImp.loadBmobToRV(true);
             }
         });
@@ -164,6 +163,7 @@ public class MainActivity extends BaseActivity implements ActivityView  {
 
 
         appBarLayout = (AppBarLayout) findViewById(R.id.main_abl);
+        //设置AppBarLayout透明度渐变
         appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             @Override
             public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
@@ -174,6 +174,7 @@ public class MainActivity extends BaseActivity implements ActivityView  {
 
         mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         mToolbar.getBackground().setAlpha(5);
+        //改变Menu菜单的图标，使用自定义的图标代替
         mToolbar.setOverflowIcon(ContextCompat.getDrawable(this,R.drawable.ic_menu_white_36dp));
         mToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -211,27 +212,19 @@ public class MainActivity extends BaseActivity implements ActivityView  {
         recyclerView.addOnScrollListener(new RvScrollListener(appBarLayout) {
             @Override
             public void onLoadMore(View view) {
-                LoadingFooter.State state = RecyclerViewStateUtils.getFooterViewState(recyclerView);
-
-
-
 
                 if (page <= 1){
+                    //显示一页后就不在显示了，数据太多，只做展示用
                     Log.e(TAG, "onLoadMore: " + " first load more" );
                     RecyclerViewStateUtils.setFooterViewState(MainActivity.this, recyclerView,30, LoadingFooter.State.Loading, null);
                     mLoadPresenterImp.loadApiToRV(MainActivity.this,4001, page);
                     page++;
-                }else {
-                    //显示一页后就不在显示了，直接显示没有已经到底部了
-                    Log.e(TAG, "onLoadMore: " + " second load more" );
-                    RecyclerViewStateUtils.setFooterViewState(MainActivity.this, recyclerView,30, LoadingFooter.State.TheEnd, null);
                 }
-
             }
 
             @Override
             public void onDragLoadMore() {
-                Log.e(TAG, "onDragLoadMore: " + "dragMore" );
+
                 GlideApp.with(MainActivity.this).pauseRequests();
             }
         });
@@ -247,6 +240,7 @@ public class MainActivity extends BaseActivity implements ActivityView  {
                 Bundle bundle = new Bundle();
                 bundle.putParcelableArrayList("url",url);
                 bundle.putInt("position",position);
+
                 Intent intent = new Intent(MainActivity.this, NextActivity.class);
                 intent.putExtra("urls",bundle);
                 startActivity(intent);
@@ -296,4 +290,5 @@ public class MainActivity extends BaseActivity implements ActivityView  {
         int alpha = (int) (Color.alpha(color) * fraction *0.7);
         return Color.argb(alpha, red, green, blue);
     }
+
 }

@@ -2,6 +2,7 @@ package com.open.finewallpaper.CoustomView;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.RelativeLayout;
@@ -14,7 +15,8 @@ import com.open.finewallpaper.R;
  */
 
 public class LoadingFooter extends RelativeLayout{
-    protected State mState = State.Normal;
+    private final static String TAG = "LoadingFooter";
+    protected State mState = State.Loading;
     private View mLoadingView;
     private View mNetworkErrorView;
     private View mTheEndView;
@@ -41,7 +43,7 @@ public class LoadingFooter extends RelativeLayout{
         inflate(context, R.layout.list_footer, this);
         setOnClickListener(null);
 
-        setState(State.Normal, true);
+        setState(State.Loading, true);
     }
 
     public State getState() {
@@ -53,11 +55,9 @@ public class LoadingFooter extends RelativeLayout{
     }
 
     public void setState(State status, boolean showView) {
-        if (mState == status) {
-            return;
-        }
-        mState = status;
 
+        mState = status;
+        Log.e(TAG, "setState: " + status );
         switch (status) {
 
             case Normal:
@@ -98,6 +98,7 @@ public class LoadingFooter extends RelativeLayout{
                 mLoadingView.setVisibility(showView ? View.VISIBLE : View.GONE);
 
                // mLoadingProgress.setVisibility(View.VISIBLE);
+                Log.e(TAG, "setState: " + "正在加载");
                 mLoadingText.setText(R.string.footer_load);
                 break;
             case TheEnd:

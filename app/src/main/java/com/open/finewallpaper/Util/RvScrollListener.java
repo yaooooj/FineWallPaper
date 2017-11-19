@@ -47,7 +47,7 @@ public abstract class RvScrollListener extends RecyclerView.OnScrollListener {
                 }
                 GlideApp.with(recyclerView.getContext()).resumeRequests();
                 if (lastVisibleItem  == layoutManager.getItemCount() - 1 && (count > 1)){
-                    Log.e(TAG, "onScrollStateChanged: " + "execute" );
+
                     onLoadMore(recyclerView);
                 }
 
@@ -62,6 +62,7 @@ public abstract class RvScrollListener extends RecyclerView.OnScrollListener {
                 }
                 break;
             case RecyclerView.SCROLL_STATE_SETTLING:
+                Log.e(TAG, "onScrollStateChanged: " + " on fling " );
                 break;
             default:
                 break;

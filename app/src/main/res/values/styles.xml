@@ -17,4 +17,17 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
+    <!-- 启动界面主题-->
+    <style name="WelcomeStyle" parent="android:Theme">
+        <item name="android:windowBackground">@drawable/welcome_bg</item>
+        <item name="android:windowNoTitle">true</item>
+
+    </style>
+
+    <!-- -->
+    <style name="themeNew" parent="android:Theme.Translucent.NoTitleBar.Fullscreen">">
+
+    </style>
+
+
 </resources>
