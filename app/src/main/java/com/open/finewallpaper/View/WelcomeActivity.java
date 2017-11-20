@@ -21,7 +21,7 @@ public class WelcomeActivity extends Activity {
 
     private ImageView mImageView;
 
-    private final static int ANIM_TIME = 1000;
+    private final static int ANIM_TIME = 2000;
     private static final float SCALE_END = 1.1F;
 
     @Override
@@ -54,7 +54,6 @@ public class WelcomeActivity extends Activity {
             @Override
             public void onAnimationEnd(Animator animation)
             {
-
                 startActivity(new Intent(WelcomeActivity.this, MainActivity.class));
                 WelcomeActivity.this.finish();
             }
