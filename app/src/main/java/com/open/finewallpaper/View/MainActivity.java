@@ -273,7 +273,8 @@ public class MainActivity extends BaseActivity implements ActivityView  {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.nvg:
-                Intent intent = new Intent(MainActivity.this,SetActivity.class);
+                //Intent intent = new Intent(MainActivity.this,SetActivity.class);
+                Intent intent = new Intent(MainActivity.this,TestActivity.class);
                 startActivity(intent);
                 break;
             default:

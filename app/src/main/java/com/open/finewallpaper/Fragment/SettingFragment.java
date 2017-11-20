@@ -67,8 +67,8 @@ public class SettingFragment extends PreferenceFragment
     }
 
     public void setSummary(Preference pr,String s){
-        int idex = Integer.parseInt(s);
-        String summary = this.getResources().getStringArray(R.array.auto_updata_entries)[idex];
+        int index = Integer.parseInt(s);
+        String summary = this.getResources().getStringArray(R.array.auto_updata_entries)[index];
         pr.setSummary(summary);
     }
 
