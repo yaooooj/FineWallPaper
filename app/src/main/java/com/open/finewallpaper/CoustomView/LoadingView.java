@@ -24,21 +24,35 @@ import com.open.finewallpaper.Util.DisplayUtil;
 
 public class LoadingView  extends View{
     private final static String TAG = "LoadingView";
-    private String LOADTEXT = "loading";
+
     private Paint mPaint;
+
     private Paint textPaint;
-    private TextView mTextView;
+
+
+    //view大小
+    private int result;
+
+    //padding大小
+    private int padding;
+
+    // View中心
+    private int center;
 
     private int textColor;
+
     private int color;
-    private RectF rect;
 
     private int height ;
+
     private int width ;
 
     private Path path;
 
     private Path textPath;
+
+    private int textTopx;
+
     public LoadingView(Context context) {
         super(context);
         init(context);
@@ -51,6 +65,9 @@ public class LoadingView  extends View{
 
     public LoadingView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
+
+
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.LoadingView);
         color = ta.getColor(R.styleable.LoadingView_load_color,Color.BLACK);
         textColor = ta.getColor(R.styleable.LoadingView_load_textColor,Color.RED);
@@ -59,18 +76,8 @@ public class LoadingView  extends View{
     }
 
     private void  init(Context context){
-        height = getMeasuredHeight();
-        width = getMeasuredWidth();
-        Log.e(TAG, "init:   " + height +  "   " + width  );
-        mTextView = new TextView(context);
-        mTextView.setTextColor(textColor);
-        mPaint = new Paint();
-        mPaint.setAntiAlias(true);
-        mPaint.setStrokeWidth(5);
-        mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setColor(Color.BLACK);
 
-
+        result = dp2px(100);
 
 
         int screenWidth = DisplayUtil.getsWidthPixles(context);
@@ -78,38 +85,39 @@ public class LoadingView  extends View{
         float ratioWidth = (float)screenWidth / 720;
         float ratioHeight = (float)screenHeight / 1080;
         float RATIO = Math.min(ratioWidth, ratioHeight);
-        int textSize = Math.round(20 * RATIO);
-
-
-        textPaint = new Paint();
-        textPaint.setColor(Color.BLACK);
-        textPaint.setAntiAlias(true);
-        textPaint.setStyle(Paint.Style.STROKE);
-        textPaint.setStrokeWidth(2f);
-        textPaint.setTextAlign(Paint.Align.CENTER);
-        textPaint.setTextSize(textSize);
-        //RectF rect = new RectF(3 * width / 8,(height / 3) - (width / 8) ,8 * width / 5,height / 3);
-        rect = new RectF(0,0,200,200);
-
-
-
+        textTopx = Math.round(20 * RATIO);
     }
 
-    public void setText(String text){
-        mTextView.setText(text);
-    }
 
-    public void setTextColor(int color){
-        this.textColor = color;
-    }
 
-    public void  setColor(int color){
-        this.color = color;
-    }
+
+
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        //获取宽高的mode和size
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        //测量宽度
+        if (widthMode == MeasureSpec.AT_MOST) {
+            width = result;
+        } else {
+            width = widthSize;
+        }
+
+        //测量高度
+        if (heightMode == MeasureSpec.AT_MOST) {
+            height = result;
+        } else {
+            height = heightSize;
+        }
+
+        //设置测量的宽高值
+        setMeasuredDimension(width, height);
 
     }
 
@@ -118,30 +126,77 @@ public class LoadingView  extends View{
         super.onSizeChanged(w, h, oldw, oldh);
         width = w;
         height = h;
-        path = new Path();
-        path.moveTo(3 * width / 8,height / 2 - width / 8 );
-        path.quadTo(width / 2, height / 6, 5 * width / 8,height / 2 - width / 8 );
 
-        textPath = new Path();
-        textPath.moveTo(3 * width / 8,height * 17 / 32);
-        textPath.lineTo(5 * width / 8,height * 17 / 32);
-
+        padding = dp2px(5);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
        super.onDraw(canvas);
 
-        canvas.drawARGB(1,2,3,4);
+        center = getWidth() / 2;
 
-        Log.e(TAG, "init: next  " + height +  "   " + width  );
-        //new RectF(3 * width / 8,height / 3,5 * width / 8,height / 2)
-        canvas.drawRect(width / 4,height / 2 - width / 8 ,3 * width / 4, height / 2 + width / 6,mPaint);
-        //canvas.drawText("Loading",3 * width / 8,7 * height / 12,5 * width / 8,7 * height / 12,textPaint);
-       // canvas.drawArc(new RectF(3 * width / 8,height / 3,5 * width / 8,height / 2),180,190,false,mPaint);
+        drawRect(canvas);
+
+        drawArc(canvas);
+
+        drawText(canvas);
+    }
+
+
+
+    private void drawRect(Canvas canvas){
+
+        mPaint = new Paint();
+        mPaint.setAntiAlias(true);
+        mPaint.setStrokeWidth(5);
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setColor(Color.BLACK);
+
+        //canvas.drawRect(width / 4,height / 2 - width / 8 ,3 * width / 4, height / 2 + width / 6,mPaint);
+        canvas.drawRect(padding, height / 3 - padding,width - padding,height - padding - padding ,mPaint);
+    }
+
+    private void drawArc(Canvas canvas){
+
+        path = new Path();
+        //path.moveTo(3 * width / 8,height / 2 - width / 8 );
+        // path.quadTo(width / 2, height / 6, 5 * width / 8,height / 2 - width / 8 );
+        path.moveTo(width / 5 , height / 3 - padding);
+
+        path.quadTo(width / 2 , -10 , 4 * width / 5, height / 3 - padding);
+
         canvas.drawPath(path, mPaint);
-        canvas.drawTextOnPath("Loading",textPath,0,-8,textPaint);
+    }
 
+    private void drawText(Canvas canvas){
+
+
+
+        textPaint = new Paint();
+        textPaint.setColor(Color.BLACK);
+        textPaint.setAntiAlias(true);
+        textPaint.setStyle(Paint.Style.STROKE);
+        textPaint.setStrokeWidth(0);
+        textPaint.setTextAlign(Paint.Align.LEFT);
+        textPaint.setTextSize(textTopx);
+
+        int textCenter = ((height - padding ) - ( height / 3 - padding)) / 2;
+        Log.e(TAG, "textCenter: " +textCenter + "Center:" + center );
+        //获取文字的宽度 用于绘制文本内容
+        float textWidth = textPaint.measureText("Loading");
+        Paint.FontMetricsInt fontMetrics = mPaint.getFontMetricsInt();
+        int baseline = (getMeasuredHeight() - fontMetrics.bottom + fontMetrics.top + height / 3 - padding ) / 2 - fontMetrics.top ;
+        canvas.drawText("Loading", center - textWidth / 2, baseline ,textPaint);
+    }
+
+    /**
+     * dp转px
+     */
+    public int dp2px(int dp) {
+
+        float density = getContext().getResources().getDisplayMetrics().density;
+        return (int) (dp * density + 0.5f);
     }
 }
 
