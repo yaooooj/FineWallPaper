@@ -2,9 +2,23 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <com.open.finewallpaper.CoustomView.LoadingView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         />
+
+    <com.open.finewallpaper.CoustomView.CharacterView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:id="@+id/charview"
+        android:background="@color/grey"
+        android:layout_gravity="center"/>
+
+    <Button
+        android:id="@+id/button"
+        android:text="Hit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 </LinearLayout>
