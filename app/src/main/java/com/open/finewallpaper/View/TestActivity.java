@@ -5,9 +5,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.open.finewallpaper.BaseActivity;
 import com.open.finewallpaper.CoustomView.CharacterView;
+import com.open.finewallpaper.CoustomView.MultiCharacterView;
 import com.open.finewallpaper.R;
 
 public class TestActivity extends AppCompatActivity implements View.OnClickListener {
@@ -21,6 +23,19 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
 
         Log.e(TAG, "onCreate: " );
         ca  = (CharacterView) findViewById(R.id.charview);
+
+        MultiCharacterView multiCharacterView = (MultiCharacterView) findViewById(R.id.multi_view);
+        multiCharacterView.setText("Loading");
+
+        MultiCharacterView multiCharacterView1 = (MultiCharacterView) findViewById(R.id.load_more);
+        multiCharacterView1.setText("Refresh");
+        multiCharacterView1.setOnFreshListener(new MultiCharacterView.OnFreshListener() {
+            @Override
+            public void onFresh() {
+                Toast.makeText(TestActivity.this,"refresh complete",Toast.LENGTH_SHORT).show();
+            }
+        });
+
         Button button = (Button) findViewById(R.id.button);
         button.setOnClickListener(this);
     }
@@ -29,7 +44,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         if (v.getId() == R.id.button){
             Log.e(TAG, "onClick: " );
-            ca.setAnimation();
+           // ca.setAnimation();
         }
     }
 }

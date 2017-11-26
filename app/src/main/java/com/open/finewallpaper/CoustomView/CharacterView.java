@@ -1,10 +1,9 @@
 package com.open.finewallpaper.CoustomView;
 
-import android.animation.Animator;
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
+
 import android.content.Context;
 import android.graphics.Canvas;
+
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.support.annotation.Nullable;
@@ -12,7 +11,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.animation.LinearInterpolator;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Interpolator;
+
 
 /**
  * Created by SEELE on 2017/11/23.
@@ -24,14 +25,29 @@ public class CharacterView extends View {
     private int mTextSize = sp2px(30);
     private int mTextColor = 0xFF000000;
 
-    private int width;
-    private int height;
+    private final static String type = "L";
 
-    private int times = 5;
+    private int baseLine;
+    private int center;
 
-    private int mOffset = 0;
+    private int times;
+    private int mCurNum = 0;
+    private int mDeltaNum;
+
+    public static final int DEFAULT_VELOCITY = 20;
+    private int mVelocity = DEFAULT_VELOCITY;
+
+    private char character;
+
+
+    private Interpolator mInterpolator = new AccelerateDecelerateInterpolator();
+    private float mOffset = 0;
 
     private int mTextHeight;
+
+
+    private OnFinish mOnFinish;
+
 
 
 
@@ -60,10 +76,34 @@ public class CharacterView extends View {
         mPaint.setTextSize(mTextSize);
 
         measureTextHeight();
+
     }
 
+
+    public void setCharacter(final char character, final int times, long delay) {
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                setCharacter(character,times);
+                mDeltaNum = 1 + times;
+            }
+        }, delay);
+    }
+
+
+    public void setCharacter(final char character,int times){
+
+        this.character = character;
+        this.times = times;
+        this.mDeltaNum =  times + 1;
+
+        invalidate();
+    }
+
+
     private void measureTextHeight() {
-        mPaint.getTextBounds( "L", 0, 1, mTextBounds);
+        mPaint.getTextBounds( type, 0, 1, mTextBounds);
         mTextHeight = mTextBounds.height();
     }
 
@@ -85,17 +125,17 @@ public class CharacterView extends View {
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
 
         switch (mode){
-            case MeasureSpec.AT_MOST:
+            case MeasureSpec.EXACTLY:
                 result = widthSize;
                 break;
-            case MeasureSpec.EXACTLY:
+            case MeasureSpec.AT_MOST:
             case MeasureSpec.UNSPECIFIED:
-                mPaint.getTextBounds("L", 0, 1, mTextBounds);
+                mPaint.getTextBounds(type, 0, 1, mTextBounds);
                 result = mTextBounds.width();
                 break;
         }
         result = mode == MeasureSpec.AT_MOST ? Math.min(result, widthSize) : result;
-        return result + getPaddingTop() + getPaddingBottom() + dp2px(40);
+        return result + getPaddingTop() + getPaddingBottom() + dp2px(5);
     }
 
     private int measureHeight(int heightMeasureSpec){
@@ -104,50 +144,78 @@ public class CharacterView extends View {
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
         switch (mode){
-            case MeasureSpec.AT_MOST:
+            case MeasureSpec.EXACTLY:
                 result = heightSize;
                 break;
-            case MeasureSpec.EXACTLY:
+            case MeasureSpec.AT_MOST:
             case MeasureSpec.UNSPECIFIED:
-                mPaint.getTextBounds("L", 0, 1, mTextBounds);
+                mPaint.getTextBounds(type, 0, 1, mTextBounds);
                 result = mTextBounds.height();
                 break;
         }
         result = mode == MeasureSpec.AT_MOST ? Math.min(result, heightSize) : result;
-        return result + getPaddingTop() + getPaddingBottom() + dp2px(40);
+        return result + getPaddingTop() + getPaddingBottom() + dp2px(15);
     }
 
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        width = w;
-        height = h;
+        center = (getMeasuredWidth()- getPaddingLeft() - getPaddingRight()) / 2;
+        Paint.FontMetricsInt fontMetrics = mPaint.getFontMetricsInt();
+        baseLine = (h - fontMetrics.bottom + fontMetrics.top  - getPaddingBottom() - getPaddingTop())/ 2 - fontMetrics.top;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        canvas.save();
 
-        drawText(canvas);canvas.translate(0, (float) (mOffset * getMeasuredHeight() * 0.01));
-        canvas.restore();
+        if (mCurNum != times) {
+            postDelayed(mScrollRunnable, 0);
+        }else{
+            if (mOnFinish != null){
+                mOnFinish.finished();
+            }
+        }
+
+        canvas.translate(0, mOffset * getMeasuredHeight());
+        drawText(canvas);
+        drawNext(canvas);
+
     }
 
 
     private void drawText(Canvas canvas){
-        int height = getMeasuredHeight();
+        canvas.drawText(character + "",center,baseLine,mPaint);
+    }
 
-        float textWidth = mPaint.measureText("L");
-
-        int center = (getMeasuredWidth()- getPaddingLeft() - getPaddingRight()) / 2;
-        Paint.FontMetricsInt fontMetrics = mPaint.getFontMetricsInt();
-        int baseLine = (height - fontMetrics.bottom + fontMetrics.top  - getPaddingBottom() - getPaddingTop())/ 2 - fontMetrics.top;
-        canvas.drawText("L",center,baseLine,mPaint);
-
+    private void drawNext(Canvas canvas) {
+        float y = (float) (getMeasuredHeight() * 1.5);
+        canvas.drawText(character + "", center, y + mTextHeight / 2, mPaint);
     }
 
 
+    private Runnable mScrollRunnable = new Runnable() {
+        @Override
+        public void run() {
+            float x = (float) (1 - 1.0 * (times - mCurNum) / mDeltaNum);
+            mOffset -= mVelocity * 0.01f * (1 - mInterpolator.getInterpolation(x) + 0.1);
+            invalidate();
+            if (mOffset <= -1) {
+                mOffset = 0;
+                calNum(mCurNum + 1);
+            }
+        }
+    };
+
+
+    private void calNum(int number) {
+        if (number > 20){
+            throw new IllegalArgumentException("length more than 20");
+        }
+        number = number == -1 ? 9 : number;
+        number = number == 20 ? 0 : number;
+        mCurNum = number;
+    }
 
     private int dp2px(float dpVal) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
@@ -161,26 +229,12 @@ public class CharacterView extends View {
     }
 
 
+    public void setOnFinish(OnFinish onFinish) {
+        mOnFinish = onFinish;
+    }
 
-    public void setAnimation(Context context) {
-        Log.e(TAG, "onAnimationUpdate: ");
-        ValueAnimator transAnimator = ValueAnimator.ofInt(getMeasuredHeight() / 2, getMeasuredHeight(),0,getMeasuredHeight() / 2);
-        //ObjectAnimator transAnimator = ObjectAnimator.ofFloat(new CharacterView(context),"fraction",getMeasuredHeight() / 2, getMeasuredHeight(),0,getMeasuredHeight() / 2);
-        transAnimator.setDuration(2000);
-        transAnimator.setRepeatCount(times);
-        transAnimator.setInterpolator( new LinearInterpolator());
-        transAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-
-                mOffset = (int) animation.getAnimatedValue();
-
-                Log.e(TAG, "onAnimationUpdate: " + mOffset );
-                invalidate();
-            }
-        });
-
-        transAnimator.start();
+    public interface OnFinish{
+        void finished();
     }
 
 }
