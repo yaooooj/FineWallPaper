@@ -9,16 +9,17 @@
         android:layout_gravity="center"
         />
 
-    <com.open.finewallpaper.CoustomView.CharacterView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/charview"
-        android:background="@color/grey"
-        android:layout_gravity="center"/>
+
 
     <Button
-        android:id="@+id/button"
-        android:text="Hit"
+    android:id="@+id/button"
+    android:text="Hit"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/refresh_bt"
+        android:text="refresh"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 

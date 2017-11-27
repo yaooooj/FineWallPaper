@@ -7,28 +7,24 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.open.finewallpaper.BaseActivity;
-import com.open.finewallpaper.CoustomView.CharacterView;
 import com.open.finewallpaper.CoustomView.MultiCharacterView;
 import com.open.finewallpaper.R;
 
 public class TestActivity extends AppCompatActivity implements View.OnClickListener {
     private final static String TAG = "SetActivity";
-    private CharacterView ca;
+    private MultiCharacterView multiCharacterView;
+    private MultiCharacterView multiCharacterView1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.viewa);
 
 
-        Log.e(TAG, "onCreate: " );
-        ca  = (CharacterView) findViewById(R.id.charview);
+        multiCharacterView = (MultiCharacterView) findViewById(R.id.multi_view);
+        multiCharacterView.setText("正在加载");
 
-        MultiCharacterView multiCharacterView = (MultiCharacterView) findViewById(R.id.multi_view);
-        multiCharacterView.setText("Loading");
-
-        MultiCharacterView multiCharacterView1 = (MultiCharacterView) findViewById(R.id.load_more);
-        multiCharacterView1.setText("Refresh");
+        multiCharacterView1 = (MultiCharacterView) findViewById(R.id.load_more);
+        multiCharacterView1.setText("Refresh", MultiCharacterView.Type.EN);
         multiCharacterView1.setOnFreshListener(new MultiCharacterView.OnFreshListener() {
             @Override
             public void onFresh() {
@@ -38,13 +34,18 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
 
         Button button = (Button) findViewById(R.id.button);
         button.setOnClickListener(this);
+
+        Button button1 = (Button) findViewById(R.id.refresh_bt);
+        button1.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.button){
             Log.e(TAG, "onClick: " );
-           // ca.setAnimation();
+           multiCharacterView.dismiss();
+        }else if (v.getId() == R.id.refresh_bt){
+            multiCharacterView.show();
         }
     }
 }

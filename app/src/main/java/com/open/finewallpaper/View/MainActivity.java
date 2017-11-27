@@ -94,7 +94,7 @@ public class MainActivity extends BaseActivity implements ActivityView  {
     @Override
     public  void showDataRV(List<ItemBean> itemList) {
         if (page > 1){
-            //在这里临时设置显示不需要在加载更多数据
+            //这里只是临时展示数据,不需要在加载更多数据
             RecyclerViewStateUtils.setFooterViewState(MainActivity.this, recyclerView,30, LoadingFooter.State.TheEnd, null);
         }
         //更新RecyclerView中的数据
