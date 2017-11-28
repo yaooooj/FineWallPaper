@@ -347,6 +347,8 @@ public class MultiCharacterView extends LinearLayout {
 
 
         public void setTextFont(String fileName) {
+
+
             if (TextUtils.isEmpty(fileName))
                 throw new IllegalArgumentException("please check file name end with '.ttf' or '.otf'");
             mTypeface = Typeface.createFromAsset(mContext.getAssets(), fileName);
