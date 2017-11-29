@@ -99,6 +99,8 @@ public class MainActivity extends BaseActivity implements ActivityView  {
         }
         //更新RecyclerView中的数据
         adapter.upData(itemList,isFresh);
+        Log.e(TAG, "showDataRV: " + recyclerView.getMeasuredHeight());
+
         isFresh = false;
     }
 

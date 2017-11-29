@@ -1,12 +1,11 @@
 package com.open.finewallpaper.CoustomView;
 
 import android.content.Context;
+import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
-
-import com.open.finewallpaper.Adapter.ShowAdapter;
 
 /**
  * Created by yaojian on 2017/11/20.
@@ -17,18 +16,33 @@ public class HeadingView extends ViewGroup {
     private int start;
     private ListAdapter mAdapter;
     private OnItemClickListener mOnItemClickListener;
+
+    private ViewDragHelper mViewDragHelper;
+    private int totalHeight;
     public HeadingView(Context context) {
         super(context);
+        init();
     }
 
     public HeadingView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init();
     }
 
     public HeadingView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init();
     }
 
+
+    public void init(){
+        mViewDragHelper = ViewDragHelper.create(this, 1.0f, new HeadingViewDragHelperCallBack());
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+    }
 
     @Override
     protected void onAttachedToWindow() {
@@ -135,6 +149,11 @@ public class HeadingView extends ViewGroup {
         }
     }
 
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        totalHeight = getChildCount() * w;
+    }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
@@ -173,5 +192,57 @@ public class HeadingView extends ViewGroup {
 
     public interface OnItemClickListener{
         void onClick(View itemView,int position);
+    }
+
+    private class HeadingViewDragHelperCallBack extends ViewDragHelper.Callback{
+
+        @Override
+        public boolean tryCaptureView(View child, int pointerId) {
+            final int count = getChildCount();
+            View view;
+            for (int i = 0; i < count; i++) {
+                view = getChildAt(i);
+                if (child == view){
+                    view.setTag(i);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public void onViewReleased(View releasedChild, float xvel, float yvel) {
+            final int width = releasedChild.getMeasuredWidth();
+
+
+        }
+
+        @Override
+        public int clampViewPositionHorizontal(View child, int left, int dx) {
+            return super.clampViewPositionHorizontal(child, left, dx);
+        }
+
+        @Override
+        public void onViewDragStateChanged(int state) {
+            super.onViewDragStateChanged(state);
+        }
+
+        @Override
+        public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
+            super.onViewPositionChanged(changedView, left, top, dx, dy);
+            //perform do something animator
+        }
+
+        @Override
+        public void onViewCaptured(View capturedChild, int activePointerId) {
+            super.onViewCaptured(capturedChild, activePointerId);
+        }
+
+        @Override
+        public int getViewHorizontalDragRange(View child) {
+            //child move range,limite the range in the screen width
+            return super.getViewHorizontalDragRange(child);
+        }
+
     }
 }
