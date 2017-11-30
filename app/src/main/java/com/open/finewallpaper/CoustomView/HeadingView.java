@@ -3,6 +3,8 @@ package com.open.finewallpaper.CoustomView;
 import android.content.Context;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
@@ -13,12 +15,13 @@ import android.widget.ListAdapter;
 
 
 public class HeadingView extends ViewGroup {
+    private final static String TAG = "HeadingView";
     private int start;
     private ListAdapter mAdapter;
     private OnItemClickListener mOnItemClickListener;
 
-    private ViewDragHelper mViewDragHelper;
     private int totalHeight;
+
     public HeadingView(Context context) {
         super(context);
         init();
@@ -36,7 +39,7 @@ public class HeadingView extends ViewGroup {
 
 
     public void init(){
-        mViewDragHelper = ViewDragHelper.create(this, 1.0f, new HeadingViewDragHelperCallBack());
+
     }
 
     @Override
@@ -49,7 +52,7 @@ public class HeadingView extends ViewGroup {
         if (mAdapter != null){
             buildView();
         }else {
-            throw new IllegalArgumentException("adapter in null");
+            throw new IllegalArgumentException("adapter is null");
         }
         super.onAttachedToWindow();
     }
@@ -67,6 +70,7 @@ public class HeadingView extends ViewGroup {
                 }
             });
             addView(itemView);
+            Log.e(TAG, "buildView: " + getChildCount() );
         }
     }
 
@@ -133,7 +137,7 @@ public class HeadingView extends ViewGroup {
         int childWidthSize = getMeasuredWidth()  * 2 / 3;
         int childWidthMode = MeasureSpec.EXACTLY;
         int childHeightSize = getMeasuredHeight() * 4 / 5;
-        int childHeightMode = MeasureSpec.AT_MOST ;
+        int childHeightMode = MeasureSpec.EXACTLY ;
 
         for (int i = 0;i < childCount;i ++){
             final View child = getChildAt(i);
@@ -180,7 +184,23 @@ public class HeadingView extends ViewGroup {
         }
     }
 
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
 
+        return true;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+        return true;
+    }
+
+
+    @Override
+    public void computeScroll() {
+
+    }
 
     public OnItemClickListener getOnItemClickListener() {
         return mOnItemClickListener;
@@ -194,55 +214,5 @@ public class HeadingView extends ViewGroup {
         void onClick(View itemView,int position);
     }
 
-    private class HeadingViewDragHelperCallBack extends ViewDragHelper.Callback{
 
-        @Override
-        public boolean tryCaptureView(View child, int pointerId) {
-            final int count = getChildCount();
-            View view;
-            for (int i = 0; i < count; i++) {
-                view = getChildAt(i);
-                if (child == view){
-                    view.setTag(i);
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public void onViewReleased(View releasedChild, float xvel, float yvel) {
-            final int width = releasedChild.getMeasuredWidth();
-
-
-        }
-
-        @Override
-        public int clampViewPositionHorizontal(View child, int left, int dx) {
-            return super.clampViewPositionHorizontal(child, left, dx);
-        }
-
-        @Override
-        public void onViewDragStateChanged(int state) {
-            super.onViewDragStateChanged(state);
-        }
-
-        @Override
-        public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
-            super.onViewPositionChanged(changedView, left, top, dx, dy);
-            //perform do something animator
-        }
-
-        @Override
-        public void onViewCaptured(View capturedChild, int activePointerId) {
-            super.onViewCaptured(capturedChild, activePointerId);
-        }
-
-        @Override
-        public int getViewHorizontalDragRange(View child) {
-            //child move range,limite the range in the screen width
-            return super.getViewHorizontalDragRange(child);
-        }
-
-    }
 }

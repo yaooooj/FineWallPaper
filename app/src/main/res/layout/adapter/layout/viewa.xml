@@ -46,38 +46,25 @@
     </com.open.finewallpaper.CoustomView.MultiCharacterView>
 
     <com.open.finewallpaper.CoustomView.HeadingView
+        android:id="@+id/heading"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#50000000"
+        android:layout_height="300dp"
+        android:background="@color/lightslategray"
         >
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/cornflowerblue"
-            android:gravity="center"
-            android:text="1111111111111111"
-            android:textSize="32sp"/>
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/slateblue"
-            android:gravity="center"
-            android:text="222222222222222"
-            android:textSize="32sp"/>
 
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/cornflowerblue"
-            android:gravity="center"
-            android:text="33333333"
-            android:textSize="32sp"/>
     </com.open.finewallpaper.CoustomView.HeadingView>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp"/>
 
+    <com.open.finewallpaper.CoustomView.CuVp
+        android:id="@+id/heading_vp"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:background="@color/lightslategray">
+
+    </com.open.finewallpaper.CoustomView.CuVp>
 
 
 </LinearLayout>
