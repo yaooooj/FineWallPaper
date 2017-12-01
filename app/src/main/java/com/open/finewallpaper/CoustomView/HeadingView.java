@@ -1,13 +1,17 @@
 package com.open.finewallpaper.CoustomView;
 
 import android.content.Context;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.view.animation.Interpolator;
 import android.widget.ListAdapter;
+import android.widget.Scroller;
 
 /**
  * Created by yaojian on 2017/11/20.
@@ -16,11 +20,45 @@ import android.widget.ListAdapter;
 
 public class HeadingView extends ViewGroup {
     private final static String TAG = "HeadingView";
+    private boolean DEBUG = true;
+    private Context context;
     private int start;
     private ListAdapter mAdapter;
     private OnItemClickListener mOnItemClickListener;
 
+    private static final int CLOSE_ENOUGH = 2;
+
+
+
     private int totalHeight;
+
+    private Scroller mScroller;
+
+    private boolean mIsScrollStarted;
+    private boolean mIsBeingDragged;
+    private boolean mIsUnableToDrag;
+
+    private float mLastMotionX;
+    private float mLastMotionY;
+    private float mInitialMotionX;
+    private float mInitialMotionY;
+
+    public static final int SCROLL_STATE_IDLE = 0;
+    public static final int SCROLL_STATE_DRAGGING = 1;
+    public static final int SCROLL_STATE_SETTLING = 2;
+
+    private int mScrollState = SCROLL_STATE_IDLE;
+
+
+    private int mCloseEnough;
+
+    private static final Interpolator sInterpolator = new Interpolator() {
+        @Override
+        public float getInterpolation(float t) {
+            t -= 1.0f;
+            return t * t * t * t * t + 1.0f;
+        }
+    };
 
     public HeadingView(Context context) {
         super(context);
@@ -39,7 +77,10 @@ public class HeadingView extends ViewGroup {
 
 
     public void init(){
-
+        final Context context = getContext();
+        final float density = context.getResources().getDisplayMetrics().density;
+        mScroller = new Scroller(context, sInterpolator);
+        mCloseEnough = (int) (CLOSE_ENOUGH * density);
     }
 
     @Override
@@ -187,8 +228,60 @@ public class HeadingView extends ViewGroup {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
 
+        final int action = ev.getAction() & MotionEventCompat.ACTION_MASK;
+        if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
+            // Release the drag.
+            resetTouch();
+            return false;
+        }
+
+        if (action != MotionEvent.ACTION_DOWN) {
+            if (mIsBeingDragged) {
+                if (DEBUG) Log.v(TAG, "Intercept returning true!");
+                return true;
+            }
+            if (mIsUnableToDrag) {
+                if (DEBUG) Log.v(TAG, "Intercept returning false!");
+                return false;
+            }
+        }
+
+        switch (action){
+            case MotionEvent.ACTION_DOWN:
+                mLastMotionX = mInitialMotionX = ev.getX();
+                mLastMotionY = mInitialMotionY = ev.getY();
+                mIsUnableToDrag = false;
+
+                mIsScrollStarted = true;
+
+                mScroller.computeScrollOffset();
+                if (mScrollState == SCROLL_STATE_SETTLING &&
+                        Math.abs(mScroller.getFinalX() - mScroller.getCurrX()) > mCloseEnough){
+                    mScroller.abortAnimation();
+                    mIsBeingDragged = true;
+                    requestParentDisallowInterceptTouchEvent(true);
+                    setScrollState(SCROLL_STATE_DRAGGING);
+                }else {
+                    //completeScroll(false);
+                    mIsBeingDragged = false;
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+
+                break;
+        }
+
         return true;
     }
+
+
+    public void resetTouch(){
+
+    }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -200,6 +293,21 @@ public class HeadingView extends ViewGroup {
     @Override
     public void computeScroll() {
 
+    }
+
+    private void requestParentDisallowInterceptTouchEvent(boolean disallowIntercept) {
+        final ViewParent parent = getParent();
+        if (parent != null) {
+            parent.requestDisallowInterceptTouchEvent(disallowIntercept);
+        }
+    }
+
+    void setScrollState(int newState) {
+        if (mScrollState == newState) {
+            return;
+        }
+
+        mScrollState = newState;
     }
 
     public OnItemClickListener getOnItemClickListener() {
