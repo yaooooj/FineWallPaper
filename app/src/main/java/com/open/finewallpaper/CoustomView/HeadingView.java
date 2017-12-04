@@ -2,16 +2,22 @@ package com.open.finewallpaper.CoustomView;
 
 import android.content.Context;
 import android.support.v4.view.MotionEventCompat;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.view.ViewPager;
+import android.support.v4.widget.EdgeEffectCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.animation.Interpolator;
 import android.widget.ListAdapter;
 import android.widget.Scroller;
+
+import java.util.ArrayList;
 
 /**
  * Created by yaojian on 2017/11/20.
@@ -26,17 +32,46 @@ public class HeadingView extends ViewGroup {
     private ListAdapter mAdapter;
     private OnItemClickListener mOnItemClickListener;
 
+    // Offsets of the first and last items, if known.
+    // Set during population, used to determine if we are at the beginning
+    // or end of the pager data set during touch scrolling.
+    private float mFirstOffset = -Float.MAX_VALUE;
+    private float mLastOffset = Float.MAX_VALUE;
+
+
+    private static final boolean USE_CACHE = false;
     private static final int CLOSE_ENOUGH = 2;
+    /**
+     * ID of the active pointer. This is used to retain consistency during
+     * drags/flings if multiple pointers are used.
+     */
+    private int mActivePointerId = INVALID_POINTER;
+    /**
+     * Sentinel value for no current active pointer.
+     * Used by {@link #mActivePointerId}.
+     */
+    private static final int INVALID_POINTER = -1;
 
+    static class ItemInfo {
+        Object object;
+        int position;
+        boolean scrolling;
+        float widthFactor;
+        float offset;
+    }
 
-
+    private final ArrayList<ItemInfo> mItems = new ArrayList<ItemInfo>();
     private int totalHeight;
 
+    private int mTouchSlop;
     private Scroller mScroller;
+    private int mDefaultGutterSize;
 
     private boolean mIsScrollStarted;
     private boolean mIsBeingDragged;
     private boolean mIsUnableToDrag;
+    private boolean mScrollingCacheEnabled;
+    private boolean mPopulatePending;
 
     private float mLastMotionX;
     private float mLastMotionY;
@@ -49,6 +84,8 @@ public class HeadingView extends ViewGroup {
 
     private int mScrollState = SCROLL_STATE_IDLE;
 
+    private EdgeEffectCompat mLeftEdge;
+    private EdgeEffectCompat mRightEdge;
 
     private int mCloseEnough;
 
@@ -79,8 +116,12 @@ public class HeadingView extends ViewGroup {
     public void init(){
         final Context context = getContext();
         final float density = context.getResources().getDisplayMetrics().density;
+        final ViewConfiguration configuration = ViewConfiguration.get(context);
         mScroller = new Scroller(context, sInterpolator);
         mCloseEnough = (int) (CLOSE_ENOUGH * density);
+        mTouchSlop = configuration.getScaledPagingTouchSlop();
+        mLeftEdge = new EdgeEffectCompat(context);
+        mRightEdge = new EdgeEffectCompat(context);
     }
 
     @Override
@@ -259,8 +300,11 @@ public class HeadingView extends ViewGroup {
                         Math.abs(mScroller.getFinalX() - mScroller.getCurrX()) > mCloseEnough){
                     mScroller.abortAnimation();
                     mIsBeingDragged = true;
+                    mPopulatePending = false;
+                    populate();
                     requestParentDisallowInterceptTouchEvent(true);
                     setScrollState(SCROLL_STATE_DRAGGING);
+
                 }else {
                     //completeScroll(false);
                     mIsBeingDragged = false;
@@ -268,6 +312,51 @@ public class HeadingView extends ViewGroup {
                 break;
             case MotionEvent.ACTION_MOVE:
 
+                final int activePointerId = mActivePointerId;
+                if (activePointerId == INVALID_POINTER) {
+                    // If we don't have a valid id, the touch down wasn't on content.
+                    break;
+                }
+
+                final int pointerIndex = ev.findPointerIndex(activePointerId);
+                final float x = ev.getX(pointerIndex);
+                final float dx = x - mLastMotionX;
+                final float xDiff = Math.abs(dx);
+                final float y = ev.getY(pointerIndex);
+                final float yDiff = Math.abs(y - mInitialMotionY);
+                if (DEBUG) Log.v(TAG, "Moved x to " + x + "," + y + " diff=" + xDiff + "," + yDiff);
+
+                if (dx != 0 && !isGutterDrag(mLastMotionX, dx)
+                        && canScroll(this, false, (int) dx, (int) x, (int) y)) {
+                    // Nested view has scrollable area under this point. Let it be handled there.
+                    mLastMotionX = x;
+                    mLastMotionY = y;
+                    mIsUnableToDrag = true;
+                    return false;
+                }
+                if (xDiff > mTouchSlop && xDiff * 0.5f > yDiff) {
+                    if (DEBUG) Log.v(TAG, "Starting drag!");
+                    mIsBeingDragged = true;
+                    requestParentDisallowInterceptTouchEvent(true);
+                    setScrollState(SCROLL_STATE_DRAGGING);
+                    mLastMotionX = dx > 0
+                            ? mInitialMotionX + mTouchSlop : mInitialMotionX - mTouchSlop;
+                    mLastMotionY = y;
+                    setScrollingCacheEnabled(true);
+                } else if (yDiff > mTouchSlop) {
+                    // The finger has moved enough in the vertical
+                    // direction to be counted as a drag...  abort
+                    // any attempt to drag horizontally, to work correctly
+                    // with children that have scrolling containers.
+                    if (DEBUG) Log.v(TAG, "Starting unable to drag!");
+                    mIsUnableToDrag = true;
+                }
+                if (mIsBeingDragged) {
+                    // Scroll to follow the motion event
+                    if (performDrag(x)) {
+                        ViewCompat.postInvalidateOnAnimation(this);
+                    }
+                }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
 
@@ -275,6 +364,30 @@ public class HeadingView extends ViewGroup {
         }
 
         return true;
+    }
+
+
+    protected boolean canScroll(View v, boolean checkV, int dx, int x, int y) {
+        if (v instanceof ViewGroup) {
+            final ViewGroup group = (ViewGroup) v;
+            final int scrollX = v.getScrollX();
+            final int scrollY = v.getScrollY();
+            final int count = group.getChildCount();
+            // Count backwards - let topmost views consume scroll distance first.
+            for (int i = count - 1; i >= 0; i--) {
+                // TODO: Add versioned support here for transformed views.
+                // This will not work for transformed views in Honeycomb+
+                final View child = group.getChildAt(i);
+                if (x + scrollX >= child.getLeft() && x + scrollX < child.getRight()
+                        && y + scrollY >= child.getTop() && y + scrollY < child.getBottom()
+                        && canScroll(child, true, dx, x + scrollX - child.getLeft(),
+                        y + scrollY - child.getTop())) {
+                    return true;
+                }
+            }
+        }
+
+        return checkV && ViewCompat.canScrollHorizontally(v, -dx);
     }
 
 
@@ -302,7 +415,106 @@ public class HeadingView extends ViewGroup {
         }
     }
 
-    void setScrollState(int newState) {
+    private void setScrollingCacheEnabled(boolean enabled) {
+        if (mScrollingCacheEnabled != enabled) {
+            mScrollingCacheEnabled = enabled;
+            if (USE_CACHE) {
+                final int size = getChildCount();
+                for (int i = 0; i < size; ++i) {
+                    final View child = getChildAt(i);
+                    if (child.getVisibility() != GONE) {
+                        child.setDrawingCacheEnabled(enabled);
+                    }
+                }
+            }
+        }
+    }
+
+    private int getClientWidth() {
+        return getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
+    }
+
+    private boolean performDrag(float x) {
+        boolean needsInvalidate = false;
+
+        final float deltaX = mLastMotionX - x;
+        mLastMotionX = x;
+
+        float oldScrollX = getScrollX();
+        float scrollX = oldScrollX + deltaX;
+        final int width = getClientWidth();
+
+        float leftBound = width * mFirstOffset;
+        float rightBound = width * mLastOffset;
+        boolean leftAbsolute = true;
+        boolean rightAbsolute = true;
+
+        final ItemInfo firstItem = mItems.get(0);
+        final ItemInfo lastItem = mItems.get(mItems.size() - 1);
+        if (firstItem.position != 0) {
+            leftAbsolute = false;
+            leftBound = firstItem.offset * width;
+        }
+        if (lastItem.position != mAdapter.getCount() - 1) {
+            rightAbsolute = false;
+            rightBound = lastItem.offset * width;
+        }
+
+        if (scrollX < leftBound) {
+            if (leftAbsolute) {
+                float over = leftBound - scrollX;
+                needsInvalidate = mLeftEdge.onPull(Math.abs(over) / width);
+            }
+            scrollX = leftBound;
+        } else if (scrollX > rightBound) {
+            if (rightAbsolute) {
+                float over = scrollX - rightBound;
+                needsInvalidate = mRightEdge.onPull(Math.abs(over) / width);
+            }
+            scrollX = rightBound;
+        }
+        // Don't lose the rounded component
+        mLastMotionX += scrollX - (int) scrollX;
+        scrollTo((int) scrollX, getScrollY());
+        pageScrolled((int) scrollX);
+
+        return needsInvalidate;
+    }
+
+    private boolean pageScrolled(int xpos) {
+        if (mItems.size() == 0) {
+            if (mFirstLayout) {
+                // If we haven't been laid out yet, we probably just haven't been populated yet.
+                // Let's skip this call since it doesn't make sense in this state
+                return false;
+            }
+            mCalledSuper = false;
+            onPageScrolled(0, 0, 0);
+            if (!mCalledSuper) {
+                throw new IllegalStateException(
+                        "onPageScrolled did not call superclass implementation");
+            }
+            return false;
+        }
+        final ViewPager.ItemInfo ii = infoForCurrentScrollPosition();
+        final int width = getClientWidth();
+        final int widthWithMargin = width + mPageMargin;
+        final float marginOffset = (float) mPageMargin / width;
+        final int currentPage = ii.position;
+        final float pageOffset = (((float) xpos / width) - ii.offset)
+                / (ii.widthFactor + marginOffset);
+        final int offsetPixels = (int) (pageOffset * widthWithMargin);
+
+        mCalledSuper = false;
+        onPageScrolled(currentPage, pageOffset, offsetPixels);
+        if (!mCalledSuper) {
+            throw new IllegalStateException(
+                    "onPageScrolled did not call superclass implementation");
+        }
+        return true;
+    }
+
+    private void setScrollState(int newState) {
         if (mScrollState == newState) {
             return;
         }
