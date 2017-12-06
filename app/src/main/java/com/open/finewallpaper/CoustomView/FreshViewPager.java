@@ -96,8 +96,6 @@ public  class FreshViewPager extends ViewGroup {
 
         LayoutParams layoutParams =
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-
-
     }
 
 

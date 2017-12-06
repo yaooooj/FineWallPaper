@@ -2,13 +2,11 @@ package com.open.finewallpaper.CoustomView;
 
 import android.content.Context;
 import android.support.v4.view.MotionEventCompat;
-import android.support.v4.view.ViewCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.EdgeEffectCompat;
-import android.support.v4.widget.ViewDragHelper;
+import android.support.v4.view.VelocityTrackerCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -27,56 +25,38 @@ import java.util.ArrayList;
 public class HeadingView extends ViewGroup {
     private final static String TAG = "HeadingView";
     private boolean DEBUG = true;
-    private Context context;
     private int start;
     private ListAdapter mAdapter;
     private OnItemClickListener mOnItemClickListener;
+    private VelocityTracker mVelocityTracker;
 
-    // Offsets of the first and last items, if known.
-    // Set during population, used to determine if we are at the beginning
-    // or end of the pager data set during touch scrolling.
-    private float mFirstOffset = -Float.MAX_VALUE;
-    private float mLastOffset = Float.MAX_VALUE;
-
-
-    private static final boolean USE_CACHE = false;
     private static final int CLOSE_ENOUGH = 2;
-    /**
-     * ID of the active pointer. This is used to retain consistency during
-     * drags/flings if multiple pointers are used.
-     */
     private int mActivePointerId = INVALID_POINTER;
-    /**
-     * Sentinel value for no current active pointer.
-     * Used by {@link #mActivePointerId}.
-     */
     private static final int INVALID_POINTER = -1;
 
+    private int pagePosition;
     static class ItemInfo {
-        Object object;
-        int position;
-        boolean scrolling;
-        float widthFactor;
-        float offset;
+        Object object; // 加载的View对象
+        int position;  // 在所有View中的位置
+        boolean scrolling;  //是否可以滑动
+        float widthFactor;  //一个view在屏幕中占的比例
+        float offset;       //偏移量
     }
-
     private final ArrayList<ItemInfo> mItems = new ArrayList<ItemInfo>();
-    private int totalHeight;
 
-    private int mTouchSlop;
+    private int totalWidth;
+
     private Scroller mScroller;
-    private int mDefaultGutterSize;
 
     private boolean mIsScrollStarted;
     private boolean mIsBeingDragged;
     private boolean mIsUnableToDrag;
-    private boolean mScrollingCacheEnabled;
-    private boolean mPopulatePending;
 
     private float mLastMotionX;
     private float mLastMotionY;
     private float mInitialMotionX;
     private float mInitialMotionY;
+
 
     public static final int SCROLL_STATE_IDLE = 0;
     public static final int SCROLL_STATE_DRAGGING = 1;
@@ -84,11 +64,9 @@ public class HeadingView extends ViewGroup {
 
     private int mScrollState = SCROLL_STATE_IDLE;
 
-    private EdgeEffectCompat mLeftEdge;
-    private EdgeEffectCompat mRightEdge;
-
+    private int mTouchSlop;
     private int mCloseEnough;
-
+    private int mMaximumVelocity;
     private static final Interpolator sInterpolator = new Interpolator() {
         @Override
         public float getInterpolation(float t) {
@@ -120,8 +98,7 @@ public class HeadingView extends ViewGroup {
         mScroller = new Scroller(context, sInterpolator);
         mCloseEnough = (int) (CLOSE_ENOUGH * density);
         mTouchSlop = configuration.getScaledPagingTouchSlop();
-        mLeftEdge = new EdgeEffectCompat(context);
-        mRightEdge = new EdgeEffectCompat(context);
+        mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
     }
 
     @Override
@@ -216,9 +193,9 @@ public class HeadingView extends ViewGroup {
 
         int childCount = getChildCount();
 
-        int childWidthSize = getMeasuredWidth()  * 2 / 3;
+        int childWidthSize = getMeasuredWidth();
         int childWidthMode = MeasureSpec.EXACTLY;
-        int childHeightSize = getMeasuredHeight() * 4 / 5;
+        int childHeightSize = getMeasuredHeight();
         int childHeightMode = MeasureSpec.EXACTLY ;
 
         for (int i = 0;i < childCount;i ++){
@@ -227,8 +204,8 @@ public class HeadingView extends ViewGroup {
                 continue;
             }
 
-            int makeWidthMeasureSpec = -1;
-            int makeHeightMeasureSpec = -1;
+            int makeWidthMeasureSpec;
+            int makeHeightMeasureSpec;
             makeWidthMeasureSpec = MeasureSpec.makeMeasureSpec(childWidthSize,childWidthMode);
             makeHeightMeasureSpec = MeasureSpec.makeMeasureSpec(childHeightSize,childHeightMode);
             child.measure(makeWidthMeasureSpec,makeHeightMeasureSpec);
@@ -238,7 +215,7 @@ public class HeadingView extends ViewGroup {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        totalHeight = getChildCount() * w;
+        totalWidth = getChildCount() * w;
     }
 
     @Override
@@ -256,6 +233,7 @@ public class HeadingView extends ViewGroup {
         for(int i = 0; i < count;i++){
 
             final View child = getChildAt(i);
+
             if (child.getVisibility() == GONE){
                 continue;
             }
@@ -286,63 +264,45 @@ public class HeadingView extends ViewGroup {
                 return false;
             }
         }
-
+        Log.e(TAG, "onInterceptTouchEvent: " );
         switch (action){
             case MotionEvent.ACTION_DOWN:
                 mLastMotionX = mInitialMotionX = ev.getX();
                 mLastMotionY = mInitialMotionY = ev.getY();
                 mIsUnableToDrag = false;
-
                 mIsScrollStarted = true;
-
-                mScroller.computeScrollOffset();
+                mActivePointerId = ev.getPointerId(0);
+                //mScroller.computeScrollOffset();
                 if (mScrollState == SCROLL_STATE_SETTLING &&
                         Math.abs(mScroller.getFinalX() - mScroller.getCurrX()) > mCloseEnough){
                     mScroller.abortAnimation();
                     mIsBeingDragged = true;
-                    mPopulatePending = false;
-                    populate();
                     requestParentDisallowInterceptTouchEvent(true);
                     setScrollState(SCROLL_STATE_DRAGGING);
-
-                }else {
-                    //completeScroll(false);
-                    mIsBeingDragged = false;
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-
                 final int activePointerId = mActivePointerId;
+                Log.e(TAG, "onInterceptTouchEvent: " + "Move" + activePointerId);
                 if (activePointerId == INVALID_POINTER) {
                     // If we don't have a valid id, the touch down wasn't on content.
+                    Log.e(TAG, "onInterceptTouchEvent: " + "Move Break" );
                     break;
                 }
-
                 final int pointerIndex = ev.findPointerIndex(activePointerId);
                 final float x = ev.getX(pointerIndex);
                 final float dx = x - mLastMotionX;
                 final float xDiff = Math.abs(dx);
                 final float y = ev.getY(pointerIndex);
                 final float yDiff = Math.abs(y - mInitialMotionY);
-                if (DEBUG) Log.v(TAG, "Moved x to " + x + "," + y + " diff=" + xDiff + "," + yDiff);
-
-                if (dx != 0 && !isGutterDrag(mLastMotionX, dx)
-                        && canScroll(this, false, (int) dx, (int) x, (int) y)) {
-                    // Nested view has scrollable area under this point. Let it be handled there.
-                    mLastMotionX = x;
-                    mLastMotionY = y;
-                    mIsUnableToDrag = true;
-                    return false;
-                }
                 if (xDiff > mTouchSlop && xDiff * 0.5f > yDiff) {
-                    if (DEBUG) Log.v(TAG, "Starting drag!");
+                    Log.e(TAG, "onInterceptTouchEvent: " + "Starting drag!" );
                     mIsBeingDragged = true;
                     requestParentDisallowInterceptTouchEvent(true);
                     setScrollState(SCROLL_STATE_DRAGGING);
                     mLastMotionX = dx > 0
                             ? mInitialMotionX + mTouchSlop : mInitialMotionX - mTouchSlop;
                     mLastMotionY = y;
-                    setScrollingCacheEnabled(true);
                 } else if (yDiff > mTouchSlop) {
                     // The finger has moved enough in the vertical
                     // direction to be counted as a drag...  abort
@@ -351,61 +311,162 @@ public class HeadingView extends ViewGroup {
                     if (DEBUG) Log.v(TAG, "Starting unable to drag!");
                     mIsUnableToDrag = true;
                 }
+                /*
                 if (mIsBeingDragged) {
                     // Scroll to follow the motion event
                     if (performDrag(x)) {
                         ViewCompat.postInvalidateOnAnimation(this);
                     }
                 }
+                */
                 break;
             case MotionEvent.ACTION_POINTER_UP:
 
                 break;
         }
 
-        return true;
-    }
-
-
-    protected boolean canScroll(View v, boolean checkV, int dx, int x, int y) {
-        if (v instanceof ViewGroup) {
-            final ViewGroup group = (ViewGroup) v;
-            final int scrollX = v.getScrollX();
-            final int scrollY = v.getScrollY();
-            final int count = group.getChildCount();
-            // Count backwards - let topmost views consume scroll distance first.
-            for (int i = count - 1; i >= 0; i--) {
-                // TODO: Add versioned support here for transformed views.
-                // This will not work for transformed views in Honeycomb+
-                final View child = group.getChildAt(i);
-                if (x + scrollX >= child.getLeft() && x + scrollX < child.getRight()
-                        && y + scrollY >= child.getTop() && y + scrollY < child.getBottom()
-                        && canScroll(child, true, dx, x + scrollX - child.getLeft(),
-                        y + scrollY - child.getTop())) {
-                    return true;
-                }
-            }
-        }
-
-        return checkV && ViewCompat.canScrollHorizontally(v, -dx);
-    }
-
-
-    public void resetTouch(){
-
+        return mIsBeingDragged;
     }
 
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        Log.e(TAG, "onTouchEvent: " + "Down" );
+        if (mAdapter == null || mAdapter.getCount() == 0) {
+            // Nothing to present or scroll; nothing to touch.
+            return false;
+        }
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+        mVelocityTracker.addMovement(event);
 
+        final int action = event.getAction();
+        boolean needsInvalidate = false;
+
+        switch (action & MotionEventCompat.ACTION_MASK){
+            case MotionEvent.ACTION_DOWN: {
+                mScroller.abortAnimation();
+
+                // Remember where the motion event started
+                mLastMotionX = mInitialMotionX = event.getX();
+                mLastMotionY = mInitialMotionY = event.getY();
+                mActivePointerId = event.getPointerId(0);
+                break;
+            }
+            case MotionEvent.ACTION_MOVE:
+                if (!mIsBeingDragged) {
+                    final int pointerIndex = event.findPointerIndex(mActivePointerId);
+                    if (pointerIndex == -1) {
+                        // A child has consumed some touch events and put us into an inconsistent
+                        // state.
+                        needsInvalidate = resetTouch();
+                        break;
+                    }
+                    final float x = event.getX(pointerIndex);
+                    final float xDiff = Math.abs(x - mLastMotionX);
+                    final float y = event.getY(pointerIndex);
+                    final float yDiff = Math.abs(y - mLastMotionY);
+                    if (DEBUG) {
+                        Log.v(TAG, "Moved x to " + x + "," + y + " diff=" + xDiff + "," + yDiff);
+                    }
+                    if (xDiff > mTouchSlop && xDiff > yDiff) {
+                        if (DEBUG) Log.v(TAG, "Starting drag!");
+                        mIsBeingDragged = true;
+                        requestParentDisallowInterceptTouchEvent(true);
+                        mLastMotionX = x - mInitialMotionX > 0 ? mInitialMotionX + mTouchSlop :
+                                mInitialMotionX - mTouchSlop;
+                        mLastMotionY = y;
+                        setScrollState(SCROLL_STATE_DRAGGING);
+
+                        // Disallow Parent Intercept, just in case
+                        ViewParent parent = getParent();
+                        if (parent != null) {
+                            parent.requestDisallowInterceptTouchEvent(true);
+                        }
+                    }
+                }
+                // Not else! Note that mIsBeingDragged can be set above.
+
+                if (mIsBeingDragged) {
+                    // Scroll to follow the motion event
+                    final int activePointerIndex = event.findPointerIndex(mActivePointerId);
+                    final float x = event.getX(activePointerIndex);
+                    performDrag(x);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                if (mIsBeingDragged) {
+                    final VelocityTracker velocityTracker = mVelocityTracker;
+                    velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                    int initialVelocity = (int) VelocityTrackerCompat.getXVelocity(
+                            velocityTracker, mActivePointerId);
+                    final int width = getMeasuredWidth();
+                    final int scrollX = getScrollX();
+
+                    final int activePointerIndex = event.findPointerIndex(mActivePointerId);
+                    final float x = event.getX(activePointerIndex);
+                    final int totalDelta = (int) (x - mInitialMotionX);
+                    if (totalDelta > width / 2){
+                        targetNextPage();
+                        //mScroller.startScroll();
+                    }
+                    needsInvalidate = resetTouch();
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                if (mIsBeingDragged) {
+                    //scrollToItem(mCurItem, true, 0, false);
+                    needsInvalidate = resetTouch();
+                }
+                break;
+            case MotionEventCompat.ACTION_POINTER_DOWN: {
+                final int index = MotionEventCompat.getActionIndex(event);
+                final float x = event.getX(index);
+                mLastMotionX = x;
+                mActivePointerId = event.getPointerId(index);
+                break;
+            }
+            case MotionEventCompat.ACTION_POINTER_UP:
+                //onSecondaryPointerUp(event);
+                mLastMotionX = event.getX(event.findPointerIndex(mActivePointerId));
+                break;
+        }
         return true;
     }
 
+    private boolean performDrag(float x){
+        final float deltaX = mLastMotionX - x;
+        mLastMotionX = x;
+
+        float oldScrollX = getScrollX();
+        float scrollX = oldScrollX + deltaX;
+        scrollTo((int) scrollX,getScrollY());
+        return true;
+    }
+
+    private void targetNextPage(){
+        final float oldScroll = getScrollX();
+        final int width = getMeasuredWidth();
+        int offset = width + getScrollX();
+        if (offset  > oldScroll ){
+            mScroller.startScroll(offset,0,width,0,500);
+            pagePosition += 1;
+        }
+    }
+
+
+    public boolean resetTouch(){
+
+        return false;
+    }
 
     @Override
     public void computeScroll() {
-
+        if (mScroller.computeScrollOffset()){
+            scrollTo(mScroller.getCurrX(),mScroller.getCurrY());
+            postInvalidate();
+        }
     }
 
     private void requestParentDisallowInterceptTouchEvent(boolean disallowIntercept) {
@@ -415,106 +476,7 @@ public class HeadingView extends ViewGroup {
         }
     }
 
-    private void setScrollingCacheEnabled(boolean enabled) {
-        if (mScrollingCacheEnabled != enabled) {
-            mScrollingCacheEnabled = enabled;
-            if (USE_CACHE) {
-                final int size = getChildCount();
-                for (int i = 0; i < size; ++i) {
-                    final View child = getChildAt(i);
-                    if (child.getVisibility() != GONE) {
-                        child.setDrawingCacheEnabled(enabled);
-                    }
-                }
-            }
-        }
-    }
-
-    private int getClientWidth() {
-        return getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
-    }
-
-    private boolean performDrag(float x) {
-        boolean needsInvalidate = false;
-
-        final float deltaX = mLastMotionX - x;
-        mLastMotionX = x;
-
-        float oldScrollX = getScrollX();
-        float scrollX = oldScrollX + deltaX;
-        final int width = getClientWidth();
-
-        float leftBound = width * mFirstOffset;
-        float rightBound = width * mLastOffset;
-        boolean leftAbsolute = true;
-        boolean rightAbsolute = true;
-
-        final ItemInfo firstItem = mItems.get(0);
-        final ItemInfo lastItem = mItems.get(mItems.size() - 1);
-        if (firstItem.position != 0) {
-            leftAbsolute = false;
-            leftBound = firstItem.offset * width;
-        }
-        if (lastItem.position != mAdapter.getCount() - 1) {
-            rightAbsolute = false;
-            rightBound = lastItem.offset * width;
-        }
-
-        if (scrollX < leftBound) {
-            if (leftAbsolute) {
-                float over = leftBound - scrollX;
-                needsInvalidate = mLeftEdge.onPull(Math.abs(over) / width);
-            }
-            scrollX = leftBound;
-        } else if (scrollX > rightBound) {
-            if (rightAbsolute) {
-                float over = scrollX - rightBound;
-                needsInvalidate = mRightEdge.onPull(Math.abs(over) / width);
-            }
-            scrollX = rightBound;
-        }
-        // Don't lose the rounded component
-        mLastMotionX += scrollX - (int) scrollX;
-        scrollTo((int) scrollX, getScrollY());
-        pageScrolled((int) scrollX);
-
-        return needsInvalidate;
-    }
-
-    private boolean pageScrolled(int xpos) {
-        if (mItems.size() == 0) {
-            if (mFirstLayout) {
-                // If we haven't been laid out yet, we probably just haven't been populated yet.
-                // Let's skip this call since it doesn't make sense in this state
-                return false;
-            }
-            mCalledSuper = false;
-            onPageScrolled(0, 0, 0);
-            if (!mCalledSuper) {
-                throw new IllegalStateException(
-                        "onPageScrolled did not call superclass implementation");
-            }
-            return false;
-        }
-        final ViewPager.ItemInfo ii = infoForCurrentScrollPosition();
-        final int width = getClientWidth();
-        final int widthWithMargin = width + mPageMargin;
-        final float marginOffset = (float) mPageMargin / width;
-        final int currentPage = ii.position;
-        final float pageOffset = (((float) xpos / width) - ii.offset)
-                / (ii.widthFactor + marginOffset);
-        final int offsetPixels = (int) (pageOffset * widthWithMargin);
-
-        mCalledSuper = false;
-        onPageScrolled(currentPage, pageOffset, offsetPixels);
-        if (!mCalledSuper) {
-            throw new IllegalStateException(
-                    "onPageScrolled did not call superclass implementation");
-        }
-        return true;
-    }
-
-    private void setScrollState(int newState) {
+    void setScrollState(int newState) {
         if (mScrollState == newState) {
             return;
         }
