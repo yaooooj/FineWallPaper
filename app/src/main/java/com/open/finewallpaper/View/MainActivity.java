@@ -109,6 +109,9 @@ public class MainActivity extends BaseActivity implements ActivityView  {
         //更新ViewPager中的数据
         ViewPagerAdapter adapter = new ViewPagerAdapter(finPics,0,MainActivity.this);
         viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(3);
+        viewPager.setPageTransformer(false,new ScaleTransformer());
+
         adapter.setListener(new ViewPagerAdapter.OnViewPagerItemListener() {
             @Override
             public void click(int position) {
@@ -191,6 +194,7 @@ public class MainActivity extends BaseActivity implements ActivityView  {
     public void initViewPager(){
 
         viewPager = (ViewPager) findViewById(R.id.main_vp);
+
 
     }
 
@@ -292,6 +296,64 @@ public class MainActivity extends BaseActivity implements ActivityView  {
         int blue = Color.blue(color);
         int alpha = (int) (Color.alpha(color) * fraction *0.7);
         return Color.argb(alpha, red, green, blue);
+    }
+
+    private class ScaleTransformer implements ViewPager.PageTransformer {
+        private static final float MIN_SCALE = 0.85f;
+        private static final float MIN_ALPHA = 0.6f;
+
+        @Override
+        public void transformPage(View page, float position) {
+            if (position < -1 || position > 1) {
+                //page.setAlpha(MIN_ALPHA);
+                page.setScaleX(MIN_SCALE);
+                page.setScaleY(MIN_SCALE);
+            } else  { // [-1,1]
+                float scaleFactor = Math.max(MIN_SCALE, 1 - Math.abs(position));
+                if (position < 0) {
+                    float scaleX = 1 + 0.5f * position;
+                    Log.d("google_lenve_fb", "transformPage: scaleX:" + scaleX);
+                    page.setScaleX(scaleX);
+                    page.setScaleY(scaleX);
+                } else {
+                    float scaleX = 1 - 0.7f * position;
+                    page.setScaleX(scaleX);
+                    page.setScaleY(scaleX);
+                }
+                //page.setAlpha(MIN_ALPHA + (scaleFactor - MIN_SCALE) / (1 - MIN_SCALE) * (1 - MIN_ALPHA));
+            }
+        }
+    }
+    public class HeadViewPagerTransformer implements ViewPager.PageTransformer {
+        private static final float MIN_SCALE = 0.75f;
+        //主要是设置在不同位置上的VIEW的活动动画
+        @Override
+        public void transformPage(View view, float position) {
+            // TODO Auto-generated method stub
+            int pageWidth = view.getWidth();
+
+            if (position < -1) { // [-Infinity,-1)
+                view.setAlpha(0);
+            }
+            else if (position <= 0) { // [-1,0]
+                view.setAlpha(1);
+                view.setTranslationX(0);
+                float x = -1.0f * (2f / 3f) * pageWidth * position;
+                view.setTranslationX(x);
+                float scaleFactor = MIN_SCALE + (2 - MIN_SCALE) * (1 - Math.abs(position));
+                view.setScaleX(scaleFactor);
+                view.setScaleY(scaleFactor);
+            } else if (position <= 1) { // (0,1]
+                view.setAlpha(1);
+                float x = -1.0f * (2f / 3f) * pageWidth * position;
+                view.setTranslationX(x);
+                float scaleFactor = MIN_SCALE + (2 - MIN_SCALE) * (1 - Math.abs(position));
+                view.setScaleX(scaleFactor);
+                view.setScaleY(scaleFactor);
+
+            }
+        }
+
     }
 
 }

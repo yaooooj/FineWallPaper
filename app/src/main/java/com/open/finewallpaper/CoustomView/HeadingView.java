@@ -331,7 +331,7 @@ public class HeadingView extends ViewGroup {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Log.e(TAG, "onTouchEvent: " + "Down" );
+
         if (mAdapter == null || mAdapter.getCount() == 0) {
             // Nothing to present or scroll; nothing to touch.
             return false;
@@ -346,6 +346,7 @@ public class HeadingView extends ViewGroup {
 
         switch (action & MotionEventCompat.ACTION_MASK){
             case MotionEvent.ACTION_DOWN: {
+                Log.e(TAG, "onTouchEvent: " + "Down" );
                 mScroller.abortAnimation();
 
                 // Remember where the motion event started
@@ -355,6 +356,7 @@ public class HeadingView extends ViewGroup {
                 break;
             }
             case MotionEvent.ACTION_MOVE:
+                Log.e(TAG, "onTouchEvent: " + " Move" );
                 if (!mIsBeingDragged) {
                     final int pointerIndex = event.findPointerIndex(mActivePointerId);
                     if (pointerIndex == -1) {
@@ -390,6 +392,7 @@ public class HeadingView extends ViewGroup {
 
                 if (mIsBeingDragged) {
                     // Scroll to follow the motion event
+
                     final int activePointerIndex = event.findPointerIndex(mActivePointerId);
                     final float x = event.getX(activePointerIndex);
                     performDrag(x);
@@ -397,6 +400,7 @@ public class HeadingView extends ViewGroup {
                 break;
             case MotionEvent.ACTION_UP:
                 if (mIsBeingDragged) {
+
                     final VelocityTracker velocityTracker = mVelocityTracker;
                     velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                     int initialVelocity = (int) VelocityTrackerCompat.getXVelocity(
@@ -408,8 +412,9 @@ public class HeadingView extends ViewGroup {
                     final float x = event.getX(activePointerIndex);
                     final int totalDelta = (int) (x - mInitialMotionX);
                     if (totalDelta > width / 2){
-                        targetNextPage();
-                        //mScroller.startScroll();
+                        Log.e(TAG, "onTouchEvent: " + "UP" );
+                        targetNextPage(x);
+
                     }
                     needsInvalidate = resetTouch();
                 }
@@ -445,12 +450,17 @@ public class HeadingView extends ViewGroup {
         return true;
     }
 
-    private void targetNextPage(){
-        final float oldScroll = getScrollX();
+    private void targetNextPage(float x){
+        final float deltaX = mLastMotionX - x;
+        mLastMotionX = x;
+        float oldScrollX = getScrollX();
+        float scrollX = oldScrollX + deltaX;
         final int width = getMeasuredWidth();
+        final int w = Math.abs(width);
         int offset = width + getScrollX();
-        if (offset  > oldScroll ){
-            mScroller.startScroll(offset,0,width,0,500);
+        if (deltaX > w / 4 ){
+            Log.e(TAG, "targetNextPage: " + w );
+            mScroller.startScroll(0,0,w,0,500);
             pagePosition += 1;
         }
     }

@@ -35,7 +35,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.viewa);
 
-
+        /*
         multiCharacterView = (MultiCharacterView) findViewById(R.id.multi_view);
         multiCharacterView.setText("正在加载");
 
@@ -54,6 +54,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         Button button1 = (Button) findViewById(R.id.refresh_bt);
         button1.setOnClickListener(this);
 
+
         List<HeadingBean> data = new ArrayList<>();
         HeadingBean headingBean;
         for (int i = 0; i < 4; i++) {
@@ -64,6 +65,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
 
         HeadingView headingView = (HeadingView) findViewById(R.id.heading);
         headingView.setAdapter(new HeadingAdapter(data));
+        */
 
         initVp();
 
@@ -78,18 +80,22 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         ViewPager viewPager = (ViewPager) findViewById(R.id.heading_vp);
+        viewPager.setPageTransformer(false,new ScaleTransformer());
         viewPager.setAdapter(new VpAdapter(data));
+
 
     }
 
     @Override
     public void onClick(View v) {
+        /*
         if (v.getId() == R.id.button){
             Log.e(TAG, "onClick: " );
            multiCharacterView.dismiss();
         }else if (v.getId() == R.id.refresh_bt){
             multiCharacterView.show();
         }
+        */
     }
 
     private static class HeadingAdapter extends BaseAdapter{
@@ -121,7 +127,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                 viewHolder = new ViewHolder();
                 LayoutInflater inflater = LayoutInflater.from(parent.getContext());
                 convertView = inflater.inflate(R.layout.heading_item_view,parent,false);
-                viewHolder.mTextView = (TextView) convertView.findViewById(R.id.heading_tv);
+                viewHolder.mTextView = (TextView) convertView.findViewById(R.id.tv);
                 convertView.setTag(viewHolder);
             }else {
                 viewHolder = (ViewHolder) convertView.getTag();
@@ -163,5 +169,36 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         public void destroyItem(ViewGroup container, int position, Object object) {
             container.removeView(data.get(position));
         }
+
+
     }
+
+    private static class ScaleTransformer implements ViewPager.PageTransformer {
+        private static final float MIN_SCALE = 0.70f;
+        private static final float MIN_ALPHA = 0.5f;
+
+        @Override
+        public void transformPage(View page, float position) {
+            if (position < -1 || position > 1) {
+                //page.setAlpha(MIN_ALPHA);
+                page.setScaleX(MIN_SCALE);
+                page.setScaleY(MIN_SCALE);
+            } else  { // [-1,1]
+                float scaleFactor = Math.max(MIN_SCALE, 1 - Math.abs(position));
+                if (position < 0) {
+                    float scaleX = 1 + 0.3f * position;
+                    Log.d("google_lenve_fb", "transformPage: scaleX:" + scaleX);
+                    page.setScaleX(scaleX);
+                    page.setScaleY(scaleX);
+                } else {
+                    float scaleX = 1 - 0.3f * position;
+                    page.setScaleX(scaleX);
+                    page.setScaleY(scaleX);
+                }
+                //page.setAlpha(MIN_ALPHA + (scaleFactor - MIN_SCALE) / (1 - MIN_SCALE) * (1 - MIN_ALPHA));
+            }
+        }
+    }
+
+
 }
