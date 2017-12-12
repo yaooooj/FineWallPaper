@@ -3,11 +3,10 @@ package com.open.finewallpaper.View;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.NetworkOnMainThreadException;
 import android.os.Parcelable;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
+import android.support.v4.view.CuVp;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -26,7 +25,6 @@ import com.open.finewallpaper.Bean.ItemBean;
 import com.open.finewallpaper.Bean.SetBean;
 import com.open.finewallpaper.CoustomView.LoadingFooter;
 import com.open.finewallpaper.CoustomView.MyCustom;
-import com.open.finewallpaper.HTTP.NetWorkUtils;
 import com.open.finewallpaper.Presenter.LoadPresenterImp;
 import com.open.finewallpaper.R;
 import com.open.finewallpaper.Util.GlideApp;
@@ -43,7 +41,7 @@ public class MainActivity extends BaseActivity implements ActivityView  {
     private final static String TAG = "MainActivity";
     private SwipeRefreshLayout refreshLayout;
     private RecyclerView recyclerView;
-    private ViewPager viewPager;
+    private CuVp viewPager;
     private Toolbar mToolbar;
     private AppBarLayout appBarLayout;
 
@@ -109,8 +107,6 @@ public class MainActivity extends BaseActivity implements ActivityView  {
         //更新ViewPager中的数据
         ViewPagerAdapter adapter = new ViewPagerAdapter(finPics,0,MainActivity.this);
         viewPager.setAdapter(adapter);
-        viewPager.setOffscreenPageLimit(3);
-        viewPager.setPageTransformer(false,new ScaleTransformer());
 
         adapter.setListener(new ViewPagerAdapter.OnViewPagerItemListener() {
             @Override
@@ -193,8 +189,10 @@ public class MainActivity extends BaseActivity implements ActivityView  {
 
     public void initViewPager(){
 
-        viewPager = (ViewPager) findViewById(R.id.main_vp);
+        viewPager = (CuVp) findViewById(R.id.main_vp);
 
+        viewPager.setOffscreenPageLimit(3);
+        viewPager.setPageTransformer(false,new ScaleTransformer());
 
     }
 
@@ -298,7 +296,7 @@ public class MainActivity extends BaseActivity implements ActivityView  {
         return Color.argb(alpha, red, green, blue);
     }
 
-    private class ScaleTransformer implements ViewPager.PageTransformer {
+    private class ScaleTransformer implements CuVp.PageTransformer {
         private static final float MIN_SCALE = 0.85f;
         private static final float MIN_ALPHA = 0.6f;
 
@@ -324,7 +322,7 @@ public class MainActivity extends BaseActivity implements ActivityView  {
             }
         }
     }
-    public class HeadViewPagerTransformer implements ViewPager.PageTransformer {
+    public class HeadViewPagerTransformer implements CuVp.PageTransformer {
         private static final float MIN_SCALE = 0.75f;
         //主要是设置在不同位置上的VIEW的活动动画
         @Override

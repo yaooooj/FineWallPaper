@@ -1,26 +1,13 @@
 package com.open.finewallpaper.Adapter;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
-import com.open.finewallpaper.Bean.PictureBean;
 import com.open.finewallpaper.Bean.SetBean;
-import com.open.finewallpaper.Util.DisplayUtil;
-import com.open.finewallpaper.Util.GlideApp;
 import com.open.finewallpaper.Util.GlideUtil;
-import com.open.finewallpaper.Util.ScreenUtil;
 
 import java.util.ArrayList;
 import java.util.List;

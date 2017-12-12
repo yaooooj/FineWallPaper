@@ -1,22 +1,19 @@
 package com.open.finewallpaper.Fragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
+import android.support.v4.view.CuVp;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -27,10 +24,8 @@ import com.open.finewallpaper.CoustomView.FreshViewPager;
 import com.open.finewallpaper.CoustomView.HeaderView;
 import com.open.finewallpaper.CoustomView.OnPullListener;
 import com.open.finewallpaper.R;
-import com.open.finewallpaper.SetWallPaper.DownloadImage;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -47,7 +42,7 @@ public class NextFragment extends Fragment{
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    private ViewPager mViewPager;
+    private CuVp mViewPager;
 
     // TODO: Rename and change types of parameters
     private ArrayList<SetBean> mParam1;
@@ -118,7 +113,7 @@ public class NextFragment extends Fragment{
                 }
             });
 
-            mViewPager = (ViewPager) view.findViewById(R.id.nextfragment_vp);
+            mViewPager = (CuVp) view.findViewById(R.id.nextfragment_vp);
             mViewPager.setAdapter(new ViewPagerAdapter(mParam1,mParam2,getActivity()));
             mViewPager.setCurrentItem(mParam2);
 

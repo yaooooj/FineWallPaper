@@ -1,25 +1,19 @@
 package com.open.finewallpaper.View;
 
 import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.CuVp;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.open.finewallpaper.BaseActivity;
 import com.open.finewallpaper.Bean.HeadingBean;
-import com.open.finewallpaper.CoustomView.HeadingView;
+import com.open.finewallpaper.CoustomView.Aaa;
 import com.open.finewallpaper.CoustomView.MultiCharacterView;
 import com.open.finewallpaper.R;
 
@@ -79,8 +73,10 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
             data.add(view) ;
         }
 
-        ViewPager viewPager = (ViewPager) findViewById(R.id.heading_vp);
+        Aaa viewPager = (Aaa) findViewById(R.id.heading_vp);
         viewPager.setPageTransformer(false,new ScaleTransformer());
+        viewPager.setOffscreenPageLimit(3);
+        //viewPager.setPageMargin(20);
         viewPager.setAdapter(new VpAdapter(data));
 
 
@@ -170,28 +166,35 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
             container.removeView(data.get(position));
         }
 
-
+        @Override
+        public float getPageWidth(int position) {
+            return 1.0f;
+        }
     }
 
     private static class ScaleTransformer implements ViewPager.PageTransformer {
-        private static final float MIN_SCALE = 0.70f;
+        private static final float MIN_SCALE = 0.80f;
         private static final float MIN_ALPHA = 0.5f;
 
         @Override
         public void transformPage(View page, float position) {
             if (position < -1 || position > 1) {
                 //page.setAlpha(MIN_ALPHA);
+                //Log.e("google_lenve_fb", "transformPage: scaleX:"+ position);
                 page.setScaleX(MIN_SCALE);
                 page.setScaleY(MIN_SCALE);
             } else  { // [-1,1]
+                //Log.e("google_lenve_fb", "transformPage: scaleX:");
                 float scaleFactor = Math.max(MIN_SCALE, 1 - Math.abs(position));
-                if (position < 0) {
-                    float scaleX = 1 + 0.3f * position;
-                    Log.d("google_lenve_fb", "transformPage: scaleX:" + scaleX);
+                if (position <= 0) {
+                    float scaleX = 0.8f + 0.3f * position;
+                    Log.e("google_lenve_fb", "transformPage: scaleX:" + scaleX);
                     page.setScaleX(scaleX);
                     page.setScaleY(scaleX);
-                } else {
-                    float scaleX = 1 - 0.3f * position;
+
+                } else if (position > 0){
+                    float scaleX = 0.8f - 0.3f * position;
+                    //Log.d("google_lenve_fb", "transformPage: scaleX:" + scaleX);
                     page.setScaleX(scaleX);
                     page.setScaleY(scaleX);
                 }

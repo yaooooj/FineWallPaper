@@ -1,6 +1,6 @@
 package com.open.finewallpaper.Adapter;
 
-import android.support.v4.view.ViewPager;
+import android.support.v4.view.CuVp;
 import android.support.v7.widget.RecyclerView;
 import android.util.SparseArray;
 import android.view.View;
@@ -55,7 +55,7 @@ class BaseViewHolder extends RecyclerView.ViewHolder {
         this.tag = tag;
     }
 
-    public ViewPager setViewPager(int resId){
+    public CuVp setViewPager(int resId){
         return getView(resId);
     }
 }

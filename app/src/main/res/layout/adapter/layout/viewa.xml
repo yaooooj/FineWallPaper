@@ -32,18 +32,18 @@
         android:layout_width="match_parent"
         android:layout_height="10dp"/>
 
-    <android.support.v4.view.ViewPager
+    <com.open.finewallpaper.CoustomView.Aaa
         android:id="@+id/heading_vp"
         android:layout_width="match_parent"
         android:layout_height="400dp"
+        android:layout_gravity="center"
         android:clipToPadding="false"
-        android:paddingBottom="24dp"
-        android:paddingStart="60dp"
+        android:paddingStart="30dp"
         android:paddingEnd="60dp"
-        android:paddingTop="24dp"
 
+        android:background="@color/mediumslateblue"
         >
-    </android.support.v4.view.ViewPager>
+    </com.open.finewallpaper.CoustomView.Aaa>
 
 
 </LinearLayout>

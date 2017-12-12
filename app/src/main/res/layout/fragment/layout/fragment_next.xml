@@ -14,12 +14,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <android.support.v4.view.ViewPager
+            <android.support.v4.view.CuVp
                 android:id="@+id/nextfragment_vp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-            </android.support.v4.view.ViewPager>
+            </android.support.v4.view.CuVp>
 
 
 
