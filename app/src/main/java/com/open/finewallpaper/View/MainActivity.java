@@ -27,6 +27,7 @@ import com.open.finewallpaper.CoustomView.LoadingFooter;
 import com.open.finewallpaper.CoustomView.MyCustom;
 import com.open.finewallpaper.Presenter.LoadPresenterImp;
 import com.open.finewallpaper.R;
+import com.open.finewallpaper.TestFile.TestActivity;
 import com.open.finewallpaper.Util.GlideApp;
 import com.open.finewallpaper.Util.RecyclerViewStateUtils;
 import com.open.finewallpaper.Util.RvScrollListener;
@@ -260,10 +261,8 @@ public class MainActivity extends BaseActivity implements ActivityView  {
                 startActivity(intent);
             }
         });
-
         //获取数据填充
         onRefresh();
-
     }
 
 
@@ -321,37 +320,6 @@ public class MainActivity extends BaseActivity implements ActivityView  {
                 //page.setAlpha(MIN_ALPHA + (scaleFactor - MIN_SCALE) / (1 - MIN_SCALE) * (1 - MIN_ALPHA));
             }
         }
-    }
-    public class HeadViewPagerTransformer implements CuVp.PageTransformer {
-        private static final float MIN_SCALE = 0.75f;
-        //主要是设置在不同位置上的VIEW的活动动画
-        @Override
-        public void transformPage(View view, float position) {
-            // TODO Auto-generated method stub
-            int pageWidth = view.getWidth();
-
-            if (position < -1) { // [-Infinity,-1)
-                view.setAlpha(0);
-            }
-            else if (position <= 0) { // [-1,0]
-                view.setAlpha(1);
-                view.setTranslationX(0);
-                float x = -1.0f * (2f / 3f) * pageWidth * position;
-                view.setTranslationX(x);
-                float scaleFactor = MIN_SCALE + (2 - MIN_SCALE) * (1 - Math.abs(position));
-                view.setScaleX(scaleFactor);
-                view.setScaleY(scaleFactor);
-            } else if (position <= 1) { // (0,1]
-                view.setAlpha(1);
-                float x = -1.0f * (2f / 3f) * pageWidth * position;
-                view.setTranslationX(x);
-                float scaleFactor = MIN_SCALE + (2 - MIN_SCALE) * (1 - Math.abs(position));
-                view.setScaleX(scaleFactor);
-                view.setScaleY(scaleFactor);
-
-            }
-        }
-
     }
 
 }

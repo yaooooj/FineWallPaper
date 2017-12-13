@@ -58,11 +58,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             return;
         }
 
-
         mCustomDialog = new CustomDialog(this,R.style.progress_dialog_loading,"拼命加载中。。。");
-
-
-
         /*
         if (!isAllowScreenRoate) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -84,8 +80,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         FileUtil.init();
     }
 
-
-
     private void steepStatusBar() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             // 透明状态栏
@@ -105,7 +99,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (mCustomDialog != null && mCustomDialog.isShowing())
         mCustomDialog.hide();
     }
-
 
     @Override
     public void onBackPressed() {

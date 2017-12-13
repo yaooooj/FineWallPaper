@@ -1,14 +1,18 @@
-package com.open.finewallpaper.View;
+package com.open.finewallpaper.TestFile;
 
+import android.os.Build;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.CuVp;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
@@ -28,39 +32,25 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.viewa);
-
-        /*
-        multiCharacterView = (MultiCharacterView) findViewById(R.id.multi_view);
-        multiCharacterView.setText("正在加载");
-
-        multiCharacterView1 = (MultiCharacterView) findViewById(R.id.load_more);
-        multiCharacterView1.setText("Refresh", MultiCharacterView.Type.EN);
-        multiCharacterView1.setOnFreshListener(new MultiCharacterView.OnFreshListener() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            // 透明状态栏
+            getWindow().addFlags(
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            // 透明导航栏
+            getWindow().addFlags(
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        }
+        Toolbar mToolBar = (Toolbar) findViewById(R.id.viewa_tb);
+        setSupportActionBar(mToolBar);
+        if (getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
-            public void onFresh() {
-                //Toast.makeText(TestActivity.this,"refresh complete",Toast.LENGTH_SHORT).show();
+            public void onClick(View v) {
+                finish();
             }
         });
-
-        Button button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(this);
-
-        Button button1 = (Button) findViewById(R.id.refresh_bt);
-        button1.setOnClickListener(this);
-
-
-        List<HeadingBean> data = new ArrayList<>();
-        HeadingBean headingBean;
-        for (int i = 0; i < 4; i++) {
-            headingBean = new HeadingBean();
-            headingBean.setText("hah" + i);
-            data.add(headingBean);
-        }
-
-        HeadingView headingView = (HeadingView) findViewById(R.id.heading);
-        headingView.setAdapter(new HeadingAdapter(data));
-        */
-
         initVp();
 
     }
@@ -72,14 +62,11 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
             View view = LayoutInflater.from(this).inflate(R.layout.heading_item_view,null);
             data.add(view) ;
         }
-
         Aaa viewPager = (Aaa) findViewById(R.id.heading_vp);
-        viewPager.setPageTransformer(false,new ScaleTransformer());
         viewPager.setOffscreenPageLimit(3);
-        //viewPager.setPageMargin(20);
+        //viewPager.setPageMargin(110);
         viewPager.setAdapter(new VpAdapter(data));
-
-
+        viewPager.setPageTransformer(false,new ScaleTransformer());
     }
 
     @Override
@@ -173,30 +160,45 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private static class ScaleTransformer implements ViewPager.PageTransformer {
-        private static final float MIN_SCALE = 0.80f;
+        private static final float MIN_SCALE = 0.8f;
         private static final float MIN_ALPHA = 0.5f;
-
+        private int elevationInit = 40;
         @Override
         public void transformPage(View page, float position) {
-            if (position < -1 || position > 1) {
+
+            CardView cardView = (CardView) page.findViewById(R.id.ad_vp_card);
+            if (position > 1) {
                 //page.setAlpha(MIN_ALPHA);
-                //Log.e("google_lenve_fb", "transformPage: scaleX:"+ position);
-                page.setScaleX(MIN_SCALE);
-                page.setScaleY(MIN_SCALE);
-            } else  { // [-1,1]
-                //Log.e("google_lenve_fb", "transformPage: scaleX:");
+                float scale = 1.0f - 0.2f * position;
+                float elevation = (1.0f - position ) * elevationInit;
+                page.setScaleX(scale);
+                page.setScaleY(scale);
+                cardView.setCardElevation(elevation);
+            }else if (position < -1){
+                float scale = 1.0f + 0.2f * position;
+                float elevation = (1.0f + position ) * elevationInit;
+                page.setScaleX(scale);
+                page.setScaleY(scale);
+                cardView.setCardElevation(elevation);
+            }
+            else  { // [-1,1]
                 float scaleFactor = Math.max(MIN_SCALE, 1 - Math.abs(position));
-                if (position <= 0) {
-                    float scaleX = 0.8f + 0.3f * position;
-                    Log.e("google_lenve_fb", "transformPage: scaleX:" + scaleX);
+                if (position < 0) {
+                    //Log.e(TAG, "(transformPage: position < 0) = " + position );
+                    float scaleX = 1.0f + 0.2f * position;
+                    float elevation = (1.0f + position ) * elevationInit;
+                   // Log.e("google_lenve_fb", "transformPage: scaleX:" + scaleX);
                     page.setScaleX(scaleX);
                     page.setScaleY(scaleX);
+                    cardView.setCardElevation(elevation);
 
                 } else if (position > 0){
-                    float scaleX = 0.8f - 0.3f * position;
-                    //Log.d("google_lenve_fb", "transformPage: scaleX:" + scaleX);
+                    Log.e(TAG, "(transformPage: position > 0) == " + position );
+                    float scaleX = 1.0f - 0.2f * position;
+                    float elevation = (1.0f - position ) * elevationInit;
                     page.setScaleX(scaleX);
                     page.setScaleY(scaleX);
+                    cardView.setCardElevation(elevation);
                 }
                 //page.setAlpha(MIN_ALPHA + (scaleFactor - MIN_SCALE) / (1 - MIN_SCALE) * (1 - MIN_ALPHA));
             }

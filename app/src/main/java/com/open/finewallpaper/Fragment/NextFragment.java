@@ -104,7 +104,6 @@ public class NextFragment extends Fragment{
             if (activity.getSupportActionBar()!= null){
                 activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                 activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
-
             }
             toolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override

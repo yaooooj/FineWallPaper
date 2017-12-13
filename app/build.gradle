@@ -27,6 +27,7 @@ android {
                             'src/main/res/layout/adapter',
                             'src/main/res/layout/customeview',
                             'src/main/res/layout/error',
+                            'src/main/res/layout/testlayout',
                             'src/main/res/layout',
                             'src/main/res'
                     ]
