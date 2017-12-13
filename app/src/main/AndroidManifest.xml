@@ -40,7 +40,6 @@
         </activity>
         <activity android:name=".View.ErrorActivity"></activity>
         <activity android:name=".TestFile.TestActivity"></activity>
-        <activity android:name=".TestFile.TestRv"></activity>
     </application>
 
 </manifest>
