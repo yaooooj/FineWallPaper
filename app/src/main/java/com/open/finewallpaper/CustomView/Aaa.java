@@ -1,7 +1,6 @@
-package com.open.finewallpaper.CoustomView;
+package com.open.finewallpaper.CustomView;
 
 import android.content.Context;
-import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -48,17 +47,17 @@ public class Aaa extends ViewPager {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         boolean intercept  = false;
         final int action = ev.getAction();
-        Log.e(TAG, "onInterceptTouchEvent: " + getCurrentItem() );
-        Log.e(TAG, "onInterceptTouchEvent: getScrollX = " + getScrollX() );
+       // Log.e(TAG, "onInterceptTouchEvent: " + getCurrentItem() );
+        //Log.e(TAG, "onInterceptTouchEvent: getScrollX = " + getScrollX() );
         if (getCurrentItem() == 0 && getScrollX() == 0 ){
 
             switch (action){
                 case MotionEvent.ACTION_MOVE:
-                    Log.e(TAG, "onInterceptTouchEvent: "+ "Move" );
+                    //Log.e(TAG, "onInterceptTouchEvent: "+ "Move" );
                     final int activePointerId = mActivePointerId;
 
                     if (activePointerId == INVALID_POINTER) {
-                        Log.e(TAG, "onInterceptTouchEvent: " + "break" );
+                       // Log.e(TAG, "onInterceptTouchEvent: " + "break" );
                         // If we don't have a valid id, the touch down wasn't on content.
                         break;
                     }
@@ -69,7 +68,7 @@ public class Aaa extends ViewPager {
                     final float xDiff = Math.abs(dx);
                     final float y = ev.getY(pointerIndex);
                     final float yDiff = Math.abs(y - mInitialMotionY);
-                    Log.e(TAG, "onInterceptTouchEvent: " );
+                   // Log.e(TAG, "onInterceptTouchEvent: " );
                     if (xDiff > mTouchSlop && xDiff * 0.5f > yDiff){
                         Log.e(TAG, "onInterceptTouchEvent: " + mTouchSlop );
                         intercept = true;
@@ -79,17 +78,17 @@ public class Aaa extends ViewPager {
                     }
                     break;
                 case MotionEvent.ACTION_DOWN:
-                    Log.e(TAG, "onInterceptTouchEvent: " + "Down" );
+                  //  Log.e(TAG, "onInterceptTouchEvent: " + "Down" );
                     mLastMotionX = mInitialMotionX = ev.getX();
                     mLastMotionY = mInitialMotionY = ev.getY();
                     break;
             }
         }else {
-            Log.e(TAG, "onInterceptTouchEvent: "  + "execute original intercept touch event" );
+            //Log.e(TAG, "onInterceptTouchEvent: "  + "execute original intercept touch event" );
             intercept = super.onInterceptTouchEvent(ev);
         }
 
-        Log.e(TAG, "onInterceptTouchEvent: " + intercept );
+        //Log.e(TAG, "onInterceptTouchEvent: " + intercept );
         return intercept;
     }
 
@@ -106,7 +105,7 @@ public class Aaa extends ViewPager {
     }
 
     private void overScroll(float dx){
-        Log.e(TAG, "overScroll: " +  getScrollX());
+       // Log.e(TAG, "overScroll: " +  getScrollX());
         scrollBy((int)dx,getScrollY());
     }
 }

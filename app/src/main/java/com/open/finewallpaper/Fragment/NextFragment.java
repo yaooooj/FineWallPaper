@@ -20,9 +20,9 @@ import android.widget.Toast;
 
 import com.open.finewallpaper.Adapter.ViewPagerAdapter;
 import com.open.finewallpaper.Bean.SetBean;
-import com.open.finewallpaper.CoustomView.FreshViewPager;
-import com.open.finewallpaper.CoustomView.HeaderView;
-import com.open.finewallpaper.CoustomView.OnPullListener;
+import com.open.finewallpaper.CustomView.FreshViewPager;
+import com.open.finewallpaper.CustomView.HeaderView;
+import com.open.finewallpaper.CustomView.OnPullListener;
 import com.open.finewallpaper.R;
 
 import java.util.ArrayList;

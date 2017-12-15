@@ -1,12 +1,14 @@
 package com.open.finewallpaper.TestFile;
 
+import android.content.Context;
 import android.os.Build;
 import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.CuVp;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,8 +19,8 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.open.finewallpaper.Bean.HeadingBean;
-import com.open.finewallpaper.CoustomView.Aaa;
-import com.open.finewallpaper.CoustomView.MultiCharacterView;
+import com.open.finewallpaper.CustomView.Aaa;
+import com.open.finewallpaper.CustomView.MultiCharacterView;
 import com.open.finewallpaper.R;
 
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     private final static String TAG = "SetActivity";
     private MultiCharacterView multiCharacterView;
     private MultiCharacterView multiCharacterView1;
+    private List<String> list;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +55,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         initVp();
+        initRv();
 
     }
 
@@ -69,6 +73,16 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         viewPager.setPageTransformer(false,new ScaleTransformer());
     }
 
+    public void initRv(){
+        list = new ArrayList<>();
+        for (int i = 0; i < 5;i++){
+            list.add(" this is a recyclerView item " + i);
+        }
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.ts_rv);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
+        recyclerView.setAdapter(new RvAdapter(this,list));
+    }
+
     @Override
     public void onClick(View v) {
         /*
@@ -79,6 +93,42 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
             multiCharacterView.show();
         }
         */
+    }
+
+    private static class RvAdapter extends RecyclerView.Adapter{
+
+        private List<String> data;
+        private Context context;
+
+        public RvAdapter(Context context,List<String> data) {
+            this.data = data;
+            this.context = context;
+        }
+
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return  new RvViewHolder(LayoutInflater.from(context).inflate(R.layout.ad_layout,parent,false));
+        }
+
+        @Override
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+                if (holder instanceof RvViewHolder){
+                    ((RvViewHolder) holder).textView.setText(data.get(position));
+                }
+        }
+
+        @Override
+        public int getItemCount() {
+            return data.size();
+        }
+    }
+
+    private static class RvViewHolder extends RecyclerView.ViewHolder{
+        TextView textView;
+        public RvViewHolder(View itemView) {
+            super(itemView);
+            textView = (TextView) itemView.findViewById(R.id.ad_ts_tv);
+        }
     }
 
     private static class HeadingAdapter extends BaseAdapter{
@@ -193,7 +243,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                     cardView.setCardElevation(elevation);
 
                 } else if (position > 0){
-                    Log.e(TAG, "(transformPage: position > 0) == " + position );
+                   // Log.e(TAG, "(transformPage: position > 0) == " + position );
                     float scaleX = 1.0f - 0.2f * position;
                     float elevation = (1.0f - position ) * elevationInit;
                     page.setScaleX(scaleX);

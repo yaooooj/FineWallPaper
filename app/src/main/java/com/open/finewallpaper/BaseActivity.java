@@ -2,21 +2,18 @@ package com.open.finewallpaper;
 
 
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.open.finewallpaper.CoustomView.CustomDialog;
+import com.open.finewallpaper.CustomView.CustomDialog;
 import com.open.finewallpaper.HTTP.NetWorkUtils;
 import com.open.finewallpaper.Util.FileUtil;
 import com.open.finewallpaper.View.ErrorActivity;
-import com.open.finewallpaper.View.MainActivity;
 
 import cn.bmob.v3.Bmob;
 

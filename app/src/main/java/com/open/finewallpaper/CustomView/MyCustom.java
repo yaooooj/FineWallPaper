@@ -1,4 +1,4 @@
-package com.open.finewallpaper.CoustomView;
+package com.open.finewallpaper.CustomView;
 
 import android.app.Dialog;
 import android.content.Context;

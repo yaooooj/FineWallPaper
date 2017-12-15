@@ -6,7 +6,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.open.finewallpaper.Adapter.MainFragmentAdapter;
-import com.open.finewallpaper.CoustomView.LoadingFooter;
+import com.open.finewallpaper.CustomView.LoadingFooter;
 
 /**
  * Created by SEELE on 2017/11/15.

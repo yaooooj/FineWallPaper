@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/lightsteelblue"
+
         >
         <android.support.v7.widget.Toolbar
             android:id="@+id/viewa_tb"
@@ -20,7 +22,7 @@
             >
         </android.support.v7.widget.Toolbar>
 
-        <com.open.finewallpaper.CoustomView.Aaa
+        <com.open.finewallpaper.CustomView.Aaa
             android:id="@+id/heading_vp"
             android:layout_width="match_parent"
             android:layout_height="400dp"
@@ -31,26 +33,18 @@
             android:paddingEnd="60dp"
             android:layout_below="@+id/viewa_tb"
             >
-        </com.open.finewallpaper.CoustomView.Aaa>
+        </com.open.finewallpaper.CustomView.Aaa>
     </RelativeLayout>
 
-    <View
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/ts_rv"
         android:layout_width="match_parent"
-        android:layout_height="10dp"
-        />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.open.finewallpaper.CustomView.ScrollBehavior"
         >
 
-        <include layout="@layout/ad_layout" />
-        <include layout="@layout/ad_layout" />
-        <include layout="@layout/ad_layout" />
-        <include layout="@layout/ad_layout" />
-    </LinearLayout>
+    </android.support.v7.widget.RecyclerView>
+
 
 
 </android.support.design.widget.CoordinatorLayout>

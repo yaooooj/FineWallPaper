@@ -1,4 +1,4 @@
-package com.open.finewallpaper.CoustomView;
+package com.open.finewallpaper.CustomView;
 
 /**
  * Created by SEELE on 2017/9/26.

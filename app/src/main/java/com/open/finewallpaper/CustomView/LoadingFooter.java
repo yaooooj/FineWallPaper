@@ -1,4 +1,4 @@
-package com.open.finewallpaper.CoustomView;
+package com.open.finewallpaper.CustomView;
 
 import android.content.Context;
 import android.util.AttributeSet;

@@ -1,4 +1,4 @@
-package com.open.finewallpaper.CoustomView;
+package com.open.finewallpaper.CustomView;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -9,11 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import com.tpshop.wofupay.R;
+import com.open.finewallpaper.R;
 
 import java.lang.ref.WeakReference;
 
-import em.sang.com.allrecycleview.BasicRefrushRecycleView;
 
 /**
  * Description：用于首页，模仿支付宝效果
@@ -56,7 +55,7 @@ public class CustomBehavior extends CoordinatorLayout.Behavior {
         child.layout(0, 0, parent.getWidth(), (parent.getHeight() - dependentView.get().getHeight()));
         if (heardSize == -1) {
             heardSize = dependentView.get().getHeight();
-            minHeard = dependentView.get().findViewById(R.id.rl_icon).getHeight();
+            minHeard = dependentView.get().findViewById(R.id.viewa_tb).getHeight();
             child.setTranslationY(heardSize);
         }
 
@@ -72,10 +71,10 @@ public class CustomBehavior extends CoordinatorLayout.Behavior {
 
         float min = minHeard*1.0f/heardSize;
         float pro = (translationY) / heardSize;
-        View child1 = view.findViewById(R.id.ll);
+        View child1 = view.findViewById(R.id.ts_rv);
         child1.setPivotY(0);
         child1.setPivotX(0);
-        View titleView = dependentView.get().findViewById(R.id.rl_icon);
+        View titleView = dependentView.get().findViewById(R.id.viewa_tb);
         titleView.setPivotY(0);
         titleView.setPivotX(0);
         titleView.setAlpha(1 - pro);
@@ -125,7 +124,8 @@ public class CustomBehavior extends CoordinatorLayout.Behavior {
                 int h = height - dy;
                 int H = (h < minHeard) ? minHeard : h;
                 params.height = H;
-                view.setLayoutParams(params);
+                //view.setLayoutParams(params);
+                view.offsetTopAndBottom(dy);
                 child.setTranslationY(H);
                 consumed[1] = dy;
             }
@@ -151,10 +151,10 @@ public class CustomBehavior extends CoordinatorLayout.Behavior {
                 params.height = h;
                 view.setLayoutParams(params);
                 child.setTranslationY(h);
-                if (child instanceof BasicRefrushRecycleView){
-                    BasicRefrushRecycleView recycleView = (BasicRefrushRecycleView) child;
-                    recycleView.setViewHeight(recycleView.getEndView(),0);
-                }
+                //if (child instanceof BasicRefrushRecycleView){
+               //     BasicRefrushRecycleView recycleView = (BasicRefrushRecycleView) child;
+               //     recycleView.setViewHeight(recycleView.getEndView(),0);
+               // }
             }
 
         }
@@ -202,7 +202,7 @@ public class CustomBehavior extends CoordinatorLayout.Behavior {
 
         if (!isScroll && height > minHeard && height < heardSize) {
             childeView.get().setScrollY(0);
-            if (height < 0.7 * heardSize) {//上滑
+            if (height < 0.8 * heardSize) {//上滑
                 float pro = (height - minHeard) * 1.0f / (heardSize - minHeard);
                 creatAnimation(height, minHeard, (int) (500 * pro));
             } else {//下滑
