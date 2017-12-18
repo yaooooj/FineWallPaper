@@ -1,16 +1,15 @@
 package com.open.finewallpaper.CustomView;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.view.ViewCompat;
-import android.support.v7.widget.RecyclerView;
+import android.support.v4.widget.ScrollerCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.Scroller;
 
 import com.open.finewallpaper.R;
 
@@ -32,14 +31,13 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
     private int mLayoutTop;
     private int mChildLayoutTop;
 
-
-    private boolean isScroll;
-    private boolean isExpand;
-
     private Context context;
 
     private boolean isSkipPreNestScroll = false;
+    private boolean isNestedFlung = false;
 
+    private ScrollerCompat mScroller;
+    private FlingRunnable flingRunnable;
     public ScrollBehavior(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
@@ -60,15 +58,16 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
     @Override
     public boolean layoutDependsOn(CoordinatorLayout parent, View
             child, View dependency) {
+        boolean isDependView = false;
         if (child != null){
             childView = new WeakReference<>(child);
 
         }
         if (dependency != null && dependency instanceof RelativeLayout){
             dependencyView = new WeakReference<>(dependency);
-            return true;
+           isDependView = true;
         }
-        return super.layoutDependsOn(parent, child, dependency);
+        return isDependView;
     }
 
     @Override
@@ -78,19 +77,21 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
             headerSize = dependencyView.get().getMeasuredHeight();
             mLayoutTop = dependencyView.get().getTop();
             mChildLayoutTop = child.getTop();
-            //titleSize = dependencyView.get().findViewById(R.id.viewa_tb).getHeight();
-            titleSize = 0;
             child.setTranslationY(headerSize);
+            Log.e(TAG, "onLayoutChild: " + " headerSize  "+ headerSize +
+                    " mLayoutTop " + mLayoutTop + " mChildLayoutTop " + child.getTop());
+            titleSize = 0;
+
         }
-        return super.onLayoutChild(parent, child, layoutDirection);
+        return true;
     }
 
     @Override
     public boolean onDependentViewChanged(CoordinatorLayout parent, View child, View dependency) {
-        View view  = dependencyView.get();
-        float translationY = child.getTranslationY();
-        float min = titleSize *1.0f/headerSize;
-        float pro = translationY / headerSize;
+       // View view  = dependencyView.get();
+        //float translationY = child.getTranslationY();
+       // float min = titleSize *1.0f/headerSize;
+       // float pro = translationY / headerSize;
         /*
         View titleView = dependencyView.get().findViewById(R.id.viewa_tb);
         titleView.setPivotX(0);
@@ -113,8 +114,8 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
 
     @Override
     public void onNestedScrollAccepted(CoordinatorLayout coordinatorLayout, View child, View directTargetChild, View target, int nestedScrollAxes) {
-        clearAnimator();
-        isScroll = false;
+
+
     }
 
     @Override
@@ -122,35 +123,27 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
         if (dy != 0  && !isSkipPreNestScroll){
             int min,max;
             if (dy < 0){
-                Log.e(TAG, "onNestedPreScroll: " + " dy = " + dy  + "UP");
                 min = -headerSize;
-                max = 0;
+                max = -headerSize + titleSize + min;
             }else {
-                Log.e(TAG, "onNestedPreScroll: " + " dy = " + dy );
                 min = -headerSize;
                 max = 0;
             }
-            consumed[1] = scroll(coordinatorLayout,child,getTopBottomOffset() - dy, min,max);
+            consumed[1] = scroll(child,getTopBottomOffset() - dy, min,max);
         }
-
     }
 
-
-    private int scroll(View parent,View child,int newOffset,int min,int max){
+    private int scroll(View child,int newOffset,int min,int max){
         int consumed = 0;
         final int currOffset = getTopBottomOffset();
         View view = dependencyView.get().findViewById(R.id.ts_rvl);
-        //Log.e(TAG, "scroll: " + " min = " + min + " max = " + max + " currentOffset = " + currOffset  );
         if (min != 0 && currOffset >= min && currOffset <= max){
             newOffset = newOffset < min ? min : (newOffset > max ? max : newOffset);
-            Log.e(TAG, "scroll: " + newOffset );
             if (currOffset != newOffset){
                 setOffset(newOffset);
-
                 int p = newOffset - (child.getTop() - mLayoutTop);
                 child.offsetTopAndBottom(p);
                 int l = newOffset - (view.getTop() - mLayoutTop);
-                Log.e(TAG, "scroll: " + l );
                 view.offsetTopAndBottom(l);
                 consumed = currOffset - newOffset;
             }
@@ -160,24 +153,40 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
 
     @Override
     public void onNestedScroll(CoordinatorLayout coordinatorLayout, View child, View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
-        //Log.e(TAG, "onNestedScroll: ");
         if (dyUnconsumed < 0) {
-            scroll(coordinatorLayout,child,dyConsumed,-headerSize,0);
+            scroll(child,getTopBottomOffset() - dyUnconsumed ,-headerSize,0 );
             isSkipPreNestScroll = true;
-
         }else {
             isSkipPreNestScroll = false;
         }
     }
 
+
     @Override
-    public boolean onNestedPreFling(CoordinatorLayout coordinatorLayout, View child, View target, float velocityX, float velocityY) {
-        return onStopDrag();
+    public boolean onNestedFling(CoordinatorLayout coordinatorLayout, View child, View target, float velocityX, float velocityY, boolean consumed) {
+        boolean flung = false;
+        Log.e(TAG, "onNestedFling: " +consumed );
+        if (!consumed){
+            flung = fling(coordinatorLayout,child,-headerSize,0,-velocityY);
+        }
+        return flung;
     }
 
-    private boolean onStopDrag(){
-        int height = dependencyView.get().getHeight();
-        if (height> titleSize){
+    private boolean fling(CoordinatorLayout coordinatorLayout, View child, int minOffset,
+                          int maxOffset, float velocityY){
+
+        if (mScroller == null){
+            mScroller = ScrollerCompat.create(child.getContext());
+        }
+        mScroller.fling(
+                0, getTopBottomOffset(), // curr
+                0, Math.round(velocityY), // velocity.
+                0, 0, // x
+                minOffset, maxOffset); // y
+
+        if (mScroller.computeScrollOffset()){
+            flingRunnable = new FlingRunnable(coordinatorLayout,child);
+            ViewCompat.postOnAnimation(child,flingRunnable);
             return true;
         }else {
             return false;
@@ -185,92 +194,41 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
     }
 
     @Override
-    public boolean onNestedFling(CoordinatorLayout coordinatorLayout, View child, View target, float velocityX, float velocityY, boolean consumed) {
-        return true;
-    }
-
-
-    @Override
     public void onStopNestedScroll(CoordinatorLayout coordinatorLayout, View child, View target) {
-        int height = dependencyView.get().getHeight();
-        float translationY = childView.get().getTranslationY();
-        if (translationY > height) {
-            isExpand = true;
-        } else {
-            isExpand = false;
-        }
-
-        if (isExpand) {
-            float pro = ((translationY - height) * 1.0f / headerSize);
-            createExpendAnimator(translationY, height, (int) (500 * pro));
-        }
-
-
-        if (!isScroll && height > titleSize && height < headerSize) {
-            childView.get().setScrollY(0);
-            if (height < 0.7 * headerSize) {//上滑
-                float pro = (height - titleSize) * 1.0f / (headerSize - titleSize);
-                createAnimation(height, titleSize, (int) (500 * pro));
-            } else {//下滑
-                float pro = (headerSize - height) * 1.0f / (headerSize - titleSize);
-                createAnimation(height, headerSize, (int) (500 * pro));
-            }
-            isScroll = true;
-        }
+        isSkipPreNestScroll = false;
+        isNestedFlung = false;
     }
 
-    private ValueAnimator animator;
 
-    private void createAnimation(float start, float end, int duration) {
-        clearAnimator();
-        animator = ValueAnimator.ofFloat(start, end);
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float value = (float) animation.getAnimatedValue();
-                View view = dependencyView.get();
-                ViewGroup.LayoutParams params = view.getLayoutParams();
-                params.height = (int) value;
-                view.setLayoutParams(params);
-                childView.get().setTranslationY(value);
-
-            }
-        });
-        animator.setDuration(duration);
-        animator.start();
-    }
-
-    private void createExpendAnimator(float start, float end, int duration) {
-        clearAnimator();
-        animator = ValueAnimator.ofFloat(start, end);
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float value = (float) animation.getAnimatedValue();
-//                View view = dependentView.get();
-//                ViewGroup.LayoutParams params = view.getLayoutParams();
-//                params.height = (int) value;
-//                view.setLayoutParams(params);
-                childView.get().setTranslationY(value);
-
-            }
-        });
-        animator.setDuration(duration);
-        animator.start();
-    }
-
-    private void clearAnimator(){
-        if (animator != null) {
-            animator.cancel();
-        }
-        isScroll = false;
-    }
-
-    public int getTopBottomOffset() {
+    private int getTopBottomOffset() {
         return offset;
     }
 
-    public void setOffset(int offset) {
+    private void setOffset(int offset) {
         this.offset = offset;
+    }
+
+    private class FlingRunnable implements Runnable {
+        private final CoordinatorLayout mParent;
+        private final View mLayout;
+
+        FlingRunnable(CoordinatorLayout parent, View layout) {
+            mParent = parent;
+            mLayout = layout;
+        }
+
+        @Override
+        public void run() {
+            if (mParent != null && mLayout != null){
+                if (mScroller.computeScrollOffset()){
+                    if (mScroller.computeScrollOffset()) {
+                        //setHeaderTopBottomOffset(mParent, mLayout, mScroller.getCurrY());
+                        scroll(mLayout,getTopBottomOffset() - mScroller.getCurrY(),-headerSize,0);
+                        // Post ourselves so that we run on the next animation
+                        ViewCompat.postOnAnimation(mLayout, this);
+                    }
+                }
+            }
+        }
     }
 }
