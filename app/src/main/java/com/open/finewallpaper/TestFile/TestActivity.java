@@ -75,7 +75,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
 
     public void initRv(){
         list = new ArrayList<>();
-        for (int i = 0; i < 5;i++){
+        for (int i = 0; i < 10;i++){
             list.add(" this is a recyclerView item " + i);
         }
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.ts_rv);

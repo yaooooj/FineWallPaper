@@ -1,5 +1,6 @@
 package com.open.finewallpaper.CustomView;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.view.ViewCompat;
@@ -8,8 +9,11 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.widget.RelativeLayout;
-import android.widget.Scroller;
+
 
 import com.open.finewallpaper.R;
 
@@ -24,6 +28,12 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
 
     WeakReference<View> childView ;
     WeakReference<View> dependencyView;
+
+    private ValueAnimator mOffsetAnimator;
+    final Interpolator DECELERATE_INTERPOLATOR = new DecelerateInterpolator();
+    private static final int MAX_OFFSET_ANIMATION_DURATION = 600; // ms
+
+
     private int offset = 0;
 
     private int headerSize = -1;
@@ -37,7 +47,11 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
     private boolean isNestedFlung = false;
 
     private ScrollerCompat mScroller;
+    private ScrollerCompat mScroller1;
     private FlingRunnable flingRunnable;
+    private FlingRunnable flingRunnable1;
+
+
     public ScrollBehavior(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
@@ -83,6 +97,7 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
             titleSize = 0;
 
         }
+        Log.e(TAG, "onLayoutChild: " );
         return true;
     }
 
@@ -128,14 +143,16 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
             }else {
                 min = -headerSize;
                 max = 0;
+                consumed[1] = scroll(child,getTopBottomOffset() - dy, min,max);
             }
-            consumed[1] = scroll(child,getTopBottomOffset() - dy, min,max);
+
         }
     }
 
     private int scroll(View child,int newOffset,int min,int max){
         int consumed = 0;
         final int currOffset = getTopBottomOffset();
+
         View view = dependencyView.get().findViewById(R.id.ts_rvl);
         if (min != 0 && currOffset >= min && currOffset <= max){
             newOffset = newOffset < min ? min : (newOffset > max ? max : newOffset);
@@ -162,14 +179,56 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
     }
 
 
-    @Override
-    public boolean onNestedFling(CoordinatorLayout coordinatorLayout, View child, View target, float velocityX, float velocityY, boolean consumed) {
-        boolean flung = false;
-        Log.e(TAG, "onNestedFling: " +consumed );
-        if (!consumed){
-            flung = fling(coordinatorLayout,child,-headerSize,0,-velocityY);
+
+
+
+
+    private void animateOffsetTo(final CoordinatorLayout coordinatorLayout,
+                                 final View child, final int offset, float velocity){
+
+        final int deltaY = Math.abs(getTopBottomOffset() - offset);
+        final int duration;
+
+        velocity = Math.abs(velocity);
+
+        if (velocity > 0) {
+            duration = 3 * Math.round(1000 * (deltaY / velocity));
+        }else {
+            final float deltaRatio = (float) deltaY / child.getHeight();
+            duration = (int) ((deltaRatio + 1) * 150);
         }
-        return flung;
+
+        animateOffsetWithDuration(coordinatorLayout,child,offset,duration);
+    }
+
+    private void animateOffsetWithDuration(final CoordinatorLayout coordinatorLayout,
+                                           final View child, final int offset, final int duration){
+
+        final int currOffset = getTopBottomOffset();
+        if (currOffset == offset){
+            if (mOffsetAnimator != null && mOffsetAnimator.isRunning()){
+                mOffsetAnimator.cancel();
+            }
+            return;
+        }
+
+        if (mOffsetAnimator == null){
+            mOffsetAnimator = new ValueAnimator();
+            mOffsetAnimator.setInterpolator(DECELERATE_INTERPOLATOR);
+            mOffsetAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    setOffset((Integer) animation.getAnimatedValue());
+                }
+            });
+        }else {
+            mOffsetAnimator.cancel();
+        }
+
+        mOffsetAnimator.setDuration(Math.max(duration,MAX_OFFSET_ANIMATION_DURATION));
+        mOffsetAnimator.setIntValues(offset);
+        mOffsetAnimator.start();
+
     }
 
     private boolean fling(CoordinatorLayout coordinatorLayout, View child, int minOffset,
@@ -183,6 +242,7 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
                 0, Math.round(velocityY), // velocity.
                 0, 0, // x
                 minOffset, maxOffset); // y
+
 
         if (mScroller.computeScrollOffset()){
             flingRunnable = new FlingRunnable(coordinatorLayout,child);
@@ -212,9 +272,11 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
         private final CoordinatorLayout mParent;
         private final View mLayout;
 
+
         FlingRunnable(CoordinatorLayout parent, View layout) {
             mParent = parent;
             mLayout = layout;
+
         }
 
         @Override
@@ -222,10 +284,10 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
             if (mParent != null && mLayout != null){
                 if (mScroller.computeScrollOffset()){
                     if (mScroller.computeScrollOffset()) {
-                        //setHeaderTopBottomOffset(mParent, mLayout, mScroller.getCurrY());
-                        scroll(mLayout,getTopBottomOffset() - mScroller.getCurrY(),-headerSize,0);
+                        scroll(mLayout, mScroller.getCurrY(),-headerSize,0);
                         // Post ourselves so that we run on the next animation
                         ViewCompat.postOnAnimation(mLayout, this);
+
                     }
                 }
             }
