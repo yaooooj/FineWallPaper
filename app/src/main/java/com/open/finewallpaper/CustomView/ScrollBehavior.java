@@ -3,12 +3,17 @@ package com.open.finewallpaper.CustomView;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.v4.view.MotionEventCompat;
+import android.support.v4.view.VelocityTrackerCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ScrollerCompat;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -25,15 +30,21 @@ import java.lang.ref.WeakReference;
 
 public class ScrollBehavior extends CoordinatorLayout.Behavior {
     private static final String TAG = "ScrollBehavior";
+    private static final int INVALID_POINTER = -1;
 
-    WeakReference<View> childView ;
-    WeakReference<View> dependencyView;
+    private WeakReference<View> childView ;
+    private WeakReference<View> dependencyView;
 
     private ValueAnimator mOffsetAnimator;
     final Interpolator DECELERATE_INTERPOLATOR = new DecelerateInterpolator();
     private static final int MAX_OFFSET_ANIMATION_DURATION = 600; // ms
 
+    private boolean mIsBeingDragged;
+    private int mTouchSlop = -1;
+    private VelocityTracker mVelocityTracker;
 
+    private int mActivePointerId = INVALID_POINTER;
+    private int mLastMotionY;
     private int offset = 0;
 
     private int headerSize = -1;
@@ -45,11 +56,10 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
 
     private boolean isSkipPreNestScroll = false;
     private boolean isNestedFlung = false;
+    private boolean mIsNeedFlung = false;
 
     private ScrollerCompat mScroller;
-    private ScrollerCompat mScroller1;
     private FlingRunnable flingRunnable;
-    private FlingRunnable flingRunnable1;
 
 
     public ScrollBehavior(Context context, AttributeSet attrs) {
@@ -61,12 +71,133 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
 
     @Override
     public boolean onInterceptTouchEvent(CoordinatorLayout parent, View child, MotionEvent ev) {
-        return super.onInterceptTouchEvent(parent, child, ev);
+
+        if (mTouchSlop < 0){
+            mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        }
+
+        final int action= ev.getAction();
+        switch (action){
+            case MotionEvent.ACTION_DOWN:
+                mIsBeingDragged = false;
+                final int x = (int) ev.getX();
+                final int y = (int) ev.getY();
+                if ( parent.isPointInChildBounds(dependencyView.get(), x, y)) {
+                    mLastMotionY = y;
+                    mActivePointerId = ev.getPointerId(0);
+                    ensureVelocityTracker();
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                final int activePointerId = mActivePointerId;
+                if (activePointerId == INVALID_POINTER) {
+                    // If we don't have a valid id, the touch down wasn't on content.
+                    break;
+                }
+                final int pointerIndex = ev.findPointerIndex(activePointerId);
+                if (pointerIndex == -1) {
+                    break;
+                }
+
+                final int yy = (int) ev.getY(pointerIndex);
+                final int yDiff = Math.abs(yy - mLastMotionY);
+                if (yDiff > mTouchSlop) {
+                    mIsBeingDragged = true;
+                    mLastMotionY = yy;
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                mIsBeingDragged = false;
+                mActivePointerId = INVALID_POINTER;
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
+                break;
+        }
+
+        if (mVelocityTracker != null) {
+            mVelocityTracker.addMovement(ev);
+        }
+
+        return mIsBeingDragged;
     }
+
 
     @Override
     public boolean onTouchEvent(CoordinatorLayout parent, View child, MotionEvent ev) {
-        return super.onTouchEvent(parent, child, ev);
+        if (mTouchSlop < 0) {
+            mTouchSlop = ViewConfiguration.get(parent.getContext()).getScaledTouchSlop();
+        }
+
+        switch (MotionEventCompat.getActionMasked(ev)){
+            case MotionEvent.ACTION_DOWN:
+                final int x = (int) ev.getX();
+                final int y = (int) ev.getY();
+
+                if (parent.isPointInChildBounds(dependencyView.get(), x, y)) {
+                    mLastMotionY = y;
+                    mActivePointerId = ev.getPointerId(0);
+                    ensureVelocityTracker();
+                } else {
+                    return false;
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
+                if (activePointerIndex == -1) {
+                    return false;
+                }
+
+                final int yy = (int) ev.getY(activePointerIndex);
+                int dy = mLastMotionY - yy;
+
+                if (!mIsBeingDragged && Math.abs(dy) > mTouchSlop) {
+                    mIsBeingDragged = true;
+                    if (dy > 0) {
+                        dy -= mTouchSlop;
+                    } else {
+                        dy += mTouchSlop;
+                    }
+                }
+
+                if (mIsBeingDragged) {
+                    mLastMotionY = yy;
+                    // We're being dragged so scroll the ABL
+                    scroll(dependencyView.get(), dy, -headerSize , 0);
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                mIsBeingDragged = false;
+                mActivePointerId = INVALID_POINTER;
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.addMovement(ev);
+                    mVelocityTracker.computeCurrentVelocity(1000);
+                    float yvel = VelocityTrackerCompat.getYVelocity(mVelocityTracker,
+                            mActivePointerId);
+                    fling(parent, dependencyView.get(), -headerSize, 0, yvel);
+                }
+                break;
+        }
+
+        if (mVelocityTracker != null) {
+            mVelocityTracker.addMovement(ev);
+        }
+
+        return true;
+    }
+
+    private void ensureVelocityTracker() {
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
     }
 
     @Override
@@ -86,16 +217,16 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
 
     @Override
     public boolean onLayoutChild(CoordinatorLayout parent, View child, int layoutDirection) {
-        child.layout(0,0,parent.getWidth(),(parent.getHeight() - dependencyView.get().getHeight()));
         if (headerSize == -1){
             headerSize = dependencyView.get().getMeasuredHeight();
             mLayoutTop = dependencyView.get().getTop();
             mChildLayoutTop = child.getTop();
+            child.layout(0,0,parent.getWidth(),parent.getHeight());
             child.setTranslationY(headerSize);
+
             Log.e(TAG, "onLayoutChild: " + " headerSize  "+ headerSize +
                     " mLayoutTop " + mLayoutTop + " mChildLayoutTop " + child.getTop());
             titleSize = 0;
-
         }
         Log.e(TAG, "onLayoutChild: " );
         return true;
@@ -103,6 +234,8 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
 
     @Override
     public boolean onDependentViewChanged(CoordinatorLayout parent, View child, View dependency) {
+
+        child.setY(dependency.getHeight() + dependency.getY());
        // View view  = dependencyView.get();
         //float translationY = child.getTranslationY();
        // float min = titleSize *1.0f/headerSize;
@@ -158,10 +291,9 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
             newOffset = newOffset < min ? min : (newOffset > max ? max : newOffset);
             if (currOffset != newOffset){
                 setOffset(newOffset);
-                int p = newOffset - (child.getTop() - mLayoutTop);
-                child.offsetTopAndBottom(p);
-                int l = newOffset - (view.getTop() - mLayoutTop);
-                view.offsetTopAndBottom(l);
+                //int p = newOffset - (child.getTop() - mLayoutTop);
+                //child.offsetTopAndBottom(p);
+                view.offsetTopAndBottom(newOffset - (view.getTop() - mLayoutTop));
                 consumed = currOffset - newOffset;
             }
         }
@@ -169,7 +301,8 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
     }
 
     @Override
-    public void onNestedScroll(CoordinatorLayout coordinatorLayout, View child, View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
+    public void onNestedScroll(CoordinatorLayout coordinatorLayout, View child, View target,
+                               int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
         if (dyUnconsumed < 0) {
             scroll(child,getTopBottomOffset() - dyUnconsumed ,-headerSize,0 );
             isSkipPreNestScroll = true;
@@ -177,9 +310,6 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
             isSkipPreNestScroll = false;
         }
     }
-
-
-
 
 
 
@@ -231,12 +361,32 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
 
     }
 
+    @Override
+    public boolean onNestedPreFling(CoordinatorLayout coordinatorLayout, View child, View target, float velocityX, float velocityY) {
+        Log.e(TAG, "onNestedPreFling: " );
+
+        return  false;
+    }
+
+    @Override
+    public boolean onNestedFling(CoordinatorLayout coordinatorLayout, View child, View target,
+                                 float velocityX, float velocityY, boolean consumed) {
+        boolean flung = false;
+        if (consumed){
+            flung = fling(coordinatorLayout,dependencyView.get(),-headerSize,0,-velocityY);
+        }
+        isNestedFlung = flung;
+        return flung;
+    }
+
+
     private boolean fling(CoordinatorLayout coordinatorLayout, View child, int minOffset,
                           int maxOffset, float velocityY){
 
         if (mScroller == null){
             mScroller = ScrollerCompat.create(child.getContext());
         }
+
         mScroller.fling(
                 0, getTopBottomOffset(), // curr
                 0, Math.round(velocityY), // velocity.
@@ -245,6 +395,7 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
 
 
         if (mScroller.computeScrollOffset()){
+            //Log.e(TAG, "fling: " + " mScroll is not null ,can we fling" );
             flingRunnable = new FlingRunnable(coordinatorLayout,child);
             ViewCompat.postOnAnimation(child,flingRunnable);
             return true;
@@ -255,6 +406,9 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
 
     @Override
     public void onStopNestedScroll(CoordinatorLayout coordinatorLayout, View child, View target) {
+        if (!isNestedFlung ){
+            Log.e(TAG, "onStopNestedScroll: " +  " we are not on fling ,can we do  next steps"  );
+        }
         isSkipPreNestScroll = false;
         isNestedFlung = false;
     }
@@ -276,7 +430,6 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
         FlingRunnable(CoordinatorLayout parent, View layout) {
             mParent = parent;
             mLayout = layout;
-
         }
 
         @Override
@@ -284,10 +437,10 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
             if (mParent != null && mLayout != null){
                 if (mScroller.computeScrollOffset()){
                     if (mScroller.computeScrollOffset()) {
-                        scroll(mLayout, mScroller.getCurrY(),-headerSize,0);
+                        //Log.e(TAG, "run: "  + mScroller.getCurrY() );
+                        scroll(mLayout, mScroller.getCurrY(), Integer.MIN_VALUE, Integer.MAX_VALUE);
                         // Post ourselves so that we run on the next animation
                         ViewCompat.postOnAnimation(mLayout, this);
-
                     }
                 }
             }
