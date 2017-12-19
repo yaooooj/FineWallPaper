@@ -153,7 +153,7 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
                 final int yy = (int) ev.getY(activePointerIndex);
                 int dy = mLastMotionY - yy;
 
-                if (!mIsBeingDragged && Math.abs(dy) > mTouchSlop) {
+                if (!mIsBeingDragged && Math.abs(dy) > mTouchSlop ) {
                     mIsBeingDragged = true;
                     if (dy > 0) {
                         dy -= mTouchSlop;
@@ -164,8 +164,9 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
 
                 if (mIsBeingDragged) {
                     mLastMotionY = yy;
+                    Log.e(TAG, "onTouchEvent: " + yy );
                     // We're being dragged so scroll the ABL
-                    scroll(dependencyView.get(), dy, -headerSize , 0);
+                    scroll(dependencyView.get(), getTopBottomOffset() - dy, -headerSize , 0);
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
@@ -303,12 +304,15 @@ public class ScrollBehavior extends CoordinatorLayout.Behavior {
     @Override
     public void onNestedScroll(CoordinatorLayout coordinatorLayout, View child, View target,
                                int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
-        if (dyUnconsumed < 0) {
+
+        if (dyUnconsumed < 0 ) {
             scroll(child,getTopBottomOffset() - dyUnconsumed ,-headerSize,0 );
             isSkipPreNestScroll = true;
         }else {
             isSkipPreNestScroll = false;
         }
+
+
     }
 
 
